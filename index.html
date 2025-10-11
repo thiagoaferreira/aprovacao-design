@@ -2,377 +2,521 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Mockup Interativo – Gama Laser</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Aprovação de Mockup – Gama Laser</title>
 <style>
   :root{
-    --bg:#1b120e; --panel:#2a1f1a; --ink:#f6f3f2; --muted:#9adfbc; --accent:#ffb703;
-    --primary:#29d391; --danger:#ff6b6b;
+    --orange:#f68729; --bg:#0b0b0b; --white:#fff; --muted:#6b7280; --shadow:0 10px 30px rgba(0,0,0,.15);
   }
   *{box-sizing:border-box}
-  body{
-    margin:0; background:radial-gradient(1200px 60% at 50% 100%, #000 0%, var(--bg) 55%);
-    color:var(--ink); font-family:system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji','Segoe UI Emoji', 'Segoe UI Symbol';
-    display:flex; align-items:center; justify-content:center; min-height:100dvh; padding:16px;
-  }
-  .app{width:min(100%, 980px); display:grid; gap:16px; grid-template-columns: 1fr 320px}
-  @media (max-width: 860px){ .app{grid-template-columns: 1fr} }
-  .stage-wrap{background:#120c0a; padding:22px 18px; border-radius:18px; box-shadow:0 10px 30px rgba(0,0,0,.35)}
-  .stage{position:relative; width:100%; aspect-ratio: 4/3; background:#fff; border-radius:12px; overflow:hidden; user-select:none}
-  .stage img.base{position:absolute; inset:0; width:100%; height:100%; object-fit:contain; pointer-events:none}
-  /* draggable layers */
-  .layer{position:absolute; translate:-50% -50%; /* we position by center for consistência */
-         outline:2px dashed rgba(0,0,0,.25); border-radius:6px}
-  .layer .tag{position:absolute; top:-26px; left:-6px; font-size:11px; font-weight:700;
-              background:#000; color:#fff; padding:4px 6px; border-radius:6px}
+  body{margin:0; background:var(--bg); color:#111; font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Arial}
+  .header-wrap{background:#fff; padding:22px 16px; border-bottom:3px solid var(--orange)}
+  .header{max-width:1100px; margin:0 auto; text-align:center}
+  .brand img{width:200px; height:auto}
+  .order-info{margin-top:10px; color:var(--orange); font-weight:700}
+  .order-info small{display:block; color:#c2410c; font-weight:600; opacity:.9}
+  .app{max-width:1100px; margin:26px auto; padding:0 16px; display:grid; grid-template-columns:1fr 340px; gap:18px}
+  @media (max-width:950px){ .app{grid-template-columns:1fr} }
+  .card{background:#fff; border-radius:16px; box-shadow:var(--shadow)}
+  .card.pad{padding:18px}
+  .row{display:flex; gap:12px; flex-wrap:wrap}
+  .muted{color:var(--muted); font-size:14px}
+  /* Progress */
+  .progress{display:flex; gap:10px; justify-content:center; margin-bottom:12px}
+  .dot{width:10px; height:10px; border-radius:999px; background:#e5e7eb; transition:.2s}
+  .dot.active{background:var(--orange); transform:scale(1.2)}
+  .dot.done{background:#22c55e}
+  /* Stage */
+  .stage-wrap{padding:18px}
+  .stage{position:relative; width:100%; background:#fafafa; border-radius:12px; overflow:hidden; box-shadow:inset 0 0 0 1px #eee}
+  .stage::after{content:""; display:block; padding-top:75%} /* 4:3 default */
+  .stage > img.base{position:absolute; inset:0; width:100%; height:100%; object-fit:contain; background:#fff}
+  /* Layers (editor) */
+  .layer{position:absolute; translate:-50% -50%; outline:2px dashed rgba(0,0,0,.25); border-radius:8px; user-select:none; touch-action:none}
+  .layer .tag{position:absolute; top:-24px; left:0; background:#111; color:#fff; font-size:11px; font-weight:700; padding:3px 6px; border-radius:6px}
   .handles{position:absolute; inset:-8px; pointer-events:none}
-  .handle{position:absolute; width:12px; height:12px; border:2px solid currentColor; border-radius:3px;
-          background:#fff; color:#07f; pointer-events:auto; cursor:nwse-resize}
-  .handle.br{right:-6px; bottom:-6px}
+  .handle{position:absolute; width:12px; height:12px; border:2px solid #0ea5e9; background:#fff; border-radius:2px; pointer-events:auto; cursor:nwse-resize}
   .handle.tl{left:-6px; top:-6px}
-  /* TEXT content */
-  .text-content{display:flex; align-items:center; justify-content:center; padding:6px 10px; white-space:pre;
-                line-height:1; transform-origin:center; color:#000}
+  .handle.br{right:-6px; bottom:-6px}
+  .text-box{display:flex; align-items:center; justify-content:center; padding:6px 8px; line-height:1; white-space:pre; color:#000; transform-origin:center}
   .text-vertical{writing-mode:vertical-rl}
-  /* LOGO content */
-  .logo-content img{display:block; width:100%; height:100%; object-fit:contain; pointer-events:none}
-
-  /* sidebar controls */
-  .panel{background:var(--panel); border-radius:18px; padding:16px; display:flex; flex-direction:column; gap:12px}
-  .box{background:#16110f; border-radius:12px; padding:12px}
-  .btn{display:flex; align-items:center; justify-content:center; gap:8px; width:100%; border:0; border-radius:12px; padding:12px;
-       font-weight:700; color:#08130e; background:var(--primary); cursor:pointer}
-  .btn.secondary{background:#3dd3ff; color:#00131a}
-  .btn.warn{background:#ffd166; color:#1a1300}
-  .btn.danger{background:var(--danger); color:#2b0a0a}
-  .btn:active{transform:translateY(1px)}
-  .row{display:grid; grid-template-columns:1fr 1fr; gap:8px}
-  .coord{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-         color:#9adfbc; font-size:12px; line-height:1.35}
-  label{font-size:12px; opacity:.8; display:block; margin-bottom:6px}
-  input[type="text"]{width:100%; padding:10px 12px; border-radius:10px; border:1px solid #3b2b24; background:#0e0a08; color:#eee}
-  select{width:100%; padding:10px 12px; border-radius:10px; border:1px solid #3b2b24; background:#0e0a08; color:#eee}
-  .pill{display:inline-flex; padding:.25rem .5rem; border:1px solid #41332b; border-radius:999px; gap:.5rem; font-size:12px}
+  .logo-box img{display:block; width:100%; height:100%; object-fit:contain; pointer-events:none}
+  /* Side panel */
+  .panel .section{padding:14px; border-bottom:1px solid #eee}
+  .panel .section:last-child{border-bottom:0}
+  .panel h3{margin:0 0 8px; font-size:16px}
+  label{font-size:13px; font-weight:600; color:#111; margin-bottom:6px; display:block}
+  input[type="text"], select{width:100%; padding:10px 12px; border:1px solid #e5e7eb; border-radius:10px; background:#fff; font-size:14px}
+  .btn{display:inline-flex; align-items:center; justify-content:center; gap:8px; width:100%; border:0; border-radius:10px; padding:12px; font-weight:800; cursor:pointer}
+  .btn.primary{background:var(--orange); color:#fff}
+  .btn.dark{background:#111; color:#fff}
+  .btn.gray{background:#e5e7eb}
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+  .grid3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px}
+  .coords{font-family:ui-monospace,Menlo,Consolas,monospace; background:#0f172a; color:#93c5fd; padding:10px 12px; border-radius:10px; font-size:12px; white-space:pre-wrap}
+  .error{background:#fee2e2; border:1px solid #ef4444; color:#991b1b; padding:10px 12px; border-radius:10px; display:none}
+  .success{background:#ecfdf5; border:1px solid #10b981; color:#065f46; padding:12px; border-radius:10px; display:none}
+  .hide{display:none!important}
 </style>
 </head>
 <body>
-  <main class="app">
-    <section class="stage-wrap">
-      <div id="stage" class="stage" aria-label="área do mockup">
-        <img id="baseImg" class="base" alt="mockup base" />
-        <!-- TEXT LAYER -->
-        <div id="textLayer" class="layer" data-type="text" style="left:55%; top:27%;">
-          <div class="tag">🖊️ TEXTO</div>
-          <div id="textContent" class="text-content" contenteditable="true" spellcheck="false">teste</div>
+
+  <!-- HEADER -->
+  <div class="header-wrap">
+    <div class="header">
+      <div class="brand">
+        <img src="https://zqaoxvxuznonytzibhhe.supabase.co/storage/v1/object/sign/imagens_gamalaser/LOGO-GAMA-LASER.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV8xYjVlYTRkMi03MGI2LTQ1MjgtODE0Mi1kZDUyYmZjZTM2ZTUiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJpbWFnZW5zX2dhbWFsYXNlci9MT0dPLUdBTUEtTEFTRVIucG5nIiwiaWF0IjoxNzYwMTM3NzE5LCJleHAiOjIwNzU0OTc3MTl9.HYRTr9yYjrRMoWLZKmefCOKOfHjdXXj6z26QL7rshKc" alt="Gama Laser" />
+      </div>
+      <div class="order-info">
+        <div id="orderLine">Pedido #—</div>
+        <small id="orderSub">Produto — SKU —</small>
+      </div>
+    </div>
+  </div>
+
+  <!-- APP -->
+  <div class="app">
+    <!-- LEFT: Editor -->
+    <div class="card stage-wrap">
+      <!-- Loading / mensagens -->
+      <div id="msgError" class="error">Erro…</div>
+      <div id="msgOk" class="success">OK</div>
+
+      <!-- Progress dos produtos -->
+      <div id="progress" class="progress"></div>
+
+      <!-- Painel de dados do produto atual -->
+      <div class="row" style="justify-content:space-between; align-items:center; margin:8px 0 14px">
+        <div class="muted">
+          <strong>Produto atual:</strong> <span id="pNome">—</span> ·
+          <strong>Variante:</strong> <span id="pVariante">—</span> ·
+          <strong>SKU:</strong> <span id="pSku">—</span> ·
+          <strong>Qtd:</strong> <span id="pQtd">—</span>
+        </div>
+      </div>
+
+      <!-- Stage (mockup base + layers editáveis) -->
+      <div id="stage" class="stage">
+        <img id="baseImg" class="base" alt="mockup" />
+        <!-- Texto -->
+        <div id="textLayer" class="layer hide" data-type="text">
+          <div class="tag">✏️ TEXTO</div>
+          <div id="textBox" class="text-box">Seu texto</div>
           <div class="handles">
             <div class="handle tl" data-resize="tl"></div>
             <div class="handle br" data-resize="br"></div>
           </div>
         </div>
-        <!-- LOGO LAYER -->
-        <div id="logoLayer" class="layer" data-type="logo" style="left:32%; top:28%; width:100px; height:100px;">
-          <div class="tag">🧷 LOGO</div>
-          <div class="logo-content"><img id="logoImg" alt="logo" /></div>
+        <!-- Logo -->
+        <div id="logoLayer" class="layer hide" data-type="logo" style="width:110px; height:110px;">
+          <div class="tag">📷 LOGO</div>
+          <div class="logo-box"><img id="logoImg" alt="logo" /></div>
           <div class="handles">
             <div class="handle tl" data-resize="tl"></div>
             <div class="handle br" data-resize="br"></div>
           </div>
         </div>
       </div>
-    </section>
 
-    <aside class="panel">
-      <div class="box">
-        <div class="pill">☁️ Cloudinary: <strong id="cloudName">dslzqtajk</strong></div>
-        <div style="height:8px"></div>
-        <label for="logoSelect">Logo</label>
-        <select id="logoSelect">
-          <!-- Coloque aqui os public_id que você usa com mais frequência -->
-          <option value="logo_3017D_1760207385277">logo_3017D_1760207385277</option>
-        </select>
-        <label for="baseSelect">Mockup base</label>
-        <select id="baseSelect">
-          <option value="mockups/3017d_azul">mockups/3017d_azul</option>
-        </select>
+      <!-- Coordenadas -->
+      <div id="coords" class="coords" style="margin-top:12px">—</div>
+    </div>
+
+    <!-- RIGHT: Painel -->
+    <div class="card panel">
+      <!-- Entrada -->
+      <div class="section">
+        <h3>1) Selecione e gere a prévia</h3>
+        <label>Logo (arquivo)</label>
+        <input id="logoInput" type="file" accept="image/*" />
+        <div class="grid2" style="margin-top:10px">
+          <div>
+            <label>Texto (20 caract.)</label>
+            <input id="textInput" type="text" maxlength="20" placeholder="Digite o texto…" />
+          </div>
+          <div>
+            <label>Fonte</label>
+            <select id="fontSelect">
+              <option>Arial</option><option>Helvetica</option><option>Times</option>
+              <option>Verdana</option><option>Courier</option><option>Impact</option>
+              <option>Georgia</option>
+            </select>
+          </div>
+        </div>
+        <button id="btnPreview" class="btn dark" style="margin-top:12px">🔍 Gerar prévia</button>
       </div>
 
-      <div class="box">
-        <label>Texto</label>
-        <input id="textInput" type="text" value="teste" />
-        <div class="row" style="margin-top:8px">
-          <button id="toggleVertical" class="btn secondary">↕️ Texto Vertical</button>
-          <button id="rotateText90" class="btn warn">⤴️ Rotacionar 90°</button>
+      <!-- Edição -->
+      <div id="editSection" class="section hide">
+        <h3>2) Ajuste livre (arraste, redimensione, gire)</h3>
+        <div class="grid3" style="margin-top:8px">
+          <button id="btnRotateLogo" class="btn gray">⤴️ Rotacionar Logo 90°</button>
+          <button id="btnTextVertical" class="btn gray">↕️ Texto Vertical</button>
+          <button id="btnReset" class="btn gray">↺ Resetar</button>
         </div>
-        <div class="row" style="margin-top:8px">
-          <button id="textMinus" class="btn danger">− Diminuir Texto</button>
-          <button id="textPlus" class="btn">+ Aumentar Texto</button>
+        <div class="grid2" style="margin-top:8px">
+          <button id="btnLogoMinus" class="btn gray">− Logo</button>
+          <button id="btnLogoPlus" class="btn gray">+ Logo</button>
         </div>
-      </div>
-
-      <div class="box">
-        <label>Logo</label>
-        <div class="row">
-          <button id="logoRotate90" class="btn warn">⤴️ Rotacionar Logo 90°</button>
-          <button id="resetAll" class="btn danger">↺ Resetar</button>
-        </div>
-        <div class="row" style="margin-top:8px">
-          <button id="logoMinus" class="btn danger">− Diminuir Logo</button>
-          <button id="logoPlus" class="btn">+ Aumentar Logo</button>
+        <div class="grid2" style="margin-top:8px">
+          <button id="btnTextMinus" class="btn gray">− Texto</button>
+          <button id="btnTextPlus" class="btn gray">+ Texto</button>
         </div>
       </div>
 
-      <div class="box">
-        <div class="coord" id="coordBox">—</div>
+      <!-- Aprovar -->
+      <div id="approveSection" class="section hide">
+        <h3>3) Aprovar produto</h3>
+        <p class="muted" style="margin:0 0 8px">Ao aprovar, geramos a URL final (Cloudinary) com logo e texto aplicados.</p>
+        <button id="btnApprove" class="btn primary">✅ Aprovar este produto</button>
       </div>
-
-      <button id="approve" class="btn">✅ APROVAR ESTE PRODUTO</button>
-    </aside>
-  </main>
+    </div>
+  </div>
 
 <script>
-/* ================== CONFIG ================== */
+/* ===================== CONFIG ===================== */
 const CLOUD_NAME = 'dslzqtajk';
-const DEFAULTS = {
-  basePublicId: 'mockups/3017d_azul',
-  logoPublicId: 'logo_3017D_1760207385277',
-  text: 'teste'
-};
+const WEBHOOK_PREVIEW   = 'https://gama-laser-n8n.gtyipj.easypanel.host/webhook-test/gerar-preview-mockup';
+const WEBHOOK_APROVACAO = 'https://gama-laser-n8n.gtyipj.easypanel.host/webhook-test/aprovar-mockup'; // usar quando integrar
+const SUPABASE_URL      = 'https://zqaoxvxuznonytzibhhe.supabase.co';
+const SUPABASE_KEY      = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpxYW94dnh1em5vbnl0emliaGhlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk1NDYwMTEsImV4cCI6MjA3NTEyMjAxMX0.anrCkp8mdxVPg1lpCqvnz_OxLk3ljNz1veTMPWSjtpI';
 
-/* =============== STATE (fonte de verdade) =============== */
+/* ===================== STATE ===================== */
+let linkId = '';
+let orderNumber = '';
+let produtos = [];
+let idxAtual = 0;
+
+let mockupPublicId = '';  // ex.: "mockups/3017d_azul"
+let logoPublicId   = '';  // ex.: "logo_3017D_1760..."
+let fonte = 'Arial';
+let texto = '';
+let hasText = false;
+
+// geometria relativa ao STAGE (percentuais através do centro)
 const state = {
-  basePublicId: DEFAULTS.basePublicId,
-  logoPublicId: DEFAULTS.logoPublicId,
-  logo: { x: 0.32, y: 0.28, w: 100, h: 100, rot: 0 },     // relativos ao stage (x,y em % via center)
-  text: { x: 0.55, y: 0.27, font: 28, rot: 0, vertical: false, value: DEFAULTS.text },
+  logo: { x: 0.30, y: 0.30, w: 120, rot: 0 },
+  text: { x: 0.55, y: 0.30, font: 28, rot: 0, vertical: false }
 };
 
-/* =============== ELEMENTOS =============== */
+/* ===================== ELTs ===================== */
+const msgError = document.getElementById('msgError');
+const msgOk    = document.getElementById('msgOk');
+
+const orderLine = document.getElementById('orderLine');
+const orderSub  = document.getElementById('orderSub');
+
+const progress  = document.getElementById('progress');
+const pNome = document.getElementById('pNome');
+const pVar  = document.getElementById('pVariante');
+const pSku  = document.getElementById('pSku');
+const pQtd  = document.getElementById('pQtd');
+
 const stage = document.getElementById('stage');
 const baseImg = document.getElementById('baseImg');
+const textLayer = document.getElementById('textLayer');
+const textBox   = document.getElementById('textBox');
 const logoLayer = document.getElementById('logoLayer');
 const logoImg   = document.getElementById('logoImg');
-const textLayer = document.getElementById('textLayer');
-const textContent = document.getElementById('textContent');
+const coords    = document.getElementById('coords');
 
-const coordBox = document.getElementById('coordBox');
+const logoInput = document.getElementById('logoInput');
 const textInput = document.getElementById('textInput');
-const toggleVertical = document.getElementById('toggleVertical');
-const rotateText90 = document.getElementById('rotateText90');
-const textMinus = document.getElementById('textMinus');
-const textPlus  = document.getElementById('textPlus');
-const logoRotate90 = document.getElementById('logoRotate90');
-const logoMinus = document.getElementById('logoMinus');
-const logoPlus  = document.getElementById('logoPlus');
-const resetAll  = document.getElementById('resetAll');
-const approveBtn = document.getElementById('approve');
-const logoSelect = document.getElementById('logoSelect');
-const baseSelect = document.getElementById('baseSelect');
+const fontSelect= document.getElementById('fontSelect');
+const btnPreview= document.getElementById('btnPreview');
 
-/* =============== HELPERS =============== */
+const editSection    = document.getElementById('editSection');
+const approveSection = document.getElementById('approveSection');
+
+const btnRotateLogo  = document.getElementById('btnRotateLogo');
+const btnTextVertical= document.getElementById('btnTextVertical');
+const btnReset       = document.getElementById('btnReset');
+const btnLogoMinus   = document.getElementById('btnLogoMinus');
+const btnLogoPlus    = document.getElementById('btnLogoPlus');
+const btnTextMinus   = document.getElementById('btnTextMinus');
+const btnTextPlus    = document.getElementById('btnTextPlus');
+const btnApprove     = document.getElementById('btnApprove');
+
+/* ===================== UTILS ===================== */
+function showError(msg){ msgError.textContent = msg; msgError.style.display = 'block'; setTimeout(()=>msgError.style.display='none', 6000); }
+function showOk(msg){ msgOk.textContent = msg; msgOk.style.display='block'; setTimeout(()=>msgOk.style.display='none', 2000); }
+function setHidden(el, cond){ el.classList.toggle('hide', cond); }
 const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
 const px = n => `${Math.round(n)}px`;
-const debounce = (fn, ms=400) => {
-  let t; return (...args)=>{ clearTimeout(t); t=setTimeout(()=>fn(...args), ms); };
-};
+
+/* ===================== SUPABASE LOAD ===================== */
+async function carregarPedido(){
+  const params = new URLSearchParams(location.search);
+  linkId = params.get('p') || '';
+  if(!linkId){ showError('Link inválido. Use ?p=SEU_LINK_ID'); return; }
+
+  try{
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/links_aprovacao?id=eq.${linkId}&select=*`,{
+      headers:{ 'apikey':SUPABASE_KEY, 'Authorization':`Bearer ${SUPABASE_KEY}` }
+    });
+    const data = await r.json();
+    if(!data?.length){ showError('Link não encontrado.'); return; }
+
+    const row = data[0];
+    orderNumber = row.order_number ?? row.order_id ?? '';
+    const arr = typeof row.produtos === 'string' ? JSON.parse(row.produtos) : row.produtos;
+    produtos = Array.isArray(arr) ? arr : [];
+    if(!produtos.length){ showError('Nenhum produto neste link.'); return; }
+
+    orderLine.textContent = `Pedido #${orderNumber}`;
+    loadProduto(0);
+    // progress
+    progress.innerHTML = '';
+    produtos.forEach((_,i)=>{
+      const d = document.createElement('div'); d.className='dot'+(i===0?' active':''); d.id=`dot-${i}`; progress.appendChild(d);
+    });
+  }catch(e){
+    console.error(e); showError('Erro ao carregar pedido: '+e.message);
+  }
+}
+
+function loadProduto(idx){
+  idxAtual = idx;
+  const p = produtos[idx];
+  pNome.textContent = p?.nome || '-';
+  pVar .textContent = p?.variante || '-';
+  pSku .textContent = p?.sku || '-';
+  pQtd .textContent = p?.quantidade ?? '-';
+  orderSub.textContent = `${p?.nome || '-'} — SKU ${p?.sku || '-'}`;
+
+  // Reset editor state
+  mockupPublicId = '';
+  logoPublicId   = '';
+  fonte = 'Arial'; texto = ''; hasText = false;
+  state.logo = { x:0.30,y:0.30,w:120, rot:0 };
+  state.text = { x:0.55,y:0.30,font:28, rot:0, vertical:false };
+
+  baseImg.removeAttribute('src');
+  logoImg.removeAttribute('src');
+  setHidden(textLayer,true);
+  setHidden(logoLayer,true);
+  setHidden(editSection,true);
+  setHidden(approveSection,true);
+
+  // marcar progresso
+  document.querySelectorAll('.dot').forEach((el,i)=>{
+    el.classList.remove('active');
+    if(i<idx) el.classList.add('done');
+  });
+  const cur = document.getElementById(`dot-${idx}`);
+  cur?.classList.add('active');
+}
+
+/* ===================== PREVIEW (via n8n) ===================== */
+btnPreview.addEventListener('click', async ()=>{
+  const p = produtos[idxAtual];
+  const file = logoInput.files?.[0];
+  if(!file){ showError('Envie um arquivo de logo.'); return; }
+
+  texto = (textInput.value || '').trim();
+  fonte = fontSelect.value || 'Arial';
+  hasText = texto.length>0;
+
+  try{
+    const fd = new FormData();
+    fd.append('logo', file);
+    fd.append('texto', texto);
+    fd.append('fonte', fonte);
+    fd.append('sku', p.sku);
+    fd.append('cor', p.variante);
+
+    const resp = await fetch(WEBHOOK_PREVIEW,{method:'POST', body:fd});
+    const data = await resp.json();
+
+    if(!data?.preview_url){ showError('Erro ao gerar prévia.'); return; }
+
+    // Extrair mockup public_id (apenas o caminho final)
+    mockupPublicId = extractMockupId(data.preview_url);
+    // Extrair logo public_id (l_… -> respeitando subpasta se existir)
+    logoPublicId   = extractLogoPublicId(data.preview_url);
+
+    // Mostrar mockup LIMPO
+    baseImg.src = `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/${encodeURIComponent(mockupPublicId)}`;
+    // Mostrar logo SEM FUNDO no editor
+    logoImg.src = `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/e_bgremoval/${encodeURIComponent(logoPublicId)}.png`;
+
+    // Preparar camadas
+    textBox.textContent = texto || '';
+    state.text.vertical = false; state.text.rot = 0;
+    applyPositions();
+
+    setHidden(textLayer, !hasText);
+    setHidden(logoLayer, false);
+    setHidden(editSection,false);
+    setHidden(approveSection,false);
+    showOk('Prévia pronta. Ajuste livremente.');
+  }catch(e){
+    console.error(e); showError('Falha na conexão: '+e.message);
+  }
+});
+
+function extractMockupId(url){
+  // trecho após /upload/ e depois do último '/fl_layer_apply/'
+  const after = url.split('/upload/')[1] || '';
+  const last = after.lastIndexOf('/fl_layer_apply/');
+  if(last!==-1) return decodeURIComponent(after.substring(last + '/fl_layer_apply/'.length));
+  // fallback: pega o que vem após a primeira “/”
+  const i = after.indexOf('/');
+  return decodeURIComponent(i>=0 ? after.substring(i+1) : after);
+}
+function extractLogoPublicId(url){
+  const m = url.match(/l_([^,]+)/);
+  if(!m) return '';
+  return decodeURIComponent(m[1]).replaceAll('/',':'); // Cloudinary overlay usa ":" para subpasta
+}
+
+/* ===================== EDITOR ===================== */
 function stageRect(){ return stage.getBoundingClientRect(); }
 function applyPositions(){
-  const r = stageRect();
-  // TEXT
-  textContent.textContent = state.text.value || '';
-  textContent.style.fontSize = px(state.text.font);
+  // Texto
+  textBox.style.fontSize = px(state.text.font);
+  textBox.classList.toggle('text-vertical', state.text.vertical);
+  const txtRot = `rotate(${state.text.rot}deg)`;
+  textBox.style.transform = txtRot;
   textLayer.style.left = `${state.text.x*100}%`;
   textLayer.style.top  = `${state.text.y*100}%`;
-  const cls = 'text-vertical';
-  textContent.classList.toggle(cls, state.text.vertical);
-  textContent.style.transform = `rotate(${state.text.rot}deg)`;
-  // After styling, resize the wrapper to bound the rotated content
+  // Recalcular bounding do texto (para o “quadrado” acompanhar rotação)
   requestAnimationFrame(()=>{
-    const b = textContent.getBoundingClientRect();
+    const b = textBox.getBoundingClientRect();
     const w = Math.max(30, b.width);
     const h = Math.max(24, b.height);
-    textLayer.style.width = px(w);
-    textLayer.style.height= px(h);
-    // outline colors for clarity
-    textLayer.style.outlineColor='#3aa7ff';
+    textLayer.style.width  = px(w);
+    textLayer.style.height = px(h);
     updateCoords();
   });
 
-  // LOGO
+  // Logo
   logoLayer.style.left = `${state.logo.x*100}%`;
   logoLayer.style.top  = `${state.logo.y*100}%`;
-  logoLayer.style.width = px(state.logo.w);
-  logoLayer.style.height= px(state.logo.h);
+  logoLayer.style.width  = px(state.logo.w);
+  logoLayer.style.height = px(state.logo.w); // proporção 1:1
   logoLayer.style.transform = `translate(-50%,-50%) rotate(${state.logo.rot}deg)`;
-
-  updatePreviewDebounced();
+  updateCoords();
 }
+
 function updateCoords(){
   const r = stageRect();
-  const tx = Math.round(state.text.x * r.width);
-  const ty = Math.round(state.text.y * r.height);
   const lx = Math.round(state.logo.x * r.width);
   const ly = Math.round(state.logo.y * r.height);
-  const info = [
-    `📍 Coordenadas:`,
-    `Logo — X:${lx} Y:${ly} W:${state.logo.w} Rot:${state.logo.rot}°`,
-    `Texto — X:${tx} Y:${ty} Font:${state.text.font} Rot:${state.text.rot}° ${state.text.vertical?'(V)':''}`
-  ].join('\n');
-  coordBox.textContent = info;
+  const tx = Math.round(state.text.x * r.width);
+  const ty = Math.round(state.text.y * r.height);
+  coords.textContent =
+`📍 Coordenadas
+Logo  — X:${lx} Y:${ly} W:${state.logo.w} Rot:${state.logo.rot}°
+Texto — X:${tx} Y:${ty} Font:${state.text.font} Rot:${state.text.rot}° ${state.text.vertical?'(vertical)':''}`;
 }
 
-/* ======= CLOUDINARY URL BUILDER (preview) ======= */
-function buildCloudinaryURL(){
-  // Base
-  const base = `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/`;
+/* Drag & Resize independentes */
+function initLayerDrag(layer, kind){
+  let dragging=false, resizing=false, start={};
+  let rectS, stageR;
 
-  // LOGO overlay
-  const r = stageRect();
-  const lx = Math.round(state.logo.x*r.width);
-  const ly = Math.round(state.logo.y*r.height);
-  const logoW = Math.round(state.logo.w);
-  const logoSeg =
-    `l_${encodeURIComponent(state.logoPublicId)},e_bgremoval,w_${logoW},g_north_west,`+
-    `x_${lx},y_${ly},a_${((state.logo.rot%360)+360)%360},fl_layer_apply/`;
-
-  // TEXT overlay – usamos l_text; quando vertical, usamos rotação 90 e writing-mode visual apenas para o overlay local
-  const tx = Math.round(state.text.x*r.width);
-  const ty = Math.round(state.text.y*r.height);
-  const fontPx = Math.max(8, Math.round(state.text.font));
-  const extraRot = state.text.vertical ? 90 : 0;
-  const totalRot = ((state.text.rot + extraRot)%360+360)%360;
-  const textValue = (state.text.value || ' ').replace(/\//g,'\\/');
-  const textSeg =
-    `l_text:Arial_${fontPx}:${encodeURIComponent(textValue)},co_rgb:000000,g_north_west,`+
-    `x_${tx},y_${ty},a_${totalRot},fl_layer_apply/`;
-
-  return `${base}${logoSeg}${textSeg}${encodeURIComponent(state.basePublicId)}`;
-}
-const updatePreviewDebounced = debounce(()=>{
-  baseImg.src = buildCloudinaryURL();
-}, 400);
-
-/* =============== DRAG / RESIZE (independentes) =============== */
-function initDrag(layer, kind){
-  let dragging=false, resizing=false, start={}, rectS, stageR;
-  const onDown = (e)=>{
-    if(e.target.classList.contains('handle')){ // resize
-      e.stopPropagation();
-      resizing = e.target.dataset.resize;
-    }else{
-      dragging = true;
-    }
+  const onPointerDown = (e)=>{
+    const isHandle = e.target.classList.contains('handle');
+    dragging = !isHandle;
+    resizing = isHandle ? e.target.dataset.resize : false;
     rectS = layer.getBoundingClientRect();
     stageR = stageRect();
-    start = {x:(e.touches?e.touches[0].clientX:e.clientX), y:(e.touches?e.touches[0].clientY:e.clientY)};
-    document.addEventListener('pointermove', onMove);
-    document.addEventListener('pointerup', onUp);
+    start = { x:(e.clientX ?? e.touches?.[0]?.clientX), y:(e.clientY ?? e.touches?.[0]?.clientY) };
+    document.addEventListener('pointermove', onPointerMove);
+    document.addEventListener('pointerup', onPointerUp, {once:true});
   };
-  const onMove = (e)=>{
-    const cx = (e.touches?e.touches[0].clientX:e.clientX);
-    const cy = (e.touches?e.touches[0].clientY:e.clientY);
+  const onPointerMove = (e)=>{
+    const cx = e.clientX ?? e.touches?.[0]?.clientX;
+    const cy = e.clientY ?? e.touches?.[0]?.clientY;
     const dx = cx - start.x;
     const dy = cy - start.y;
 
     if(dragging){
       const nx = clamp((rectS.left + dx - stageR.left + rectS.width/2) / stageR.width, 0.02, 0.98);
       const ny = clamp((rectS.top  + dy - stageR.top  + rectS.height/2) / stageR.height, 0.02, 0.98);
-      if(kind==='text'){ state.text.x = nx; state.text.y = ny; }
-      else{ state.logo.x = nx; state.logo.y = ny; }
+      if(kind==='logo'){ state.logo.x = nx; state.logo.y = ny; }
+      else { state.text.x = nx; state.text.y = ny; }
       applyPositions();
     }
     if(resizing){
-      // só usamos diagonal BR para simplicidade
-      const w = Math.max(24, rectS.width + dx * (resizing==='br'?1:-1));
-      const h = Math.max(24, rectS.height + dy * (resizing==='br'?1:-1));
-      if(kind==='text'){
-        // converte largura em variação de font-size aproximada
-        const factor = w / rectS.width;
-        state.text.font = Math.max(8, Math.round(state.text.font * factor));
-      }else{
-        const factor = w / rectS.width;
+      // usamos apenas o canto BR/TL para variação de tamanho (escala)
+      const factor = (rectS.width + dx * (resizing==='br'?1:-1)) / rectS.width;
+      if(kind==='logo'){
         state.logo.w = Math.max(24, Math.round(state.logo.w * factor));
-        state.logo.h = state.logo.w; // mantém proporção
+      }else{
+        state.text.font = Math.max(8, Math.round(state.text.font * factor));
       }
       applyPositions();
-      start.x = cx; start.y = cy; // incremental para suavizar
-      rectS = layer.getBoundingClientRect();
+      start.x = cx; start.y = cy; rectS = layer.getBoundingClientRect(); // incremental suave
     }
   };
-  const onUp = ()=>{
-    dragging=false; resizing=false;
-    document.removeEventListener('pointermove', onMove);
-    document.removeEventListener('pointerup', onUp);
-  };
-  layer.addEventListener('pointerdown', onDown);
-  // Evita que cliques em um layer “puxem” o outro
-  layer.addEventListener('pointerdown', e=>e.stopPropagation());
+  const onPointerUp = ()=>{ dragging=false; resizing=false; document.removeEventListener('pointermove', onPointerMove); };
+
+  layer.addEventListener('pointerdown', (e)=>{ e.stopPropagation(); onPointerDown(e); });
 }
-initDrag(textLayer, 'text');
-initDrag(logoLayer, 'logo');
+initLayerDrag(logoLayer, 'logo');
+initLayerDrag(textLayer, 'text');
 
-/* =============== CONTROLES =============== */
-textInput.addEventListener('input', ()=>{
-  state.text.value = textInput.value;
+/* Botões de edição */
+btnRotateLogo.addEventListener('click', ()=>{ state.logo.rot = (state.logo.rot+90)%360; applyPositions(); });
+btnTextVertical.addEventListener('click', ()=>{ state.text.vertical = !state.text.vertical; applyPositions(); });
+btnReset.addEventListener('click', ()=>{
+  state.logo = { x:0.30, y:0.30, w:120, rot:0 };
+  state.text = { x:0.55, y:0.30, font:28, rot:0, vertical:false };
   applyPositions();
 });
-textContent.addEventListener('input', ()=>{
-  state.text.value = textContent.textContent;
-  textInput.value = state.text.value;
-  applyPositions();
-});
-toggleVertical.addEventListener('click', ()=>{
-  state.text.vertical = !state.text.vertical;
-  applyPositions();
-});
-rotateText90.addEventListener('click', ()=>{
-  state.text.rot = (state.text.rot + 90) % 360;
-  applyPositions();
-});
-textMinus.addEventListener('click', ()=>{ state.text.font = Math.max(8, state.text.font-2); applyPositions(); });
-textPlus .addEventListener('click', ()=>{ state.text.font = Math.min(200, state.text.font+2); applyPositions(); });
+btnLogoMinus.addEventListener('click', ()=>{ state.logo.w = Math.max(24, state.logo.w-6); applyPositions(); });
+btnLogoPlus .addEventListener('click', ()=>{ state.logo.w = Math.min(900, state.logo.w+6); applyPositions(); });
+btnTextMinus.addEventListener('click', ()=>{ state.text.font = Math.max(8, state.text.font-2); applyPositions(); });
+btnTextPlus .addEventListener('click', ()=>{ state.text.font = Math.min(240, state.text.font+2); applyPositions(); });
 
-logoRotate90.addEventListener('click', ()=>{ state.logo.rot = (state.logo.rot + 90) % 360; applyPositions(); });
-logoMinus.addEventListener('click', ()=>{ state.logo.w = Math.max(24, state.logo.w-6); state.logo.h = state.logo.w; applyPositions(); });
-logoPlus .addEventListener('click', ()=>{ state.logo.w = Math.min(800, state.logo.w+6); state.logo.h = state.logo.w; applyPositions(); });
+/* Inputs */
+textInput.addEventListener('input', ()=>{ texto = textInput.value; hasText = texto.trim().length>0; textBox.textContent = texto; setHidden(textLayer,!hasText); applyPositions(); });
+fontSelect.addEventListener('change', ()=>{ fonte = fontSelect.value; /* aplicado só na URL final */ });
 
-resetAll.addEventListener('click', ()=>{
-  Object.assign(state, {
-    basePublicId: DEFAULTS.basePublicId,
-    logoPublicId: DEFAULTS.logoPublicId,
-    logo: { x: 0.32, y: 0.28, w:100, h:100, rot:0 },
-    text: { x: 0.55, y: 0.27, font:28, rot:0, vertical:false, value: DEFAULTS.text }
-  });
-  textInput.value = state.text.value;
-  logoSelect.value = state.logoPublicId;
-  baseSelect.value = state.basePublicId;
-  applyPositions();
+/* ===================== URL FINAL (Aprovar) ===================== */
+btnApprove.addEventListener('click', async ()=>{
+  if(!mockupPublicId || !logoPublicId){ showError('Gere a prévia primeiro.'); return; }
+  const r = stageRect();
+
+  // Coordenadas absolutas (px) no canvas para Cloudinary
+  const lx = Math.round(state.logo.x * r.width);
+  const ly = Math.round(state.logo.y * r.height);
+  const logoW = Math.round(state.logo.w);
+
+  let url = `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/`;
+
+  // LOGO overlay (mantém e_bgremoval no processamento final)
+  url += `l_${encodeURIComponent(logoPublicId)},e_bgremoval,w_${logoW},g_north_west,x_${lx},y_${ly}`;
+  if(state.logo.rot) url += `,a_${((state.logo.rot%360)+360)%360}`;
+  url += `/fl_layer_apply/`;
+
+  // TEXT overlay (se houver)
+  if(hasText && texto){
+    const extraRot = state.text.vertical ? 90 : 0;
+    const tRot = ((state.text.rot + extraRot)%360+360)%360;
+    const tx = Math.round(state.text.x * r.width);
+    const ty = Math.round(state.text.y * r.height);
+    const fontPx = Math.max(8, Math.round(state.text.font));
+    const safeText = texto.replace(/\//g,'\\/');
+
+    url += `l_text:${fonte}_${fontPx}:${encodeURIComponent(safeText)},co_rgb:000000,g_north_west,x_${tx},y_${ty}`;
+    if(tRot) url += `,a_${tRot}`;
+    url += `/fl_layer_apply/`;
+  }
+
+  url += encodeURIComponent(mockupPublicId);
+
+  // 👉 aqui você integra com seu webhook de aprovação (quando o fluxo estiver pronto)
+  console.log('URL FINAL:', url);
+  showOk('URL final gerada (copiada no console).');
+  // Exemplo de envio:
+  // await fetch(WEBHOOK_APROVACAO,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ order_number: orderNumber, produto: produtos[idxAtual], url })})
 });
 
-logoSelect.addEventListener('change', ()=>{
-  state.logoPublicId = logoSelect.value;
-  applyPositions();
-});
-baseSelect.addEventListener('change', ()=>{
-  state.basePublicId = baseSelect.value;
-  applyPositions();
-});
-
-approveBtn.addEventListener('click', ()=>{
-  // Gera URL final (sem debounce) para salvar/compartilhar
-  const url = buildCloudinaryURL();
-  alert('URL gerada:\n' + url);
-  // você pode enviar essa URL ao seu backend aqui
-});
-
-/* =============== BOOT =============== */
-(function init(){
-  logoImg.src = `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/${encodeURIComponent(state.logoPublicId)}.png`;
-  baseImg.alt = state.basePublicId.split('/').pop();
-  textInput.value = state.text.value;
-  logoSelect.value = state.logoPublicId;
-  baseSelect.value = state.basePublicId;
-  applyPositions(); // também dispara preview
-})();
+/* ===================== BOOT ===================== */
+window.addEventListener('load', carregarPedido);
 </script>
 </body>
 </html>
