@@ -13,5 +13,5 @@ RUN npm install -g serve
 # Define a porta de saída
 EXPOSE 3000
 
-# Comando para manter o servidor ativo e acessível externamente
-CMD ["npx", "serve", ".", "-s", "-l", "0.0.0.0:3000"]
+# Comando para iniciar o servidor e manter ativo
+CMD ["npx", "serve", ".", "-s", "-l", "3000"]
