@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>Aprovar Design - Gama Laser</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -12,7 +12,6 @@
       background: #000;
       min-height: 100vh;
       padding-bottom: 40px;
-      touch-action: pan-y pinch-zoom;
     }
 
     .header {
@@ -231,37 +230,12 @@
       font-size: 14px;
     }
 
-    .preview-container {
-      position: relative;
-      background: #f5f5f5;
+    .preview-img {
+      max-width: 100%;
       border: 3px solid #ddd;
       border-radius: 12px;
-      overflow: hidden;
       display: none;
       margin-bottom: 20px;
-      touch-action: none;
-      user-select: none;
-    }
-
-    .preview-img {
-      width: 100%;
-      display: block;
-      pointer-events: none;
-    }
-
-    .coords-display {
-      background: #1a1a1a;
-      color: #0f0;
-      padding: 15px;
-      border-radius: 8px;
-      margin: 15px 0;
-      font-family: 'Courier New', monospace;
-      font-size: 12px;
-      display: none;
-    }
-
-    .coords-display div {
-      margin: 5px 0;
     }
 
     .controls {
@@ -273,56 +247,71 @@
 
     .control-row {
       display: flex;
-      gap: 10px;
+      gap: 20px;
       justify-content: center;
       flex-wrap: wrap;
     }
 
+    .control-group {
+      text-align: center;
+    }
+
+    .control-group strong {
+      display: block;
+      margin-bottom: 10px;
+      color: #000;
+    }
+
     .control-btn {
-      padding: 12px 20px;
+      width: 160px;
+      height: 50px;
       border: none;
-      border-radius: 8px;
+      border-radius: 10px;
       font-size: 14px;
       font-weight: bold;
       cursor: pointer;
+      margin: 4px;
       transition: all 0.2s;
-      color: #fff;
     }
 
     .control-btn:hover {
       transform: scale(1.05);
     }
 
+    .btn-move {
+      background: #f68729;
+      color: #fff;
+    }
+
+    .btn-move:hover {
+      background: #d67420;
+    }
+
+    .btn-plus {
+      background: #22c55e;
+      color: #fff;
+    }
+
+    .btn-plus:hover {
+      background: #16a34a;
+    }
+
+    .btn-minus {
+      background: #ef4444;
+      color: #fff;
+    }
+
+    .btn-minus:hover {
+      background: #dc2626;
+    }
+
     .btn-rotate {
       background: #8b5cf6;
+      color: #fff;
     }
 
     .btn-rotate:hover {
       background: #7c3aed;
-    }
-
-    .btn-reset {
-      background: #ef4444;
-    }
-
-    .btn-reset:hover {
-      background: #dc2626;
-    }
-
-    .instructions {
-      background: #e0f2fe;
-      border-left: 4px solid #0284c7;
-      padding: 15px;
-      margin: 20px 0;
-      border-radius: 8px;
-      font-size: 14px;
-      color: #0c4a6e;
-    }
-
-    .instructions strong {
-      display: block;
-      margin-bottom: 8px;
-      color: #0369a1;
     }
 
     .success-message {
@@ -376,44 +365,19 @@
       100% { transform: rotate(360deg); }
     }
 
-    /* Draggable elements */
-    .draggable-marker {
-      position: absolute;
-      cursor: move;
-      touch-action: none;
-      z-index: 10;
+    .coords-info {
+      background: #1a1a1a;
+      color: #0f0;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 15px 0;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      display: none;
     }
 
-    .logo-marker {
-      border: 2px dashed #f68729;
-      background: rgba(246, 135, 41, 0.1);
-    }
-
-    .texto-marker {
-      border: 2px dashed #0ea5e9;
-      background: rgba(14, 165, 233, 0.1);
-    }
-
-    .marker-label {
-      position: absolute;
-      top: -25px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #000;
-      color: #fff;
-      padding: 4px 8px;
-      border-radius: 4px;
-      font-size: 11px;
-      font-weight: bold;
-      white-space: nowrap;
-      pointer-events: none;
-    }
-
-    @media (max-width: 768px) {
-      .control-btn {
-        font-size: 12px;
-        padding: 10px 15px;
-      }
+    .coords-info div {
+      margin: 5px 0;
     }
   </style>
 </head>
@@ -494,34 +458,44 @@
           <span class="loading-text" id="loading-text">0%</span>
         </div>
 
-        <div class="instructions">
-          <strong>📱 Como ajustar:</strong>
-          🖱️ Desktop: Arraste os marcadores com o mouse<br>
-          👆 Mobile: Arraste com o dedo<br>
-          🔄 Use o botão "Rotacionar" para girar 90°
-        </div>
+        <img id="preview-img" class="preview-img" src="" alt="Prévia">
 
-        <div class="preview-container" id="preview-container">
-          <img id="preview-img" class="preview-img" src="" alt="Prévia">
-          <div id="logo-marker" class="draggable-marker logo-marker">
-            <div class="marker-label">📷 LOGO</div>
-          </div>
-          <div id="texto-marker" class="draggable-marker texto-marker" style="display:none;">
-            <div class="marker-label">✏️ TEXTO</div>
-          </div>
-        </div>
-
-        <div class="coords-display" id="coords-display">
-          <div><strong>📍 Coordenadas:</strong></div>
-          <div>Logo: X=<span id="logo-x">0</span>, Y=<span id="logo-y">0</span>, Tamanho=<span id="logo-w">0</span></div>
-          <div>Texto: X=<span id="texto-x">0</span>, Y=<span id="texto-y">0</span>, Tamanho=<span id="texto-w">0</span></div>
-          <div>Rotação: <span id="rotation">0</span>°</div>
+        <div class="coords-info" id="coords-info">
+          <div><strong>📍 Coordenadas Atuais:</strong></div>
+          <div>Logo: X=<span id="coord-logo-x">0</span>, Y=<span id="coord-logo-y">0</span>, W=<span id="coord-logo-w">0</span></div>
+          <div>Texto: X=<span id="coord-texto-x">0</span>, Y=<span id="coord-texto-y">0</span>, W=<span id="coord-texto-w">0</span></div>
+          <div>Rotação: <span id="coord-rotacao">0</span>°</div>
         </div>
 
         <div class="controls" id="controls">
           <div class="control-row">
+            <div class="control-group">
+              <strong>Logo:</strong>
+              <button class="control-btn btn-move" onclick="moverLogo(-10)">⬆️ Subir</button>
+              <button class="control-btn btn-move" onclick="moverLogo(10)">⬇️ Descer</button>
+            </div>
+            <div class="control-group">
+              <strong>Texto:</strong>
+              <button class="control-btn btn-move" onclick="moverTexto(-10)">⬆️ Subir</button>
+              <button class="control-btn btn-move" onclick="moverTexto(10)">⬇️ Descer</button>
+            </div>
+          </div>
+
+          <div class="control-row">
+            <div class="control-group">
+              <strong>Tamanho Logo:</strong>
+              <button class="control-btn btn-minus" onclick="mudarTamanhoLogo(-5)">➖ Diminuir</button>
+              <button class="control-btn btn-plus" onclick="mudarTamanhoLogo(5)">➕ Aumentar</button>
+            </div>
+            <div class="control-group">
+              <strong>Tamanho Texto:</strong>
+              <button class="control-btn btn-minus" onclick="mudarTamanhoTexto(-5)">➖ Diminuir</button>
+              <button class="control-btn btn-plus" onclick="mudarTamanhoTexto(5)">➕ Aumentar</button>
+            </div>
+          </div>
+
+          <div class="control-row">
             <button class="control-btn btn-rotate" onclick="rotacionarLogo()">🔄 Rotacionar 90°</button>
-            <button class="control-btn btn-reset" onclick="resetarPosicoes()">↺ Resetar Posições</button>
           </div>
 
           <button class="btn btn-success" onclick="aprovarProduto()" id="btn-aprovar">
@@ -550,26 +524,12 @@
     let orderNumber = '';
     let produtos = [];
     let produtoAtualIndex = 0;
-    let baseUrl = '';
-    let cloudName = '';
-    let mockupPublicId = '';
-    let logoPublicId = '';
     
-    // Coordenadas
-    let logoX = 0, logoY = 400, logoW = 100;
-    let textoX = 0, textoY = 520, textoW = 50;
+    let logoY = 0, logoW = 0, logoX = 0;
+    let textoY = 0, textoW = 0, textoX = 0;
     let rotacao = 0;
-    let temTexto = false;
-    let fonte = 'Arial';
-    let textoConteudo = '';
-
-    // Drag state
-    let isDraggingLogo = false;
-    let isDraggingTexto = false;
-    let dragStartX = 0;
-    let dragStartY = 0;
-    let elementStartX = 0;
-    let elementStartY = 0;
+    let baseUrl = '';
+    let urlParts = {};
 
     async function carregarDados() {
       const params = new URLSearchParams(window.location.search);
@@ -591,7 +551,7 @@
         const data = await response.json();
         
         if (!data || data.length === 0) {
-          mostrarErro('Link não encontrado. Verifique o ID.');
+          mostrarErro('Link não encontrado.');
           return;
         }
 
@@ -652,7 +612,7 @@
     async function gerarPrevia() {
       const logoInput = document.getElementById('logo');
       const texto = document.getElementById('texto').value;
-      const fonteSelect = document.getElementById('fonte').value;
+      const fonte = document.getElementById('fonte').value;
       const produto = produtos[produtoAtualIndex];
 
       if (!logoInput.files.length) {
@@ -660,18 +620,15 @@
         return;
       }
 
-      fonte = fonteSelect;
-      textoConteudo = texto;
-      temTexto = texto.trim() !== '';
-
       const previewArea = document.getElementById('preview-area');
       const loadingBar = document.getElementById('loading-bar');
       const loadingProgress = document.getElementById('loading-progress');
       const loadingText = document.getElementById('loading-text');
+      const previewImg = document.getElementById('preview-img');
 
       previewArea.style.display = 'block';
       loadingBar.style.display = 'block';
-      document.getElementById('preview-container').style.display = 'none';
+      previewImg.style.display = 'none';
       loadingProgress.style.width = '0%';
       loadingText.textContent = '0%';
 
@@ -708,10 +665,10 @@
           loadingBar.style.display = 'none';
         }, 500);
 
-        if (data && data.preview_url) {
+        if (data?.preview_url) {
           inicializarPreview(data.preview_url);
         } else {
-          mostrarErro('Erro ao gerar prévia. Tente novamente.');
+          mostrarErro('Erro ao gerar prévia.');
         }
       } catch (err) {
         clearInterval(interval);
@@ -722,243 +679,153 @@
     }
 
     function inicializarPreview(url) {
+      console.log('=== INICIALIZANDO PREVIEW ===');
+      console.log('URL recebida:', url);
+      
       baseUrl = url;
       
-      // Parse da URL
-      cloudName = url.match(/\/([^/]+)\/image\/upload/)[1];
-      mockupPublicId = url.split('/').pop();
-      
-      const logoMatch = url.match(/l_([^,]+)/);
-      if (logoMatch) logoPublicId = logoMatch[1];
-      
-      const logoYMatch = url.match(/,y_(\d+),/);
-      if (logoYMatch) logoY = parseInt(logoYMatch[1]);
-      
-      const logoWMatch = url.match(/,w_(\d+),/);
-      if (logoWMatch) logoW = parseInt(logoWMatch[1]);
-      
-      const allYMatches = [...url.matchAll(/,y_(\d+),/g)];
-      if (allYMatches.length > 1) {
-        textoY = parseInt(allYMatches[1][1]);
-      }
-      
-      const textoMatch = url.match(/l_text:[^_]+_(\d+):/);
-      if (textoMatch) textoW = parseInt(textoMatch[1]);
-
-      const img = document.getElementById('preview-img');
-      img.src = url;
-      img.onload = () => {
-        posicionarMarcadores();
-        document.getElementById('preview-container').style.display = 'block';
-        document.getElementById('controls').style.display = 'flex';
-        document.getElementById('coords-display').style.display = 'block';
-        atualizarCoordenadas();
-        inicializarDrag();
-      };
-    }
-
-    function posicionarMarcadores() {
-      const container = document.getElementById('preview-container');
-      const img = document.getElementById('preview-img');
-      const rect = img.getBoundingClientRect();
-      const containerRect = container.getBoundingClientRect();
-      
-      const scaleX = rect.width / img.naturalWidth;
-      const scaleY = rect.height / img.naturalHeight;
-
-      const logoMarker = document.getElementById('logo-marker');
-      const textoMarker = document.getElementById('texto-marker');
-      
-      const logoDisplayW = logoW * scaleX;
-      const logoDisplayH = logoDisplayW * 0.6;
-      
-      logoMarker.style.width = logoDisplayW + 'px';
-      logoMarker.style.height = logoDisplayH + 'px';
-      logoMarker.style.left = (logoX * scaleX) + 'px';
-      logoMarker.style.top = (logoY * scaleY) + 'px';
-      
-      if (temTexto) {
-        textoMarker.style.display = 'block';
-        const textoDisplayW = textoW * scaleX * 3;
-        const textoDisplayH = textoW * scaleY;
+      // Parse da URL do Cloudinary
+      try {
+        // Extrai cloud_name
+        const cloudMatch = url.match(/cloudinary\.com\/([^\/]+)\//);
+        if (cloudMatch) urlParts.cloudName = cloudMatch[1];
         
-        textoMarker.style.width = textoDisplayW + 'px';
-        textoMarker.style.height = textoDisplayH + 'px';
-        textoMarker.style.left = (textoX * scaleX) + 'px';
-        textoMarker.style.top = (textoY * scaleY) + 'px';
-      } else {
-        textoMarker.style.display = 'none';
+        // Extrai mockup public_id (última parte da URL)
+        const parts = url.split('/');
+        urlParts.mockupId = parts[parts.length - 1];
+        
+        // Extrai logo public_id
+        const logoMatch = url.match(/l_([^,]+)/);
+        if (logoMatch) urlParts.logoId = logoMatch[1];
+        
+        // Extrai coordenadas Y
+        const yMatches = [...url.matchAll(/,y_(\d+),/g)];
+        if (yMatches[0]) logoY = parseInt(yMatches[0][1]);
+        if (yMatches[1]) textoY = parseInt(yMatches[1][1]);
+        
+        // Extrai coordenadas X
+        const xMatches = [...url.matchAll(/,x_(\d+),/g)];
+        if (xMatches[0]) logoX = parseInt(xMatches[0][1]);
+        if (xMatches[1]) textoX = parseInt(xMatches[1][1]);
+        
+        // Extrai largura logo
+        const wMatch = url.match(/,w_(\d+),/);
+        if (wMatch) logoW = parseInt(wMatch[1]);
+        
+        // Extrai tamanho texto
+        const textoMatch = url.match(/l_text:[^_]+_(\d+):/);
+        if (textoMatch) textoW = parseInt(textoMatch[1]);
+        
+        // Extrai fonte
+        const fonteMatch = url.match(/l_text:([^_]+)_/);
+        if (fonteMatch) urlParts.fonte = fonteMatch[1];
+        
+        // Extrai texto
+        const textoContentMatch = url.match(/l_text:[^:]+:([^,]+)/);
+        if (textoContentMatch) urlParts.texto = decodeURIComponent(textoContentMatch[1]);
+        
+        console.log('Parsed values:', { logoX, logoY, logoW, textoX, textoY, textoW, rotacao });
+        console.log('URL parts:', urlParts);
+        
+        const img = document.getElementById('preview-img');
+        img.src = url;
+        img.style.display = 'block';
+        document.getElementById('controls').style.display = 'flex';
+        document.getElementById('coords-info').style.display = 'block';
+        
+        atualizarCoordenadas();
+      } catch (err) {
+        console.error('Erro ao parsear URL:', err);
+        mostrarErro('Erro ao processar URL do mockup');
       }
     }
 
-    function inicializarDrag() {
-      const logoMarker = document.getElementById('logo-marker');
-      const textoMarker = document.getElementById('texto-marker');
-      const container = document.getElementById('preview-container');
-
-      // Desktop - Logo
-      logoMarker.addEventListener('mousedown', (e) => {
-        e.preventDefault();
-        isDraggingLogo = true;
-        dragStartX = e.clientX;
-        dragStartY = e.clientY;
-        elementStartX = logoX;
-        elementStartY = logoY;
-        logoMarker.style.cursor = 'grabbing';
-      });
-
-      // Mobile - Logo
-      logoMarker.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        isDraggingLogo = true;
-        const touch = e.touches[0];
-        dragStartX = touch.clientX;
-        dragStartY = touch.clientY;
-        elementStartX = logoX;
-        elementStartY = logoY;
-      });
-
-      // Desktop - Texto
-      textoMarker.addEventListener('mousedown', (e) => {
-        e.preventDefault();
-        isDraggingTexto = true;
-        dragStartX = e.clientX;
-        dragStartY = e.clientY;
-        elementStartX = textoX;
-        elementStartY = textoY;
-        textoMarker.style.cursor = 'grabbing';
-      });
-
-      // Mobile - Texto
-      textoMarker.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        isDraggingTexto = true;
-        const touch = e.touches[0];
-        dragStartX = touch.clientX;
-        dragStartY = touch.clientY;
-        elementStartX = textoX;
-        elementStartY = textoY;
-      });
-
-      // Mouse move
-      document.addEventListener('mousemove', (e) => {
-        if (!isDraggingLogo && !isDraggingTexto) return;
-        handleDrag(e.clientX, e.clientY);
-      });
-
-      // Touch move
-      document.addEventListener('touchmove', (e) => {
-        if (!isDraggingLogo && !isDraggingTexto) return;
-        const touch = e.touches[0];
-        handleDrag(touch.clientX, touch.clientY);
-      });
-
-      // Mouse up
-      document.addEventListener('mouseup', () => {
-        if (isDraggingLogo) {
-          isDraggingLogo = false;
-          logoMarker.style.cursor = 'move';
-        }
-        if (isDraggingTexto) {
-          isDraggingTexto = false;
-          textoMarker.style.cursor = 'move';
-        }
-      });
-
-      // Touch end
-      document.addEventListener('touchend', () => {
-        isDraggingLogo = false;
-        isDraggingTexto = false;
-      });
+    function atualizarCoordenadas() {
+      document.getElementById('coord-logo-x').textContent = logoX;
+      document.getElementById('coord-logo-y').textContent = logoY;
+      document.getElementById('coord-logo-w').textContent = logoW;
+      document.getElementById('coord-texto-x').textContent = textoX;
+      document.getElementById('coord-texto-y').textContent = textoY;
+      document.getElementById('coord-texto-w').textContent = textoW;
+      document.getElementById('coord-rotacao').textContent = rotacao;
     }
 
-    function handleDrag(clientX, clientY) {
-      const img = document.getElementById('preview-img');
-      const rect = img.getBoundingClientRect();
-      const scaleX = rect.width / img.naturalWidth;
-      const scaleY = rect.height / img.naturalHeight;
-
-      const deltaX = clientX - dragStartX;
-      const deltaY = clientY - dragStartY;
-
-      if (isDraggingLogo) {
-        logoX = Math.round(elementStartX + (deltaX / scaleX));
-        logoY = Math.round(elementStartY + (deltaY / scaleY));
-        logoX = Math.max(0, Math.min(logoX, img.naturalWidth - logoW));
-        logoY = Math.max(0, Math.min(logoY, img.naturalHeight - 100));
-      } else if (isDraggingTexto) {
-        textoX = Math.round(elementStartX + (deltaX / scaleX));
-        textoY = Math.round(elementStartY + (deltaY / scaleY));
-        textoX = Math.max(0, Math.min(textoX, img.naturalWidth - 200));
-        textoY = Math.max(0, Math.min(textoY, img.naturalHeight - 50));
+    function atualizarPreview() {
+      if (!urlParts.cloudName || !urlParts.mockupId || !urlParts.logoId) {
+        console.error('Faltam dados para atualizar preview:', urlParts);
+        return;
       }
+      
+      try {
+        const logoTransformations = [
+          `l_${urlParts.logoId}`,
+          'e_bgremoval',
+          `w_${logoW}`,
+          'g_north_west',
+          `x_${logoX}`,
+          `y_${logoY}`
+        ];
 
-      posicionarMarcadores();
+        if (rotacao !== 0) {
+          logoTransformations.push(`a_${rotacao}`);
+        }
+        
+        logoTransformations.push('fl_layer_apply');
+
+        const logoString = logoTransformations.join(',');
+        let newUrl = `https://res.cloudinary.com/${urlParts.cloudName}/image/upload/${logoString}/${urlParts.mockupId}`;
+
+        if (urlParts.texto) {
+          const textoEncoded = encodeURIComponent(urlParts.texto);
+          const textoTransformations = [
+            `l_text:${urlParts.fonte}_${textoW}:${textoEncoded}`,
+            'co_rgb:000000',
+            'g_north_west',
+            `x_${textoX}`,
+            `y_${textoY}`,
+            'fl_layer_apply'
+          ];
+          const textoString = textoTransformations.join(',');
+          newUrl = `https://res.cloudinary.com/${urlParts.cloudName}/image/upload/${logoString}/${textoString}/${urlParts.mockupId}`;
+        }
+
+        console.log('Nova URL:', newUrl);
+        document.getElementById('preview-img').src = newUrl;
+        baseUrl = newUrl;
+      } catch (err) {
+        console.error('Erro ao atualizar preview:', err);
+        mostrarErro('Erro ao atualizar imagem');
+      }
+    }
+
+    function moverLogo(delta) {
+      logoY += delta;
       atualizarCoordenadas();
       atualizarPreview();
     }
 
-    function atualizarCoordenadas() {
-      document.getElementById('logo-x').textContent = logoX;
-      document.getElementById('logo-y').textContent = logoY;
-      document.getElementById('logo-w').textContent = logoW;
-      document.getElementById('texto-x').textContent = textoX;
-      document.getElementById('texto-y').textContent = textoY;
-      document.getElementById('texto-w').textContent = textoW;
-      document.getElementById('rotation').textContent = rotacao;
+    function moverTexto(delta) {
+      textoY += delta;
+      atualizarCoordenadas();
+      atualizarPreview();
     }
 
-    function atualizarPreview() {
-      const logoTransformations = [
-        `l_${logoPublicId}`,
-        'e_bgremoval',
-        `w_${logoW}`,
-        'g_north_west',
-        `x_${logoX}`,
-        `y_${logoY}`,
-        'fl_layer_apply'
-      ];
+    function mudarTamanhoLogo(delta) {
+      logoW += delta;
+      if (logoW < 20) logoW = 20;
+      atualizarCoordenadas();
+      atualizarPreview();
+    }
 
-      if (rotacao !== 0) {
-        logoTransformations.splice(-1, 0, `a_${rotacao}`);
-      }
-
-      const logoString = logoTransformations.join(',');
-      let newUrl = `https://res.cloudinary.com/${cloudName}/image/upload/${logoString}/${mockupPublicId}`;
-
-      if (temTexto) {
-        const textoEncoded = encodeURIComponent(textoConteudo);
-        const textoTransformations = [
-          `l_text:${fonte}_${textoW}:${textoEncoded}`,
-          'co_rgb:000000',
-          'g_north_west',
-          `x_${textoX}`,
-          `y_${textoY}`,
-          'fl_layer_apply'
-        ];
-        const textoString = textoTransformations.join(',');
-        newUrl = `https://res.cloudinary.com/${cloudName}/image/upload/${logoString}/${textoString}/${mockupPublicId}`;
-      }
-
-      document.getElementById('preview-img').src = newUrl;
-      baseUrl = newUrl;
+    function mudarTamanhoTexto(delta) {
+      textoW += delta;
+      if (textoW < 10) textoW = 10;
+      atualizarCoordenadas();
+      atualizarPreview();
     }
 
     function rotacionarLogo() {
       rotacao = (rotacao + 90) % 360;
-      atualizarCoordenadas();
-      atualizarPreview();
-    }
-
-    function resetarPosicoes() {
-      logoX = 0;
-      logoY = 400;
-      logoW = 100;
-      textoX = 0;
-      textoY = 520;
-      textoW = 50;
-      rotacao = 0;
-      posicionarMarcadores();
       atualizarCoordenadas();
       atualizarPreview();
     }
@@ -1028,6 +895,7 @@
       const errorDiv = document.getElementById('error-message');
       errorDiv.textContent = mensagem;
       errorDiv.style.display = 'block';
+      console.error('ERRO:', mensagem);
       setTimeout(() => {
         errorDiv.style.display = 'none';
       }, 5000);
