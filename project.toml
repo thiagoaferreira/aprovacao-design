@@ -3,6 +3,10 @@ id = "gamalaser-aprovacao"
 name = "Gama Laser - Aprovação de Design"
 version = "1.0.0"
 
+[[build.env]]
+name = "APP_ROOT"
+value = "."
+
 [[build.buildpacks]]
 uri = "paketo-buildpacks/nginx"
 
