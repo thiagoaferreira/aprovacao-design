@@ -3,11 +3,7 @@
   "version": "1.0.0",
   "description": "Sistema de aprovação de mockups da Gama Laser",
   "scripts": {
-    "start": "serve -s . -l 3000",
-    "build": "npm install serve"
-  },
-  "dependencies": {
-    "serve": "^14.2.1"
+    "start": "echo 'Iniciando aplicação estática...' && sleep infinity"
   },
   "engines": {
     "node": "18.x"
