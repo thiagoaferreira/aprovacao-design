@@ -552,55 +552,63 @@
 
     // Buscar dados do link
     async function carregarDados() {
-      const params = new URLSearchParams(window.location.search);
-      linkId = params.get('p');
-      
-      debugLog('=== INICIANDO CARGA ===');
-      debugLog('Link ID: ' + linkId);
-      
-      if (!linkId) {
-        debugLog('❌ ERRO: Link ID não encontrado na URL');
-        mostrarErro('Link inválido. Use: ?p=SEU_LINK_ID');
-        return;
+  const params = new URLSearchParams(window.location.search);
+  linkId = params.get('p');
+  
+  debugLog('=== INICIANDO CARGA ===');
+  debugLog('Link ID: ' + linkId);
+  
+  if (!linkId) {
+    debugLog('❌ ERRO: Link ID não encontrado na URL');
+    mostrarErro('Link inválido. Use: ?p=SEU_LINK_ID');
+    return;
+  }
+
+  try {
+    debugLog('Fazendo requisição ao Supabase...');
+    debugLog('URL: ' + SUPABASE_URL + '/rest/v1/links_aprovacao?id=eq.' + linkId);
+    
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/links_aprovacao?id=eq.${linkId}&select=*`, {
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
       }
+    });
 
-      try {
-        debugLog('Fazendo requisição ao Supabase...');
-        debugLog('URL: ' + SUPABASE_URL + '/rest/v1/links_aprovacao?id=eq.' + linkId);
-        
-        const response = await fetch(`${SUPABASE_URL}/rest/v1/links_aprovacao?id=eq.${linkId}&select=*`, {
-          headers: {
-            'apikey': SUPABASE_ANON_KEY,
-            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-          }
-        });
+    debugLog('Response Status: ' + response.status);
+    debugLog('Response OK: ' + response.ok);
 
-        debugLog('Response Status: ' + response.status);
-        debugLog('Response OK: ' + response.ok);
-
-        const data = await response.json();
-        debugLog('Dados recebidos: ' + JSON.stringify(data));
-        
-        if (!data || data.length === 0) {
-          debugLog('❌ ERRO: Link não encontrado no banco');
-          mostrarErro('Link não encontrado. Verifique o ID.');
-          return;
-        }
-
-        orderNumber = data[0].order_number;
-        produtos = data[0].produtos;
-
-        debugLog('✅ Pedido carregado: ' + orderNumber);
-        debugLog('✅ Total de produtos: ' + produtos.length);
-
-        mostrarProdutos();
-      } catch (err) {
-        debugLog('❌ ERRO FATAL: ' + err.message);
-        debugLog('Stack: ' + err.stack);
-        console.error(err);
-        mostrarErro('Erro ao carregar dados: ' + err.message);
-      }
+    const data = await response.json();
+    debugLog('Dados recebidos: ' + JSON.stringify(data));
+    
+    if (!data || data.length === 0) {
+      debugLog('❌ ERRO: Link não encontrado no banco');
+      mostrarErro('Link não encontrado. Verifique o ID.');
+      return;
     }
+
+    orderNumber = data[0].order_number;
+    
+    // ✅ PARSE DO JSON STRING
+    if (typeof data[0].produtos === 'string') {
+      debugLog('⚠️ Produtos é string, fazendo parse...');
+      produtos = JSON.parse(data[0].produtos);
+    } else {
+      produtos = data[0].produtos;
+    }
+
+    debugLog('✅ Pedido carregado: ' + orderNumber);
+    debugLog('✅ Total de produtos: ' + produtos.length);
+    debugLog('✅ Produtos parseados: ' + JSON.stringify(produtos));
+
+    mostrarProdutos();
+  } catch (err) {
+    debugLog('❌ ERRO FATAL: ' + err.message);
+    debugLog('Stack: ' + err.stack);
+    console.error(err);
+    mostrarErro('Erro ao carregar dados: ' + err.message);
+  }
+}
 
     function mostrarProdutos() {
       document.getElementById('loading-screen').style.display = 'none';
