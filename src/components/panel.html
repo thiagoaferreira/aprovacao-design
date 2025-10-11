@@ -1,1 +1,80 @@
+<main class="wrap">
+  <section class="panel">
+    <div class="panel-head">
+      <div class="row">
+        <div class="order-badge">Aprovação de Design</div>
+        <div id="order-mini" class="prod-info">
+          <span><b>Pedido:</b> <span id="order-number">—</span></span>
+          <span><b>Produto:</b> <span id="produto-nome">—</span></span>
+          <span><b>SKU:</b> <span id="produto-sku">—</span></span>
+        </div>
+      </div>
+      <div class="dots" id="dots"></div>
+    </div>
+
+    <div class="panel-body">
+      <div class="grid">
+        <div class="field">
+          <label>📁 Envie seu logo (PNG/JPG, fundo será removido automaticamente)</label>
+          <input id="logo" type="file" accept="image/*" />
+        </div>
+
+        <div class="field">
+          <label>📝 Texto para gravação (máx. 20)</label>
+          <input id="texto" type="text" maxlength="20" placeholder="Digite o texto (opcional)" />
+        </div>
+
+        <div class="field">
+          <label>🔤 Fonte</label>
+          <select id="fonte">
+            <option>Arial</option><option>Helvetica</option><option>Verdana</option>
+            <option>Times</option><option>Georgia</option><option>Tahoma</option>
+            <option>Courier</option><option>Impact</option>
+          </select>
+        </div>
+
+        <div class="field" style="display:flex;align-items:end">
+          <button class="btn btn-black" id="btn-gerar">🔍 Gerar prévia</button>
+        </div>
+      </div>
+
+      <div class="preview-block" id="preview-block" style="display:none">
+        <div class="canvas-wrap" id="canvas-wrap">
+          <img id="canvas" class="canvas" src="" alt="Prévia do mockup" />
+
+          <div id="box-logo" class="layer-box" style="display:none">
+            <div class="badge">LOGO</div>
+            <div class="handle tl"></div><div class="handle tr"></div>
+            <div class="handle bl"></div><div class="handle br"></div>
+          </div>
+
+          <div id="box-texto" class="layer-box text" style="display:none">
+            <div class="badge">TEXTO</div>
+            <div class="handle tl"></div><div class="handle tr"></div>
+            <div class="handle bl"></div><div class="handle br"></div>
+          </div>
+        </div>
+
+        <div class="tools">
+          <h4>Ajustes rápidos</h4>
+          <div class="group stack-8" style="margin-bottom:8px">
+            <button class="btn btn-outline" id="rot-logo">🔄 Rotacionar LOGO 90°</button>
+            <button class="btn btn-outline" id="rot-texto">🔄 Rotacionar TEXTO 90°</button>
+            <button class="btn btn-outline" id="reset">↺ Resetar posições</button>
+          </div>
+          <div class="group stack-8">
+            <button class="btn btn-orange" id="aprovar">✅ Aprovar este produto</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="err" id="err"></div>
+    </div>
+  </section>
+
+  <section class="done" id="done">
+    <h2>🎉 Todos os produtos foram aprovados com sucesso!</h2>
+    <p>Obrigado! Vamos seguir com a produção conforme sua personalização.</p>
+  </section>
+</main>
 
