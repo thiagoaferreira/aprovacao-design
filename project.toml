@@ -4,8 +4,16 @@ name = "Gama Laser - Aprovação de Design"
 version = "1.0.0"
 
 [[build.buildpacks]]
-uri = "https://github.com/heroku/heroku-buildpack-static.git"
+uri = "paketo-buildpacks/nginx"
 
 [[build.env]]
-name = "BP_STATIC_ENABLED"
+name = "BP_LAUNCHPOINT"
+value = "index.html"
+
+[[build.env]]
+name = "BP_WEB_SERVER_ROOT"
+value = "."
+
+[[build.env]]
+name = "BP_WEB_SERVER_ENABLE_PUSH_STATE"
 value = "true"
