@@ -1,8 +1,7 @@
 {
   "name": "aprovacao-design",
   "version": "1.0.0",
-  "description": "Sistema de aprovação de mockups da Gama Laser — Comunicação Visual & Atacado dos Brindes Personalizados",
-  "main": "index.html",
+  "description": "Sistema de aprovação de mockups da Gama Laser",
   "scripts": {
     "start": "npx serve -s . -l 3000"
   },
@@ -10,15 +9,6 @@
     "serve": "^14.2.1"
   },
   "engines": {
-    "node": ">=18.0.0"
-  },
-  "keywords": [
-    "gama-laser",
-    "mockup",
-    "aprovacao",
-    "frontend",
-    "visualizacao"
-  ],
-  "author": "Gama Laser",
-  "license": "MIT"
+    "node": ">=18"
+  }
 }
