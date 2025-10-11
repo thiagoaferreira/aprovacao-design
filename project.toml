@@ -1,0 +1,10 @@
+[project]
+id = "gamalaser-aprovacao"
+name = "Gama Laser - Aprovação de Design"
+version = "1.0.0"
+
+[[build.buildpacks]]
+uri = "heroku-community/static"
+
+[build.env]
+BP_STATIC_ENABLED = "true"
