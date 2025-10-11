@@ -2,9 +2,6 @@
   "name": "aprovacao-design",
   "version": "1.0.0",
   "description": "Sistema de aprovação de mockups da Gama Laser",
-  "scripts": {
-    "start": "echo 'Iniciando aplicação estática...' && sleep infinity"
-  },
   "engines": {
     "node": "18.x"
   }
