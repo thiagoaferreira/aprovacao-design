@@ -1,13 +1,24 @@
 {
-  "name": "gamalaser-aprovacao-design",
+  "name": "aprovacao-design",
   "version": "1.0.0",
-  "description": "Sistema de aprovação de mockups da Gama Laser (Nuvemshop + n8n + Cloudinary).",
+  "description": "Sistema de aprovação de mockups da Gama Laser — Comunicação Visual & Atacado dos Brindes Personalizados",
+  "main": "index.html",
   "scripts": {
-    "start": "npx serve ."
+    "start": "npx serve -s . -l 3000"
   },
   "dependencies": {
-    "serve": "^14.2.0"
+    "serve": "^14.2.1"
   },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "gama-laser",
+    "mockup",
+    "aprovacao",
+    "frontend",
+    "visualizacao"
+  ],
   "author": "Gama Laser",
   "license": "MIT"
 }
