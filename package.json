@@ -1,0 +1,12 @@
+{
+  "name": "gamalaser-aprovacao",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "npx nunjucks src index.html -o dist",
+    "start": "npx serve dist"
+  },
+  "dependencies": {
+    "nunjucks-cli": "^1.1.0",
+    "serve": "^14.2.1"
+  }
+}
