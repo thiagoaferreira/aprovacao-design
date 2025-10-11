@@ -388,9 +388,15 @@
         url += `/${tParts.join(',')}`;
       }
 
-      url += `/${baseId}`; // sempre por último: o mockup base
-      return url;
-    }
+        // --- Garante que o mockup base sempre esteja no caminho correto (pasta Mockup)
+        let path = baseId;
+        if (!/^Mockup\//i.test(path)) {
+          path = `Mockup/${path}`;
+        }
+      
+        url += `/${path}`; // sempre por último: o mockup base
+        return url;
+      }
 
     // Atualiza imagem e caixas
     function refreshPreview(){
