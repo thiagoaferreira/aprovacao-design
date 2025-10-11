@@ -645,39 +645,55 @@
       formData.append('cor', produto.variante);
 
       try {
-        const response = await fetch(WEBHOOK_PREVIEW, {
-          method: 'POST',
-          body: formData
-        });
+  const response = await fetch(WEBHOOK_PREVIEW, {
+    method: 'POST',
+    body: formData
+  });
 
-        let data;
-        try {
-          data = await response.json();
-        } catch {
-          const txt = await response.text();
-          try { data = JSON.parse(txt); } catch { data = null; }
-        }
+  console.log('=== DEBUG RESPONSE ===');
+  console.log('Status:', response.status);
+  console.log('OK:', response.ok);
 
-        clearInterval(interval);
-        loadingProgress.style.width = '100%';
-        loadingText.textContent = '100%';
-        
-        setTimeout(() => {
-          loadingBar.style.display = 'none';
-        }, 500);
+  const responseText = await response.text();
+  console.log('Response Text:', responseText);
 
-        if (data?.preview_url) {
-          inicializarPreview(data.preview_url);
-        } else {
-          mostrarErro('Erro ao gerar prévia. Tente novamente.');
-        }
-      } catch (err) {
-        clearInterval(interval);
-        loadingBar.style.display = 'none';
-        console.error(err);
-        mostrarErro('Erro ao conectar com o servidor.');
-      }
-    }
+  let data;
+  try {
+    data = JSON.parse(responseText);
+    console.log('Data parseado:', data);
+  } catch (e) {
+    console.error('Erro ao parsear JSON:', e);
+    console.error('Texto recebido:', responseText);
+    data = null;
+  }
+
+  clearInterval(interval);
+  loadingProgress.style.width = '100%';
+  loadingText.textContent = '100%';
+  
+  setTimeout(() => {
+    loadingBar.style.display = 'none';
+  }, 500);
+
+  console.log('=== VERIFICANDO preview_url ===');
+  console.log('data:', data);
+  console.log('data.success:', data?.success);
+  console.log('data.preview_url:', data?.preview_url);
+
+  if (data?.preview_url) {
+    console.log('✅ Preview URL encontrada:', data.preview_url);
+    inicializarPreview(data.preview_url);
+  } else {
+    console.error('❌ Preview URL não encontrada!');
+    console.error('Dados recebidos completos:', JSON.stringify(data, null, 2));
+    mostrarErro('Erro ao gerar prévia. Verifique o console (F12).');
+  }
+} catch (err) {
+  clearInterval(interval);
+  loadingBar.style.display = 'none';
+  console.error('❌ ERRO NO FETCH:', err);
+  mostrarErro('Erro ao conectar com o servidor: ' + err.message);
+}
 
     function inicializarPreview(url) {
   baseUrl = url;
