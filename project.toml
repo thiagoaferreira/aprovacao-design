@@ -4,7 +4,7 @@ name = "Gama Laser - Aprovação de Design"
 version = "1.0.0"
 
 [[build.buildpacks]]
-uri = "heroku-community/static"
+uri = "https://github.com/heroku/heroku-buildpack-static.git"
 
 [[build.env]]
 name = "BP_STATIC_ENABLED"
