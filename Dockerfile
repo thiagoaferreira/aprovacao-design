@@ -1,17 +1,17 @@
-# Imagem oficial do Node.js (leve e estável)
+# Imagem leve e estável do Node 18
 FROM node:18-alpine
 
-# Define o diretório de trabalho dentro do container
+# Define diretório de trabalho
 WORKDIR /app
 
-# Copia todos os arquivos do projeto para dentro do container
+# Copia todos os arquivos do projeto
 COPY . .
 
-# Instala o servidor leve "serve" (para hospedar o site estático)
+# Instala o servidor estático "serve"
 RUN npm install -g serve
 
-# Expõe a porta que o EasyPanel usa (padrão 3000)
+# Define a porta de saída
 EXPOSE 3000
 
-# Comando de inicialização (serve tudo da raiz)
-CMD ["npx", "serve", ".", "-l", "3000"]
+# Comando que serve o index.html na raiz
+CMD ["npx", "serve", ".", "-s", "-l", "3000"]
