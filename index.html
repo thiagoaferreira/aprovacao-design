@@ -364,6 +364,18 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
+
+    .debug-info {
+      background: #1a1a1a;
+      color: #0f0;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 20px 0;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
   </style>
 </head>
 <body>
@@ -378,6 +390,7 @@
     <div id="loading-screen" class="loading-screen">
       <h2>Carregando seus produtos...</h2>
       <div class="spinner"></div>
+      <div id="debug-loading" class="debug-info" style="display:none;"></div>
     </div>
 
     <!-- Main Card -->
@@ -512,7 +525,7 @@
   <script>
     // ====== CONFIGURAÇÕES ======
     const WEBHOOK_PREVIEW = 'https://gama-laser-n8n.gtyipj.easypanel.host/webhook-test/gerar-preview-mockup';
-    const WEBHOOK_APROVACAO = 'https://hook.us2.make.com/SEU_WEBHOOK_APROVACAO';
+    const WEBHOOK_APROVACAO = 'https://gama-laser-n8n.gtyipj.easypanel.host/webhook-test/aprovar-mockup'; // TODO: Criar este webhook
     const SUPABASE_URL = 'https://zqaoxvxuznonytzibhhe.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpxYW94dnh1em5vbnl0emliaGhlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk1NDYwMTEsImV4cCI6MjA3NTEyMjAxMX0.anrCkp8mdxVPg1lpCqvnz_OxLk3ljNz1veTMPWSjtpI';
     // ===========================
@@ -527,17 +540,34 @@
     let tamanhoTexto = 0;
     let baseUrl = '';
 
+    // Função para adicionar log de debug
+    function debugLog(msg) {
+      console.log(msg);
+      const debugDiv = document.getElementById('debug-loading');
+      if (debugDiv) {
+        debugDiv.style.display = 'block';
+        debugDiv.innerHTML += msg + '<br>';
+      }
+    }
+
     // Buscar dados do link
     async function carregarDados() {
       const params = new URLSearchParams(window.location.search);
       linkId = params.get('p');
       
+      debugLog('=== INICIANDO CARGA ===');
+      debugLog('Link ID: ' + linkId);
+      
       if (!linkId) {
-        mostrarErro('Link inválido');
+        debugLog('❌ ERRO: Link ID não encontrado na URL');
+        mostrarErro('Link inválido. Use: ?p=SEU_LINK_ID');
         return;
       }
 
       try {
+        debugLog('Fazendo requisição ao Supabase...');
+        debugLog('URL: ' + SUPABASE_URL + '/rest/v1/links_aprovacao?id=eq.' + linkId);
+        
         const response = await fetch(`${SUPABASE_URL}/rest/v1/links_aprovacao?id=eq.${linkId}&select=*`, {
           headers: {
             'apikey': SUPABASE_ANON_KEY,
@@ -545,20 +575,30 @@
           }
         });
 
+        debugLog('Response Status: ' + response.status);
+        debugLog('Response OK: ' + response.ok);
+
         const data = await response.json();
+        debugLog('Dados recebidos: ' + JSON.stringify(data));
         
         if (!data || data.length === 0) {
-          mostrarErro('Link não encontrado');
+          debugLog('❌ ERRO: Link não encontrado no banco');
+          mostrarErro('Link não encontrado. Verifique o ID.');
           return;
         }
 
         orderNumber = data[0].order_number;
         produtos = data[0].produtos;
 
+        debugLog('✅ Pedido carregado: ' + orderNumber);
+        debugLog('✅ Total de produtos: ' + produtos.length);
+
         mostrarProdutos();
       } catch (err) {
+        debugLog('❌ ERRO FATAL: ' + err.message);
+        debugLog('Stack: ' + err.stack);
         console.error(err);
-        mostrarErro('Erro ao carregar dados');
+        mostrarErro('Erro ao carregar dados: ' + err.message);
       }
     }
 
@@ -644,111 +684,139 @@
       formData.append('sku', produto.sku);
       formData.append('cor', produto.variante);
 
+      console.log('=== ENVIANDO PARA WEBHOOK ===');
+      console.log('URL:', WEBHOOK_PREVIEW);
+      console.log('SKU:', produto.sku);
+      console.log('Cor:', produto.variante);
+      console.log('Texto:', texto);
+      console.log('Fonte:', fonte);
+
       try {
-  const response = await fetch(WEBHOOK_PREVIEW, {
-    method: 'POST',
-    body: formData
-  });
+        const response = await fetch(WEBHOOK_PREVIEW, {
+          method: 'POST',
+          body: formData
+        });
 
-  console.log('=== DEBUG RESPONSE ===');
-  console.log('Status:', response.status);
-  console.log('OK:', response.ok);
+        console.log('=== RESPOSTA DO WEBHOOK ===');
+        console.log('Status:', response.status);
+        console.log('OK:', response.ok);
 
-  const responseText = await response.text();
-  console.log('Response Text:', responseText);
+        const responseText = await response.text();
+        console.log('Response Text:', responseText);
 
-  let data;
-  try {
-    data = JSON.parse(responseText);
-    console.log('Data parseado:', data);
-  } catch (e) {
-    console.error('Erro ao parsear JSON:', e);
-    console.error('Texto recebido:', responseText);
-    data = null;
-  }
+        let data;
+        try {
+          data = JSON.parse(responseText);
+          console.log('✅ JSON parseado:', data);
+        } catch (e) {
+          console.error('❌ Erro ao parsear JSON:', e);
+          console.error('Texto recebido:', responseText);
+          data = null;
+        }
 
-  clearInterval(interval);
-  loadingProgress.style.width = '100%';
-  loadingText.textContent = '100%';
-  
-  setTimeout(() => {
-    loadingBar.style.display = 'none';
-  }, 500);
+        clearInterval(interval);
+        loadingProgress.style.width = '100%';
+        loadingText.textContent = '100%';
+        
+        setTimeout(() => {
+          loadingBar.style.display = 'none';
+        }, 500);
 
-  console.log('=== VERIFICANDO preview_url ===');
-  console.log('data:', data);
-  console.log('data.success:', data?.success);
-  console.log('data.preview_url:', data?.preview_url);
+        console.log('=== VERIFICANDO preview_url ===');
+        console.log('data completo:', JSON.stringify(data, null, 2));
+        console.log('data.success:', data?.success);
+        console.log('data.preview_url:', data?.preview_url);
 
-  if (data?.preview_url) {
-    console.log('✅ Preview URL encontrada:', data.preview_url);
-    inicializarPreview(data.preview_url);
-  } else {
-    console.error('❌ Preview URL não encontrada!');
-    console.error('Dados recebidos completos:', JSON.stringify(data, null, 2));
-    mostrarErro('Erro ao gerar prévia. Verifique o console (F12).');
-  }
-} catch (err) {
-  clearInterval(interval);
-  loadingBar.style.display = 'none';
-  console.error('❌ ERRO NO FETCH:', err);
-  mostrarErro('Erro ao conectar com o servidor: ' + err.message);
-}
+        if (data && data.preview_url) {
+          console.log('✅ Preview URL encontrada:', data.preview_url);
+          inicializarPreview(data.preview_url);
+        } else {
+          console.error('❌ Preview URL NÃO encontrada!');
+          console.error('Estrutura recebida:', Object.keys(data || {}));
+          mostrarErro('Erro: preview_url não encontrada na resposta. Verifique o console (F12).');
+        }
+      } catch (err) {
+        clearInterval(interval);
+        loadingBar.style.display = 'none';
+        console.error('❌ ERRO NO FETCH:', err);
+        console.error('Stack:', err.stack);
+        mostrarErro('Erro ao conectar: ' + err.message);
+      }
+    }
 
     function inicializarPreview(url) {
-  baseUrl = url;
-  
-  // Extrair valores da URL do Cloudinary
-  // Exemplo: l_logo_123,e_bgremoval,w_80,g_north_west,x_50,y_600,fl_layer_apply/...
-  
-  // Extrai posição Y da logo (primeiro y_)
-  const logoYMatch = url.match(/,y_(\d+),/);
-  if (logoYMatch) offsetLogoY = parseInt(logoYMatch[1]);
-  
-  // Extrai largura da logo (w_)
-  const logoWMatch = url.match(/,w_(\d+),/);
-  if (logoWMatch) tamanhoLogo = parseInt(logoWMatch[1]);
-  
-  // Extrai posição Y do texto (segundo y_ se existir)
-  const allYMatches = [...url.matchAll(/,y_(\d+),/g)];
-  if (allYMatches.length > 1) {
-    offsetTextoY = parseInt(allYMatches[1][1]);
-  }
-  
-  // Extrai tamanho do texto
-  const textoMatch = url.match(/l_text:[^_]+_(\d+):/);
-  if (textoMatch) tamanhoTexto = parseInt(textoMatch[1]);
+      console.log('=== INICIALIZANDO PREVIEW ===');
+      console.log('URL recebida:', url);
+      
+      baseUrl = url;
+      
+      // Extrai posição Y da logo (primeiro y_)
+      const logoYMatch = url.match(/,y_(\d+),/);
+      if (logoYMatch) {
+        offsetLogoY = parseInt(logoYMatch[1]);
+        console.log('Logo Y:', offsetLogoY);
+      }
+      
+      // Extrai largura da logo (w_)
+      const logoWMatch = url.match(/,w_(\d+),/);
+      if (logoWMatch) {
+        tamanhoLogo = parseInt(logoWMatch[1]);
+        console.log('Logo Width:', tamanhoLogo);
+      }
+      
+      // Extrai posição Y do texto (segundo y_ se existir)
+      const allYMatches = [...url.matchAll(/,y_(\d+),/g)];
+      if (allYMatches.length > 1) {
+        offsetTextoY = parseInt(allYMatches[1][1]);
+        console.log('Texto Y:', offsetTextoY);
+      }
+      
+      // Extrai tamanho do texto
+      const textoMatch = url.match(/l_text:[^_]+_(\d+):/);
+      if (textoMatch) {
+        tamanhoTexto = parseInt(textoMatch[1]);
+        console.log('Texto Size:', tamanhoTexto);
+      }
 
-  const img = document.getElementById('preview-img');
-  img.src = url;
-  img.style.display = 'block';
-  document.getElementById('controls').style.display = 'flex';
-}
+      const img = document.getElementById('preview-img');
+      img.src = url;
+      img.style.display = 'block';
+      document.getElementById('controls').style.display = 'flex';
+      
+      console.log('✅ Preview inicializada com sucesso!');
+    }
 
-function atualizarPreview() {
-  if (!baseUrl) return;
-  
-  // Reconstrói a URL alterando apenas os valores necessários
-  let newUrl = baseUrl;
-  
-  // Atualiza posição Y da logo (primeira ocorrência de y_)
-  let yCount = 0;
-  newUrl = newUrl.replace(/,y_\d+,/g, function(match) {
-    yCount++;
-    if (yCount === 1) return `,y_${offsetLogoY},`;
-    if (yCount === 2) return `,y_${offsetTextoY},`;
-    return match;
-  });
-  
-  // Atualiza largura da logo
-  newUrl = newUrl.replace(/,w_\d+,/, `,w_${tamanhoLogo},`);
-  
-  // Atualiza tamanho do texto (se existir)
-  newUrl = newUrl.replace(/l_text:([^_]+_)\d+:/, `l_text:$1${tamanhoTexto}:`);
-  
-  document.getElementById('preview-img').src = newUrl;
-  baseUrl = newUrl;
-}
+    function atualizarPreview() {
+      if (!baseUrl) return;
+      
+      console.log('=== ATUALIZANDO PREVIEW ===');
+      console.log('Logo Y:', offsetLogoY);
+      console.log('Logo Width:', tamanhoLogo);
+      console.log('Texto Y:', offsetTextoY);
+      console.log('Texto Size:', tamanhoTexto);
+      
+      let newUrl = baseUrl;
+      
+      // Atualiza posição Y da logo (primeira ocorrência de y_)
+      let yCount = 0;
+      newUrl = newUrl.replace(/,y_\d+,/g, function(match) {
+        yCount++;
+        if (yCount === 1) return `,y_${offsetLogoY},`;
+        if (yCount === 2) return `,y_${offsetTextoY},`;
+        return match;
+      });
+      
+      // Atualiza largura da logo
+      newUrl = newUrl.replace(/,w_\d+,/, `,w_${tamanhoLogo},`);
+      
+      // Atualiza tamanho do texto (se existir)
+      newUrl = newUrl.replace(/l_text:([^_]+_)\d+:/, `l_text:$1${tamanhoTexto}:`);
+      
+      console.log('Nova URL:', newUrl);
+      
+      document.getElementById('preview-img').src = newUrl;
+      baseUrl = newUrl;
+    }
 
     function moverLogo(delta) {
       offsetLogoY -= delta;
@@ -785,9 +853,18 @@ function atualizarPreview() {
       const dados = {
         order_number: orderNumber,
         produto_sku: produto.sku,
+        produto_nome: produto.nome,
+        produto_variante: produto.variante,
         mockup_url: baseUrl,
+        offset_logo_y: offsetLogoY,
+        offset_texto_y: offsetTextoY,
+        tamanho_logo: tamanhoLogo,
+        tamanho_texto: tamanhoTexto,
         timestamp: new Date().toISOString()
       };
+
+      console.log('=== APROVANDO PRODUTO ===');
+      console.log('Dados:', dados);
 
       try {
         const response = await fetch(WEBHOOK_APROVACAO, {
@@ -797,6 +874,8 @@ function atualizarPreview() {
           },
           body: JSON.stringify(dados)
         });
+
+        console.log('Resposta aprovação:', response.status);
 
         if (response.ok) {
           // Marcar como aprovado
@@ -815,11 +894,11 @@ function atualizarPreview() {
             document.getElementById('success-message').style.display = 'block';
           }
         } else {
-          throw new Error('Erro ao salvar');
+          throw new Error('Erro ao salvar (status: ' + response.status + ')');
         }
       } catch (err) {
-        console.error(err);
-        mostrarErro('Erro ao aprovar. Tente novamente.');
+        console.error('❌ Erro ao aprovar:', err);
+        mostrarErro('Erro ao aprovar: ' + err.message);
         btnAprovar.disabled = false;
         btnAprovar.textContent = '✅ APROVAR ESTE PRODUTO';
       }
@@ -829,6 +908,10 @@ function atualizarPreview() {
       const errorDiv = document.getElementById('error-message');
       errorDiv.textContent = mensagem;
       errorDiv.style.display = 'block';
+      
+      // Também mostrar no console
+      console.error('ERRO EXIBIDO:', mensagem);
+      
       setTimeout(() => {
         errorDiv.style.display = 'none';
       }, 5000);
