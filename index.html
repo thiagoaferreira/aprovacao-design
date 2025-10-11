@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Aprovar Design - Gama Laser</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -12,9 +12,9 @@
       background: #000;
       min-height: 100vh;
       padding-bottom: 40px;
+      touch-action: pan-y pinch-zoom;
     }
 
-    /* Header */
     .header {
       background: #000;
       padding: 20px;
@@ -27,14 +27,12 @@
       height: auto;
     }
 
-    /* Container */
     .container {
-      max-width: 700px;
+      max-width: 900px;
       margin: 40px auto;
       padding: 0 20px;
     }
 
-    /* Card */
     .card {
       background: #fff;
       border-radius: 16px;
@@ -69,7 +67,6 @@
       font-size: 18px;
     }
 
-    /* Progress */
     .progress-bar {
       display: flex;
       gap: 10px;
@@ -94,7 +91,6 @@
       background: #4caf50;
     }
 
-    /* Produto Info */
     .produto-info {
       background: #f9f9f9;
       padding: 20px;
@@ -124,7 +120,6 @@
       min-width: 100px;
     }
 
-    /* Form */
     .form-group {
       margin-bottom: 20px;
     }
@@ -154,7 +149,6 @@
       border-color: #f68729;
     }
 
-    /* Buttons */
     .btn {
       width: 100%;
       padding: 15px;
@@ -195,7 +189,6 @@
       transform: none;
     }
 
-    /* Preview Area */
     .preview-area {
       margin-top: 30px;
       padding-top: 30px;
@@ -238,12 +231,37 @@
       font-size: 14px;
     }
 
-    .preview-img {
-      max-width: 100%;
+    .preview-container {
+      position: relative;
+      background: #f5f5f5;
       border: 3px solid #ddd;
       border-radius: 12px;
+      overflow: hidden;
       display: none;
       margin-bottom: 20px;
+      touch-action: none;
+      user-select: none;
+    }
+
+    .preview-img {
+      width: 100%;
+      display: block;
+      pointer-events: none;
+    }
+
+    .coords-display {
+      background: #1a1a1a;
+      color: #0f0;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 15px 0;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      display: none;
+    }
+
+    .coords-display div {
+      margin: 5px 0;
     }
 
     .controls {
@@ -255,65 +273,58 @@
 
     .control-row {
       display: flex;
-      gap: 20px;
+      gap: 10px;
       justify-content: center;
       flex-wrap: wrap;
     }
 
-    .control-group {
-      text-align: center;
-    }
-
-    .control-group strong {
-      display: block;
-      margin-bottom: 10px;
-      color: #000;
-    }
-
     .control-btn {
-      width: 160px;
-      height: 50px;
+      padding: 12px 20px;
       border: none;
-      border-radius: 10px;
+      border-radius: 8px;
       font-size: 14px;
       font-weight: bold;
       cursor: pointer;
-      margin: 4px;
       transition: all 0.2s;
+      color: #fff;
     }
 
     .control-btn:hover {
       transform: scale(1.05);
     }
 
-    .btn-move {
-      background: #f68729;
-      color: #fff;
+    .btn-rotate {
+      background: #8b5cf6;
     }
 
-    .btn-move:hover {
-      background: #d67420;
+    .btn-rotate:hover {
+      background: #7c3aed;
     }
 
-    .btn-plus {
-      background: #22c55e;
-      color: #fff;
-    }
-
-    .btn-plus:hover {
-      background: #16a34a;
-    }
-
-    .btn-minus {
+    .btn-reset {
       background: #ef4444;
-      color: #fff;
     }
 
-    .btn-minus:hover {
+    .btn-reset:hover {
       background: #dc2626;
     }
 
-    /* Messages */
+    .instructions {
+      background: #e0f2fe;
+      border-left: 4px solid #0284c7;
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 8px;
+      font-size: 14px;
+      color: #0c4a6e;
+    }
+
+    .instructions strong {
+      display: block;
+      margin-bottom: 8px;
+      color: #0369a1;
+    }
+
     .success-message {
       background: #d1fae5;
       border: 2px solid #10b981;
@@ -365,35 +376,58 @@
       100% { transform: rotate(360deg); }
     }
 
-    .debug-info {
-      background: #1a1a1a;
-      color: #0f0;
-      padding: 15px;
-      border-radius: 8px;
-      margin: 20px 0;
-      font-family: 'Courier New', monospace;
-      font-size: 12px;
-      max-height: 300px;
-      overflow-y: auto;
+    /* Draggable elements */
+    .draggable-marker {
+      position: absolute;
+      cursor: move;
+      touch-action: none;
+      z-index: 10;
+    }
+
+    .logo-marker {
+      border: 2px dashed #f68729;
+      background: rgba(246, 135, 41, 0.1);
+    }
+
+    .texto-marker {
+      border: 2px dashed #0ea5e9;
+      background: rgba(14, 165, 233, 0.1);
+    }
+
+    .marker-label {
+      position: absolute;
+      top: -25px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #000;
+      color: #fff;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: bold;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    @media (max-width: 768px) {
+      .control-btn {
+        font-size: 12px;
+        padding: 10px 15px;
+      }
     }
   </style>
 </head>
 <body>
-  <!-- Header -->
   <div class="header">
     <img src="https://zqaoxvxuznonytzibhhe.supabase.co/storage/v1/object/sign/imagens_gamalaser/LOGO-GAMA-LASER.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV8xYjVlYTRkMi03MGI2LTQ1MjgtODE0Mi1kZDUyYmZjZTM2ZTUiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJpbWFnZW5zX2dhbWFsYXNlci9MT0dPLUdBTUEtTEFTRVIucG5nIiwiaWF0IjoxNzYwMTM3NzE5LCJleHAiOjIwNzU0OTc3MTl9.HYRTr9yYjrRMoWLZKmefCOKOfHjdXXj6z26QL7rshKc" alt="Gama Laser">
   </div>
 
-  <!-- Container -->
   <div class="container">
-    <!-- Loading Screen -->
     <div id="loading-screen" class="loading-screen">
       <h2>Carregando seus produtos...</h2>
       <div class="spinner"></div>
-      <div id="debug-loading" class="debug-info" style="display:none;"></div>
     </div>
 
-    <!-- Main Card -->
     <div class="card" id="main-card" style="display:none;">
       <h1 class="card-title">🎨 Aprovar Design de Gravação</h1>
       <p class="card-subtitle">Personalize cada produto e aprove o design final</p>
@@ -402,10 +436,8 @@
         <strong>📦 Pedido: #<span id="order-number">...</span></strong>
       </div>
 
-      <!-- Progress Bar -->
       <div class="progress-bar" id="progress-bar"></div>
 
-      <!-- Produto Info -->
       <div class="produto-info">
         <div class="produto-counter" id="produto-counter">Produto 1 de 1</div>
         <div class="produto-detail">
@@ -426,7 +458,6 @@
         </div>
       </div>
 
-      <!-- Form -->
       <div id="form-section">
         <div class="form-group">
           <label>📁 Envie seu Logo:</label>
@@ -448,26 +479,13 @@
             <option value="Georgia">Georgia</option>
             <option value="Tahoma">Tahoma</option>
             <option value="Impact">Impact</option>
-            <option value="Comic Sans MS">Comic Sans MS</option>
-            <option value="Trebuchet MS">Trebuchet MS</option>
-            <option value="Palatino">Palatino</option>
-            <option value="Lucida Console">Lucida Console</option>
-            <option value="Gill Sans">Gill Sans</option>
-            <option value="Franklin Gothic">Franklin Gothic</option>
             <option value="Helvetica">Helvetica</option>
-            <option value="Optima">Optima</option>
-            <option value="Rockwell">Rockwell</option>
-            <option value="Baskerville">Baskerville</option>
-            <option value="Century Gothic">Century Gothic</option>
-            <option value="Futura">Futura</option>
-            <option value="Garamond">Garamond</option>
           </select>
         </div>
 
         <button class="btn btn-primary" onclick="gerarPrevia()">🔍 Gerar Prévia</button>
       </div>
 
-      <!-- Preview Area -->
       <div class="preview-area" id="preview-area">
         <h3>Prévia do Design:</h3>
 
@@ -476,33 +494,34 @@
           <span class="loading-text" id="loading-text">0%</span>
         </div>
 
-        <img id="preview-img" class="preview-img" src="" alt="Prévia">
+        <div class="instructions">
+          <strong>📱 Como ajustar:</strong>
+          🖱️ Desktop: Arraste os marcadores com o mouse<br>
+          👆 Mobile: Arraste com o dedo<br>
+          🔄 Use o botão "Rotacionar" para girar 90°
+        </div>
+
+        <div class="preview-container" id="preview-container">
+          <img id="preview-img" class="preview-img" src="" alt="Prévia">
+          <div id="logo-marker" class="draggable-marker logo-marker">
+            <div class="marker-label">📷 LOGO</div>
+          </div>
+          <div id="texto-marker" class="draggable-marker texto-marker" style="display:none;">
+            <div class="marker-label">✏️ TEXTO</div>
+          </div>
+        </div>
+
+        <div class="coords-display" id="coords-display">
+          <div><strong>📍 Coordenadas:</strong></div>
+          <div>Logo: X=<span id="logo-x">0</span>, Y=<span id="logo-y">0</span>, Tamanho=<span id="logo-w">0</span></div>
+          <div>Texto: X=<span id="texto-x">0</span>, Y=<span id="texto-y">0</span>, Tamanho=<span id="texto-w">0</span></div>
+          <div>Rotação: <span id="rotation">0</span>°</div>
+        </div>
 
         <div class="controls" id="controls">
           <div class="control-row">
-            <div class="control-group">
-              <strong>Logo:</strong>
-              <button class="control-btn btn-move" onclick="moverLogo(-10)">⬆️ Subir</button>
-              <button class="control-btn btn-move" onclick="moverLogo(10)">⬇️ Descer</button>
-            </div>
-            <div class="control-group">
-              <strong>Texto:</strong>
-              <button class="control-btn btn-move" onclick="moverTexto(-10)">⬆️ Subir</button>
-              <button class="control-btn btn-move" onclick="moverTexto(10)">⬇️ Descer</button>
-            </div>
-          </div>
-
-          <div class="control-row">
-            <div class="control-group">
-              <strong>Tamanho Logo:</strong>
-              <button class="control-btn btn-minus" onclick="mudarTamanhoLogo(-5)">➖ Diminuir</button>
-              <button class="control-btn btn-plus" onclick="mudarTamanhoLogo(5)">➕ Aumentar</button>
-            </div>
-            <div class="control-group">
-              <strong>Tamanho Texto:</strong>
-              <button class="control-btn btn-minus" onclick="mudarTamanhoTexto(-5)">➖ Diminuir</button>
-              <button class="control-btn btn-plus" onclick="mudarTamanhoTexto(5)">➕ Aumentar</button>
-            </div>
+            <button class="control-btn btn-rotate" onclick="rotacionarLogo()">🔄 Rotacionar 90°</button>
+            <button class="control-btn btn-reset" onclick="resetarPosicoes()">↺ Resetar Posições</button>
           </div>
 
           <button class="btn btn-success" onclick="aprovarProduto()" id="btn-aprovar">
@@ -514,7 +533,6 @@
       <div class="error-message" id="error-message"></div>
     </div>
 
-    <!-- Success Message -->
     <div class="card success-message" id="success-message">
       <h2>🎉 Todos os Produtos Aprovados!</h2>
       <p>Obrigado! Seu pedido está completo e seguirá para produção.</p>
@@ -523,99 +541,80 @@
   </div>
 
   <script>
-    // ====== CONFIGURAÇÕES ======
     const WEBHOOK_PREVIEW = 'https://gama-laser-n8n.gtyipj.easypanel.host/webhook-test/gerar-preview-mockup';
-    const WEBHOOK_APROVACAO = 'https://gama-laser-n8n.gtyipj.easypanel.host/webhook-test/aprovar-mockup'; // TODO: Criar este webhook
+    const WEBHOOK_APROVACAO = 'https://gama-laser-n8n.gtyipj.easypanel.host/webhook-test/aprovar-mockup';
     const SUPABASE_URL = 'https://zqaoxvxuznonytzibhhe.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpxYW94dnh1em5vbnl0emliaGhlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk1NDYwMTEsImV4cCI6MjA3NTEyMjAxMX0.anrCkp8mdxVPg1lpCqvnz_OxLk3ljNz1veTMPWSjtpI';
-    // ===========================
 
     let linkId = '';
     let orderNumber = '';
     let produtos = [];
     let produtoAtualIndex = 0;
-    let offsetLogoY = 0;
-    let offsetTextoY = 0;
-    let tamanhoLogo = 0;
-    let tamanhoTexto = 0;
     let baseUrl = '';
+    let cloudName = '';
+    let mockupPublicId = '';
+    let logoPublicId = '';
+    
+    // Coordenadas
+    let logoX = 0, logoY = 400, logoW = 100;
+    let textoX = 0, textoY = 520, textoW = 50;
+    let rotacao = 0;
+    let temTexto = false;
+    let fonte = 'Arial';
+    let textoConteudo = '';
 
-    // Função para adicionar log de debug
-    function debugLog(msg) {
-      console.log(msg);
-      const debugDiv = document.getElementById('debug-loading');
-      if (debugDiv) {
-        debugDiv.style.display = 'block';
-        debugDiv.innerHTML += msg + '<br>';
-      }
-    }
+    // Drag state
+    let isDraggingLogo = false;
+    let isDraggingTexto = false;
+    let dragStartX = 0;
+    let dragStartY = 0;
+    let elementStartX = 0;
+    let elementStartY = 0;
 
-    // Buscar dados do link
     async function carregarDados() {
-  const params = new URLSearchParams(window.location.search);
-  linkId = params.get('p');
-  
-  debugLog('=== INICIANDO CARGA ===');
-  debugLog('Link ID: ' + linkId);
-  
-  if (!linkId) {
-    debugLog('❌ ERRO: Link ID não encontrado na URL');
-    mostrarErro('Link inválido. Use: ?p=SEU_LINK_ID');
-    return;
-  }
-
-  try {
-    debugLog('Fazendo requisição ao Supabase...');
-    debugLog('URL: ' + SUPABASE_URL + '/rest/v1/links_aprovacao?id=eq.' + linkId);
-    
-    const response = await fetch(`${SUPABASE_URL}/rest/v1/links_aprovacao?id=eq.${linkId}&select=*`, {
-      headers: {
-        'apikey': SUPABASE_ANON_KEY,
-        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+      const params = new URLSearchParams(window.location.search);
+      linkId = params.get('p');
+      
+      if (!linkId) {
+        mostrarErro('Link inválido. Use: ?p=SEU_LINK_ID');
+        return;
       }
-    });
 
-    debugLog('Response Status: ' + response.status);
-    debugLog('Response OK: ' + response.ok);
+      try {
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/links_aprovacao?id=eq.${linkId}&select=*`, {
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+          }
+        });
 
-    const data = await response.json();
-    debugLog('Dados recebidos: ' + JSON.stringify(data));
-    
-    if (!data || data.length === 0) {
-      debugLog('❌ ERRO: Link não encontrado no banco');
-      mostrarErro('Link não encontrado. Verifique o ID.');
-      return;
+        const data = await response.json();
+        
+        if (!data || data.length === 0) {
+          mostrarErro('Link não encontrado. Verifique o ID.');
+          return;
+        }
+
+        orderNumber = data[0].order_number;
+        
+        if (typeof data[0].produtos === 'string') {
+          produtos = JSON.parse(data[0].produtos);
+        } else {
+          produtos = data[0].produtos;
+        }
+
+        mostrarProdutos();
+      } catch (err) {
+        console.error(err);
+        mostrarErro('Erro ao carregar dados: ' + err.message);
+      }
     }
-
-    orderNumber = data[0].order_number;
-    
-    // ✅ PARSE DO JSON STRING
-    if (typeof data[0].produtos === 'string') {
-      debugLog('⚠️ Produtos é string, fazendo parse...');
-      produtos = JSON.parse(data[0].produtos);
-    } else {
-      produtos = data[0].produtos;
-    }
-
-    debugLog('✅ Pedido carregado: ' + orderNumber);
-    debugLog('✅ Total de produtos: ' + produtos.length);
-    debugLog('✅ Produtos parseados: ' + JSON.stringify(produtos));
-
-    mostrarProdutos();
-  } catch (err) {
-    debugLog('❌ ERRO FATAL: ' + err.message);
-    debugLog('Stack: ' + err.stack);
-    console.error(err);
-    mostrarErro('Erro ao carregar dados: ' + err.message);
-  }
-}
 
     function mostrarProdutos() {
       document.getElementById('loading-screen').style.display = 'none';
       document.getElementById('main-card').style.display = 'block';
       document.getElementById('order-number').textContent = orderNumber;
 
-      // Criar progress bar
       const progressBar = document.getElementById('progress-bar');
       progressBar.innerHTML = '';
       produtos.forEach((_, i) => {
@@ -638,14 +637,12 @@
       document.getElementById('produto-sku').textContent = produto.sku;
       document.getElementById('produto-quantidade').textContent = produto.quantidade;
 
-      // Atualizar progress
       document.querySelectorAll('.progress-dot').forEach((dot, i) => {
         dot.classList.remove('active', 'completed');
         if (i < index) dot.classList.add('completed');
         if (i === index) dot.classList.add('active');
       });
 
-      // Limpar formulário
       document.getElementById('logo').value = '';
       document.getElementById('texto').value = '';
       document.getElementById('fonte').value = 'Arial';
@@ -655,7 +652,7 @@
     async function gerarPrevia() {
       const logoInput = document.getElementById('logo');
       const texto = document.getElementById('texto').value;
-      const fonte = document.getElementById('fonte').value;
+      const fonteSelect = document.getElementById('fonte').value;
       const produto = produtos[produtoAtualIndex];
 
       if (!logoInput.files.length) {
@@ -663,15 +660,18 @@
         return;
       }
 
+      fonte = fonteSelect;
+      textoConteudo = texto;
+      temTexto = texto.trim() !== '';
+
       const previewArea = document.getElementById('preview-area');
       const loadingBar = document.getElementById('loading-bar');
       const loadingProgress = document.getElementById('loading-progress');
       const loadingText = document.getElementById('loading-text');
-      const previewImg = document.getElementById('preview-img');
 
       previewArea.style.display = 'block';
       loadingBar.style.display = 'block';
-      previewImg.style.display = 'none';
+      document.getElementById('preview-container').style.display = 'none';
       loadingProgress.style.width = '0%';
       loadingText.textContent = '0%';
 
@@ -692,35 +692,13 @@
       formData.append('sku', produto.sku);
       formData.append('cor', produto.variante);
 
-      console.log('=== ENVIANDO PARA WEBHOOK ===');
-      console.log('URL:', WEBHOOK_PREVIEW);
-      console.log('SKU:', produto.sku);
-      console.log('Cor:', produto.variante);
-      console.log('Texto:', texto);
-      console.log('Fonte:', fonte);
-
       try {
         const response = await fetch(WEBHOOK_PREVIEW, {
           method: 'POST',
           body: formData
         });
 
-        console.log('=== RESPOSTA DO WEBHOOK ===');
-        console.log('Status:', response.status);
-        console.log('OK:', response.ok);
-
-        const responseText = await response.text();
-        console.log('Response Text:', responseText);
-
-        let data;
-        try {
-          data = JSON.parse(responseText);
-          console.log('✅ JSON parseado:', data);
-        } catch (e) {
-          console.error('❌ Erro ao parsear JSON:', e);
-          console.error('Texto recebido:', responseText);
-          data = null;
-        }
+        const data = await response.json();
 
         clearInterval(interval);
         loadingProgress.style.width = '100%';
@@ -730,119 +708,258 @@
           loadingBar.style.display = 'none';
         }, 500);
 
-        console.log('=== VERIFICANDO preview_url ===');
-        console.log('data completo:', JSON.stringify(data, null, 2));
-        console.log('data.success:', data?.success);
-        console.log('data.preview_url:', data?.preview_url);
-
         if (data && data.preview_url) {
-          console.log('✅ Preview URL encontrada:', data.preview_url);
           inicializarPreview(data.preview_url);
         } else {
-          console.error('❌ Preview URL NÃO encontrada!');
-          console.error('Estrutura recebida:', Object.keys(data || {}));
-          mostrarErro('Erro: preview_url não encontrada na resposta. Verifique o console (F12).');
+          mostrarErro('Erro ao gerar prévia. Tente novamente.');
         }
       } catch (err) {
         clearInterval(interval);
         loadingBar.style.display = 'none';
-        console.error('❌ ERRO NO FETCH:', err);
-        console.error('Stack:', err.stack);
-        mostrarErro('Erro ao conectar: ' + err.message);
+        console.error(err);
+        mostrarErro('Erro ao conectar com o servidor.');
       }
     }
 
     function inicializarPreview(url) {
-      console.log('=== INICIALIZANDO PREVIEW ===');
-      console.log('URL recebida:', url);
-      
       baseUrl = url;
       
-      // Extrai posição Y da logo (primeiro y_)
+      // Parse da URL
+      cloudName = url.match(/\/([^/]+)\/image\/upload/)[1];
+      mockupPublicId = url.split('/').pop();
+      
+      const logoMatch = url.match(/l_([^,]+)/);
+      if (logoMatch) logoPublicId = logoMatch[1];
+      
       const logoYMatch = url.match(/,y_(\d+),/);
-      if (logoYMatch) {
-        offsetLogoY = parseInt(logoYMatch[1]);
-        console.log('Logo Y:', offsetLogoY);
-      }
+      if (logoYMatch) logoY = parseInt(logoYMatch[1]);
       
-      // Extrai largura da logo (w_)
       const logoWMatch = url.match(/,w_(\d+),/);
-      if (logoWMatch) {
-        tamanhoLogo = parseInt(logoWMatch[1]);
-        console.log('Logo Width:', tamanhoLogo);
-      }
+      if (logoWMatch) logoW = parseInt(logoWMatch[1]);
       
-      // Extrai posição Y do texto (segundo y_ se existir)
       const allYMatches = [...url.matchAll(/,y_(\d+),/g)];
       if (allYMatches.length > 1) {
-        offsetTextoY = parseInt(allYMatches[1][1]);
-        console.log('Texto Y:', offsetTextoY);
+        textoY = parseInt(allYMatches[1][1]);
       }
       
-      // Extrai tamanho do texto
       const textoMatch = url.match(/l_text:[^_]+_(\d+):/);
-      if (textoMatch) {
-        tamanhoTexto = parseInt(textoMatch[1]);
-        console.log('Texto Size:', tamanhoTexto);
-      }
+      if (textoMatch) textoW = parseInt(textoMatch[1]);
 
       const img = document.getElementById('preview-img');
       img.src = url;
-      img.style.display = 'block';
-      document.getElementById('controls').style.display = 'flex';
+      img.onload = () => {
+        posicionarMarcadores();
+        document.getElementById('preview-container').style.display = 'block';
+        document.getElementById('controls').style.display = 'flex';
+        document.getElementById('coords-display').style.display = 'block';
+        atualizarCoordenadas();
+        inicializarDrag();
+      };
+    }
+
+    function posicionarMarcadores() {
+      const container = document.getElementById('preview-container');
+      const img = document.getElementById('preview-img');
+      const rect = img.getBoundingClientRect();
+      const containerRect = container.getBoundingClientRect();
       
-      console.log('✅ Preview inicializada com sucesso!');
+      const scaleX = rect.width / img.naturalWidth;
+      const scaleY = rect.height / img.naturalHeight;
+
+      const logoMarker = document.getElementById('logo-marker');
+      const textoMarker = document.getElementById('texto-marker');
+      
+      const logoDisplayW = logoW * scaleX;
+      const logoDisplayH = logoDisplayW * 0.6;
+      
+      logoMarker.style.width = logoDisplayW + 'px';
+      logoMarker.style.height = logoDisplayH + 'px';
+      logoMarker.style.left = (logoX * scaleX) + 'px';
+      logoMarker.style.top = (logoY * scaleY) + 'px';
+      
+      if (temTexto) {
+        textoMarker.style.display = 'block';
+        const textoDisplayW = textoW * scaleX * 3;
+        const textoDisplayH = textoW * scaleY;
+        
+        textoMarker.style.width = textoDisplayW + 'px';
+        textoMarker.style.height = textoDisplayH + 'px';
+        textoMarker.style.left = (textoX * scaleX) + 'px';
+        textoMarker.style.top = (textoY * scaleY) + 'px';
+      } else {
+        textoMarker.style.display = 'none';
+      }
+    }
+
+    function inicializarDrag() {
+      const logoMarker = document.getElementById('logo-marker');
+      const textoMarker = document.getElementById('texto-marker');
+      const container = document.getElementById('preview-container');
+
+      // Desktop - Logo
+      logoMarker.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        isDraggingLogo = true;
+        dragStartX = e.clientX;
+        dragStartY = e.clientY;
+        elementStartX = logoX;
+        elementStartY = logoY;
+        logoMarker.style.cursor = 'grabbing';
+      });
+
+      // Mobile - Logo
+      logoMarker.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        isDraggingLogo = true;
+        const touch = e.touches[0];
+        dragStartX = touch.clientX;
+        dragStartY = touch.clientY;
+        elementStartX = logoX;
+        elementStartY = logoY;
+      });
+
+      // Desktop - Texto
+      textoMarker.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        isDraggingTexto = true;
+        dragStartX = e.clientX;
+        dragStartY = e.clientY;
+        elementStartX = textoX;
+        elementStartY = textoY;
+        textoMarker.style.cursor = 'grabbing';
+      });
+
+      // Mobile - Texto
+      textoMarker.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        isDraggingTexto = true;
+        const touch = e.touches[0];
+        dragStartX = touch.clientX;
+        dragStartY = touch.clientY;
+        elementStartX = textoX;
+        elementStartY = textoY;
+      });
+
+      // Mouse move
+      document.addEventListener('mousemove', (e) => {
+        if (!isDraggingLogo && !isDraggingTexto) return;
+        handleDrag(e.clientX, e.clientY);
+      });
+
+      // Touch move
+      document.addEventListener('touchmove', (e) => {
+        if (!isDraggingLogo && !isDraggingTexto) return;
+        const touch = e.touches[0];
+        handleDrag(touch.clientX, touch.clientY);
+      });
+
+      // Mouse up
+      document.addEventListener('mouseup', () => {
+        if (isDraggingLogo) {
+          isDraggingLogo = false;
+          logoMarker.style.cursor = 'move';
+        }
+        if (isDraggingTexto) {
+          isDraggingTexto = false;
+          textoMarker.style.cursor = 'move';
+        }
+      });
+
+      // Touch end
+      document.addEventListener('touchend', () => {
+        isDraggingLogo = false;
+        isDraggingTexto = false;
+      });
+    }
+
+    function handleDrag(clientX, clientY) {
+      const img = document.getElementById('preview-img');
+      const rect = img.getBoundingClientRect();
+      const scaleX = rect.width / img.naturalWidth;
+      const scaleY = rect.height / img.naturalHeight;
+
+      const deltaX = clientX - dragStartX;
+      const deltaY = clientY - dragStartY;
+
+      if (isDraggingLogo) {
+        logoX = Math.round(elementStartX + (deltaX / scaleX));
+        logoY = Math.round(elementStartY + (deltaY / scaleY));
+        logoX = Math.max(0, Math.min(logoX, img.naturalWidth - logoW));
+        logoY = Math.max(0, Math.min(logoY, img.naturalHeight - 100));
+      } else if (isDraggingTexto) {
+        textoX = Math.round(elementStartX + (deltaX / scaleX));
+        textoY = Math.round(elementStartY + (deltaY / scaleY));
+        textoX = Math.max(0, Math.min(textoX, img.naturalWidth - 200));
+        textoY = Math.max(0, Math.min(textoY, img.naturalHeight - 50));
+      }
+
+      posicionarMarcadores();
+      atualizarCoordenadas();
+      atualizarPreview();
+    }
+
+    function atualizarCoordenadas() {
+      document.getElementById('logo-x').textContent = logoX;
+      document.getElementById('logo-y').textContent = logoY;
+      document.getElementById('logo-w').textContent = logoW;
+      document.getElementById('texto-x').textContent = textoX;
+      document.getElementById('texto-y').textContent = textoY;
+      document.getElementById('texto-w').textContent = textoW;
+      document.getElementById('rotation').textContent = rotacao;
     }
 
     function atualizarPreview() {
-      if (!baseUrl) return;
-      
-      console.log('=== ATUALIZANDO PREVIEW ===');
-      console.log('Logo Y:', offsetLogoY);
-      console.log('Logo Width:', tamanhoLogo);
-      console.log('Texto Y:', offsetTextoY);
-      console.log('Texto Size:', tamanhoTexto);
-      
-      let newUrl = baseUrl;
-      
-      // Atualiza posição Y da logo (primeira ocorrência de y_)
-      let yCount = 0;
-      newUrl = newUrl.replace(/,y_\d+,/g, function(match) {
-        yCount++;
-        if (yCount === 1) return `,y_${offsetLogoY},`;
-        if (yCount === 2) return `,y_${offsetTextoY},`;
-        return match;
-      });
-      
-      // Atualiza largura da logo
-      newUrl = newUrl.replace(/,w_\d+,/, `,w_${tamanhoLogo},`);
-      
-      // Atualiza tamanho do texto (se existir)
-      newUrl = newUrl.replace(/l_text:([^_]+_)\d+:/, `l_text:$1${tamanhoTexto}:`);
-      
-      console.log('Nova URL:', newUrl);
-      
+      const logoTransformations = [
+        `l_${logoPublicId}`,
+        'e_bgremoval',
+        `w_${logoW}`,
+        'g_north_west',
+        `x_${logoX}`,
+        `y_${logoY}`,
+        'fl_layer_apply'
+      ];
+
+      if (rotacao !== 0) {
+        logoTransformations.splice(-1, 0, `a_${rotacao}`);
+      }
+
+      const logoString = logoTransformations.join(',');
+      let newUrl = `https://res.cloudinary.com/${cloudName}/image/upload/${logoString}/${mockupPublicId}`;
+
+      if (temTexto) {
+        const textoEncoded = encodeURIComponent(textoConteudo);
+        const textoTransformations = [
+          `l_text:${fonte}_${textoW}:${textoEncoded}`,
+          'co_rgb:000000',
+          'g_north_west',
+          `x_${textoX}`,
+          `y_${textoY}`,
+          'fl_layer_apply'
+        ];
+        const textoString = textoTransformations.join(',');
+        newUrl = `https://res.cloudinary.com/${cloudName}/image/upload/${logoString}/${textoString}/${mockupPublicId}`;
+      }
+
       document.getElementById('preview-img').src = newUrl;
       baseUrl = newUrl;
     }
 
-    function moverLogo(delta) {
-      offsetLogoY -= delta;
+    function rotacionarLogo() {
+      rotacao = (rotacao + 90) % 360;
+      atualizarCoordenadas();
       atualizarPreview();
     }
 
-    function moverTexto(delta) {
-      offsetTextoY -= delta;
-      atualizarPreview();
-    }
-
-    function mudarTamanhoLogo(delta) {
-      tamanhoLogo += delta;
-      atualizarPreview();
-    }
-
-    function mudarTamanhoTexto(delta) {
-      tamanhoTexto += delta;
+    function resetarPosicoes() {
+      logoX = 0;
+      logoY = 400;
+      logoW = 100;
+      textoX = 0;
+      textoY = 520;
+      textoW = 50;
+      rotacao = 0;
+      posicionarMarcadores();
+      atualizarCoordenadas();
       atualizarPreview();
     }
 
@@ -864,15 +981,15 @@
         produto_nome: produto.nome,
         produto_variante: produto.variante,
         mockup_url: baseUrl,
-        offset_logo_y: offsetLogoY,
-        offset_texto_y: offsetTextoY,
-        tamanho_logo: tamanhoLogo,
-        tamanho_texto: tamanhoTexto,
+        logo_x: logoX,
+        logo_y: logoY,
+        logo_w: logoW,
+        texto_x: textoX,
+        texto_y: textoY,
+        texto_w: textoW,
+        rotacao: rotacao,
         timestamp: new Date().toISOString()
       };
-
-      console.log('=== APROVANDO PRODUTO ===');
-      console.log('Dados:', dados);
 
       try {
         const response = await fetch(WEBHOOK_APROVACAO, {
@@ -883,13 +1000,9 @@
           body: JSON.stringify(dados)
         });
 
-        console.log('Resposta aprovação:', response.status);
-
         if (response.ok) {
-          // Marcar como aprovado
           document.getElementById(`dot-${produtoAtualIndex}`).classList.add('completed');
           
-          // Próximo produto
           if (produtoAtualIndex < produtos.length - 1) {
             setTimeout(() => {
               carregarProduto(produtoAtualIndex + 1);
@@ -897,15 +1010,14 @@
               btnAprovar.textContent = '✅ APROVAR ESTE PRODUTO';
             }, 1000);
           } else {
-            // Todos aprovados
             document.getElementById('main-card').style.display = 'none';
             document.getElementById('success-message').style.display = 'block';
           }
         } else {
-          throw new Error('Erro ao salvar (status: ' + response.status + ')');
+          throw new Error('Erro ao salvar');
         }
       } catch (err) {
-        console.error('❌ Erro ao aprovar:', err);
+        console.error(err);
         mostrarErro('Erro ao aprovar: ' + err.message);
         btnAprovar.disabled = false;
         btnAprovar.textContent = '✅ APROVAR ESTE PRODUTO';
@@ -916,10 +1028,6 @@
       const errorDiv = document.getElementById('error-message');
       errorDiv.textContent = mensagem;
       errorDiv.style.display = 'block';
-      
-      // Também mostrar no console
-      console.error('ERRO EXIBIDO:', mensagem);
-      
       setTimeout(() => {
         errorDiv.style.display = 'none';
       }, 5000);
