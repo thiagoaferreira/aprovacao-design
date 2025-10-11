@@ -680,37 +680,59 @@
     }
 
     function inicializarPreview(url) {
-      baseUrl = url;
-      const matches = [...url.matchAll(/y_(\d+)/g)];
-      if (matches[0]) offsetLogoY = parseInt(matches[0][1]);
-      if (matches[1]) offsetTextoY = parseInt(matches[1][1]);
+  baseUrl = url;
+  
+  // Extrair valores da URL do Cloudinary
+  // Exemplo: l_logo_123,e_bgremoval,w_80,g_north_west,x_50,y_600,fl_layer_apply/...
+  
+  // Extrai posição Y da logo (primeiro y_)
+  const logoYMatch = url.match(/,y_(\d+),/);
+  if (logoYMatch) offsetLogoY = parseInt(logoYMatch[1]);
+  
+  // Extrai largura da logo (w_)
+  const logoWMatch = url.match(/,w_(\d+),/);
+  if (logoWMatch) tamanhoLogo = parseInt(logoWMatch[1]);
+  
+  // Extrai posição Y do texto (segundo y_ se existir)
+  const allYMatches = [...url.matchAll(/,y_(\d+),/g)];
+  if (allYMatches.length > 1) {
+    offsetTextoY = parseInt(allYMatches[1][1]);
+  }
+  
+  // Extrai tamanho do texto
+  const textoMatch = url.match(/l_text:[^_]+_(\d+):/);
+  if (textoMatch) tamanhoTexto = parseInt(textoMatch[1]);
 
-      const hwMatch = url.match(/(h|w)_(\d+)/);
-      if (hwMatch) tamanhoLogo = parseInt(hwMatch[2]);
+  const img = document.getElementById('preview-img');
+  img.src = url;
+  img.style.display = 'block';
+  document.getElementById('controls').style.display = 'flex';
+}
 
-      const tMatch = url.match(/l_text:[^,]+_(\d+)/);
-      if (tMatch) tamanhoTexto = parseInt(tMatch[1]);
-
-      const img = document.getElementById('preview-img');
-      img.src = url;
-      img.style.display = 'block';
-      document.getElementById('controls').style.display = 'flex';
-    }
-
-    function atualizarPreview() {
-      if (!baseUrl) return;
-      let matchIndex = 0;
-      let newUrl = baseUrl.replace(/y_(\d+)/g, function(fullMatch, num) {
-        matchIndex++;
-        if (matchIndex === 1) return "y_" + offsetLogoY;
-        if (matchIndex === 2) return "y_" + offsetTextoY;
-        return fullMatch;
-      });
-      newUrl = newUrl.replace(/(h|w)_(\d+)/, (m, p1, p2) => `${p1}_${tamanhoLogo}`);
-      newUrl = newUrl.replace(/l_text:[^,]+_(\d+)/, (full, num) => full.replace(num, tamanhoTexto));
-      document.getElementById('preview-img').src = newUrl;
-      baseUrl = newUrl;
-    }
+function atualizarPreview() {
+  if (!baseUrl) return;
+  
+  // Reconstrói a URL alterando apenas os valores necessários
+  let newUrl = baseUrl;
+  
+  // Atualiza posição Y da logo (primeira ocorrência de y_)
+  let yCount = 0;
+  newUrl = newUrl.replace(/,y_\d+,/g, function(match) {
+    yCount++;
+    if (yCount === 1) return `,y_${offsetLogoY},`;
+    if (yCount === 2) return `,y_${offsetTextoY},`;
+    return match;
+  });
+  
+  // Atualiza largura da logo
+  newUrl = newUrl.replace(/,w_\d+,/, `,w_${tamanhoLogo},`);
+  
+  // Atualiza tamanho do texto (se existir)
+  newUrl = newUrl.replace(/l_text:([^_]+_)\d+:/, `l_text:$1${tamanhoTexto}:`);
+  
+  document.getElementById('preview-img').src = newUrl;
+  baseUrl = newUrl;
+}
 
     function moverLogo(delta) {
       offsetLogoY -= delta;
