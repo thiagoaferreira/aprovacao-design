@@ -1,489 +1,775 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Aprovação de Mockup – Gama Laser</title>
+  <meta charset="utf-8" />
+  <title>Aprovar Design – Gama Laser</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-<!-- FAVICON (sol laranja) -->
-<link rel="icon" href="https://zqaoxvxuznonytzibhhe.supabase.co/storage/v1/object/public/imagens_gamalaser/LOGO-GAMA-LASER.png" />
+  <!-- Favicon (Cloudinary permanente) -->
+  <link rel="icon" type="image/png" href="https://res.cloudinary.com/dslzqtajk/image/upload/v1760212909/favicon_1_zwr6t2.png" />
 
-<style>
-:root{
-  --orange:#f68729; --bg:#000; --white:#fff; --muted:#6b7280; --shadow:0 10px 30px rgba(0,0,0,.18);
-  --border:#eaeaea; --panel:#ffffff; --ink:#111827; --tag:#111;
-}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Arial}
-/* ======== HEADER BRANCO ======== */
-.top-white{background:#fff;border-bottom:3px solid var(--orange)}
-.top-inner{max-width:1100px;margin:0 auto;padding:22px 16px;text-align:center}
-.top-inner .brand img{width:200px;height:auto}
-.top-inner .order{margin-top:10px;color:var(--orange);font-weight:800}
-.top-inner .order small{display:block;color:#d97706;font-weight:700;opacity:.95}
+  <style>
+    :root{
+      --gama-orange:#f68729;
+      --bg-dark:#000;
+      --panel:#fff;
+      --text:#111;
+      --muted:#6b7280;
+      --ring:#e5e7eb;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      background:#000;
+      color:var(--text);
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji;
+    }
 
-/* ======== LAYOUT ======== */
-.shell{max-width:1100px;margin:26px auto;padding:0 16px;display:grid;grid-template-columns:1fr 340px;gap:18px}
-@media (max-width:980px){.shell{grid-template-columns:1fr}}
-.card{background:var(--panel);border-radius:16px;box-shadow:var(--shadow)}
-.pad{padding:16px}
+    /* Header preto */
+    .topbar{
+      background:#000;
+      color:#fff;
+      border-bottom:3px solid var(--gama-orange);
+    }
+    .topbar-inner{
+      max-width:1000px;
+      margin:0 auto;
+      padding:14px 18px;
+      display:flex;
+      align-items:center;
+      gap:16px;
+    }
+    .topbar img.logo{
+      height:44px; width:auto; display:block;
+    }
+    .topbar .brand{
+      line-height:1.2;
+    }
+    .brand .title{
+      font-weight:700;
+      font-size:16px;
+    }
+    .brand .subtitle{
+      font-size:12px;
+      color:#e5e7eb;
+    }
 
-/* progresso de produtos */
-.progress{display:flex;gap:8px;justify-content:center;margin:6px 0 12px}
-.dot{width:10px;height:10px;border-radius:99px;background:#e5e7eb;transition:.2s}
-.dot.active{background:var(--orange);transform:scale(1.15)}
-.dot.done{background:#22c55e}
+    /* Container / painel branco */
+    .wrap{
+      max-width:1000px;
+      margin:24px auto 56px;
+      padding:0 16px;
+    }
+    .panel{
+      background:#fff;
+      border-radius:18px;
+      box-shadow:0 10px 40px rgba(0,0,0,.25);
+      overflow:hidden;
+    }
+    .panel-head{
+      padding:18px 18px 8px;
+      border-bottom:1px solid var(--ring);
+    }
+    .row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px 18px;
+      align-items:center;
+      justify-content:space-between;
+    }
+    .order-badge{
+      color:var(--gama-orange);
+      font-weight:700;
+    }
+    .prod-info{
+      display:flex;
+      flex-wrap:wrap;
+      gap:14px 24px;
+      color:#111;
+    }
+    .prod-info span b{ color:#000 }
 
-/* linha do produto */
-.meta{color:#374151;font-size:15px;margin:4px 0 12px}
-.meta strong{color:#111}
+    .panel-body{ padding:18px; }
 
-/* ======== STAGE / EDITOR ======== */
-.stage-wrap{padding:18px}
-.stage{position:relative;width:100%;background:#fafafa;border-radius:14px;overflow:hidden;box-shadow:inset 0 0 0 1px #eee}
-.stage::after{content:"";display:block;padding-top:75%} /* 4:3 default; será substituído no onload */
-.stage > img.base{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#fff}
+    /* Progress de produtos */
+    .dots{
+      display:flex; gap:10px; margin:10px 0 18px;
+      justify-content:center;
+    }
+    .dot{
+      width:12px;height:12px;border-radius:50%;
+      background:#d1d5db; transition:.2s;
+    }
+    .dot.active{ background:var(--gama-orange); transform:scale(1.2) }
+    .dot.done{ background:#10b981 }
 
-/* camadas */
-.layer{position:absolute;translate:-50% -50%;outline:2px dashed rgba(0,0,0,.25);border-radius:10px;user-select:none;touch-action:none}
-.layer .tag{position:absolute;top:-24px;left:0;background:rgba(17,17,17,.7);color:#fff;font-size:11px;font-weight:800;padding:3px 6px;border-radius:6px}
-.layer.small .tag{display:none} /* oculta tag quando pequeno */
-.handles{position:absolute;inset:-8px;pointer-events:none}
-.handle{position:absolute;width:12px;height:12px;border:2px solid #0ea5e9;background:#fff;border-radius:2px;pointer-events:auto;cursor:nwse-resize}
-.handle.tl{left:-6px;top:-6px}
-.handle.br{right:-6px;bottom:-6px}
+    /* Form */
+    .grid{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:14px;
+    }
+    .field label{
+      display:block; font-weight:600; margin:6px 0 6px; color:#111;
+    }
+    .field input[type="file"],
+    .field input[type="text"],
+    .field select{
+      width:100%;
+      padding:12px 12px;
+      border:2px solid #e5e7eb;
+      border-radius:10px;
+      font-size:14px;
+      outline:none;
+    }
+    .field input:focus, .field select:focus{
+      border-color:var(--gama-orange);
+    }
+    .btn{
+      display:inline-flex; align-items:center; justify-content:center;
+      gap:8px; border:0; cursor:pointer; border-radius:10px;
+      font-weight:700; padding:12px 16px; transition:.15s;
+    }
+    .btn:disabled{ opacity:.6; cursor:not-allowed }
+    .btn-black{ background:#111; color:#fff }
+    .btn-black:hover{ filter:brightness(1.05) }
+    .btn-orange{ background:var(--gama-orange); color:#fff }
+    .btn-orange:hover{ filter:brightness(0.95) }
+    .btn-outline{
+      background:#fff; color:#111; border:2px solid #e5e7eb;
+    }
+    .stack-8{ display:flex; gap:8px; flex-wrap:wrap }
+    .stack-12{ display:flex; gap:12px; flex-wrap:wrap }
 
-.logo-box img{display:block;width:100%;height:100%;object-fit:contain;pointer-events:none}
-.text-box{display:flex;align-items:center;justify-content:center;line-height:1;white-space:pre;color:#000;padding:6px 8px;transform-origin:center}
-.text-vertical{writing-mode:vertical-rl}
+    /* Preview + ferramentas */
+    .preview-block{ margin-top:12px }
+    .canvas-wrap{
+      position:relative; width:100%; background:#f8fafc; border:2px dashed #e5e7eb;
+      border-radius:12px; overflow:hidden;
+    }
+    .canvas{
+      width:100%; display:block; user-select:none; pointer-events:none;
+    }
+    .layer-box{
+      position:absolute; border:2px dashed var(--gama-orange);
+      background:rgba(246,135,41,.08);
+      border-radius:8px; touch-action:none;
+    }
+    .layer-box.text{
+      border-color:#38bdf8;
+      background:rgba(56,189,248,.08);
+    }
+    .handle{
+      width:12px;height:12px;border-radius:3px;background:#111;position:absolute;
+    }
+    .tl{ left:-6px; top:-6px } .tr{ right:-6px; top:-6px }
+    .bl{ left:-6px; bottom:-6px } .br{ right:-6px; bottom:-6px }
+    .badge{
+      position:absolute; top:-26px; left:50%; transform:translateX(-50%);
+      background:#000; color:#fff; font-weight:700; font-size:11px;
+      padding:4px 8px; border-radius:6px; pointer-events:none;
+      white-space:nowrap;
+    }
 
-/* ======== PANEL LATERAL ======== */
-.section{padding:14px;border-bottom:1px solid var(--border)}
-.section:last-child{border-bottom:0}
-h3{margin:0 0 8px;font-size:16px}
-label{display:block;font-size:13px;font-weight:700;margin:6px 0}
-input[type="text"],select{width:100%;padding:10px 12px;border:1px solid #e5e7eb;border-radius:10px;background:#fff;font-size:14px}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;width:100%;border:0;border-radius:10px;padding:12px;font-weight:800;cursor:pointer}
-.btn.primary{background:var(--orange);color:#fff}
-.btn.dark{background:#111;color:#fff}
-.btn.gray{background:#e5e7eb}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+    .tools{
+      margin-top:12px; padding:12px; border:1px solid var(--ring); border-radius:12px;
+      background:#fff;
+    }
+    .tools h4{ margin:0 0 8px; font-size:14px; color:#111 }
+    .tools .group{ display:flex; flex-wrap:wrap; gap:8px }
 
-.coords{font-family:ui-monospace,Menlo,Consolas,monospace;background:#0f172a;color:#93c5fd;padding:10px 12px;border-radius:10px;font-size:12px;white-space:pre-wrap;margin-top:10px}
+    .err{ margin-top:12px; padding:10px 12px; border:2px solid #ef4444; color:#991b1b; border-radius:10px; display:none }
 
-.error{background:#fee2e2;border:1px solid #ef4444;color:#991b1b;padding:10px 12px;border-radius:10px;display:none}
-.success{background:#ecfdf5;border:1px solid #10b981;color:#065f46;padding:12px;border-radius:10px;display:none}
-.hide{display:none!important}
+    /* Barra de progresso em modal */
+    .modal{
+      position:fixed; inset:0; background:rgba(0,0,0,.6);
+      display:none; align-items:center; justify-content:center; z-index:50;
+    }
+    .modal-card{
+      width:min(92vw, 420px);
+      background:#fff; border-radius:14px; padding:18px; box-shadow:0 20px 60px rgba(0,0,0,.5);
+      text-align:center;
+    }
+    .meter{
+      width:100%; height:18px; background:#eef2ff; border-radius:999px; overflow:hidden; position:relative; margin-top:10px;
+    }
+    .meter > i{
+      position:absolute; left:0; top:0; bottom:0; width:0%;
+      background:linear-gradient(90deg,#f68729,#d67420);
+      transition:width .3s;
+    }
+    .meter span{
+      position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:12px; color:#111;
+      mix-blend-mode:darken;
+    }
 
-/* ======== OVERLAY DE PROGRESSO ======== */
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:99}
-.overlay .box{background:#fff;border-radius:14px;box-shadow:var(--shadow);width:min(420px,92vw);padding:22px 18px;text-align:center}
-.progress-bar{position:relative;height:12px;background:#eee;border-radius:999px;overflow:hidden;margin-top:14px}
-.progress-fill{position:absolute;left:0;top:0;height:100%;width:0%;background:var(--orange);transition:width .3s ease}
-.progress-value{margin-top:10px;color:#374151;font-weight:700}
+    /* Sucesso final */
+    .done{
+      display:none; padding:48px 18px; text-align:center; color:#111;
+    }
+    .done h2{ font-size:26px; margin:0 0 10px }
+    .done p{ color:#374151; margin:6px 0 }
 
-/* ======== TELA FINAL ======== */
-.final{display:none;max-width:760px;margin:28px auto;padding:22px;background:#fff;border-radius:16px;box-shadow:var(--shadow);text-align:center}
-.final img{width:180px}
-.final h2{color:#16a34a}
-</style>
+    @media(min-width:768px){
+      .grid{ grid-template-columns:1fr 1fr }
+    }
+  </style>
 </head>
 <body>
-
-<!-- HEADER BRANCO COM LOGO E DADOS DO PEDIDO -->
-<div class="top-white">
-  <div class="top-inner">
-    <div class="brand">
-      <img src="https://zqaoxvxuznonytzibhhe.supabase.co/storage/v1/object/public/imagens_gamalaser/LOGO-GAMA-LASER.png" alt="Gama Laser">
-    </div>
-    <div class="order">
-      <div id="orderLine">Pedido #—</div>
-      <small id="orderSub">—</small>
-    </div>
-  </div>
-</div>
-
-<!-- APP -->
-<div class="shell">
-  <!-- Painel branco com editor -->
-  <div class="card pad">
-    <div id="msgError" class="error">—</div>
-    <div id="msgOk" class="success">—</div>
-
-    <!-- indicador “Produto x de y” -->
-    <div id="progress" class="progress"></div>
-
-    <div class="meta">
-      <strong id="cap">Produto 1 de 1</strong> — <span id="pNome">—</span> ·
-      <strong>Variante:</strong> <span id="pVariante">—</span> ·
-      <strong>SKU:</strong> <span id="pSku">—</span> ·
-      <strong>Qtd:</strong> <span id="pQtd">—</span>
-    </div>
-
-    <!-- STAGE -->
-    <div id="stage" class="stage">
-      <img id="baseImg" class="base" alt="mockup">
-
-      <!-- TEXTO (drag/resize/rotate) -->
-      <div id="textLayer" class="layer hide" data-type="text">
-        <div class="tag">✏️ TEXTO</div>
-        <div id="textBox" class="text-box">Seu texto</div>
-        <div class="handles"><div class="handle tl" data-resize="tl"></div><div class="handle br" data-resize="br"></div></div>
-      </div>
-
-      <!-- LOGO (drag/resize/rotate) -->
-      <div id="logoLayer" class="layer hide" data-type="logo" style="width:110px;height:110px;">
-        <div class="tag">📷 LOGO</div>
-        <div class="logo-box"><img id="logoImg" alt="logo"></div>
-        <div class="handles"><div class="handle tl" data-resize="tl"></div><div class="handle br" data-resize="br"></div></div>
+  <!-- Topo preto -->
+  <header class="topbar">
+    <div class="topbar-inner">
+      <img class="logo" alt="Gama Laser" src="https://res.cloudinary.com/dslzqtajk/image/upload/v1760212909/LOGO-GAMA-LASER_1_sjrgzj.png" />
+      <div class="brand">
+        <div class="title">Gama Laser — Comunicação Visual & Atacado dos Brindes Personalizados</div>
+        <div class="subtitle" id="headline-order">Pedido #—</div>
       </div>
     </div>
+  </header>
 
-    <div id="coords" class="coords">—</div>
-  </div>
-
-  <!-- Painel de controles -->
-  <div class="card">
-    <div class="section">
-      <h3>1) Selecione e gere a prévia</h3>
-      <label>Logo (arquivo)</label>
-      <input id="logoInput" type="file" accept="image/*">
-      <div class="grid2" style="margin-top:10px">
-        <div>
-          <label>Texto (20 caract.)</label>
-          <input id="textInput" type="text" maxlength="20" placeholder="Digite o texto…">
+  <main class="wrap">
+    <section class="panel">
+      <div class="panel-head">
+        <div class="row">
+          <div class="order-badge">Aprovação de Design</div>
+          <div id="order-mini" class="prod-info">
+            <span><b>Pedido:</b> <span id="order-number">—</span></span>
+            <span><b>Produto:</b> <span id="produto-nome">—</span></span>
+            <span><b>SKU:</b> <span id="produto-sku">—</span></span>
+          </div>
         </div>
-        <div>
-          <label>Fonte</label>
-          <select id="fontSelect">
-            <option>Arial</option><option>Helvetica</option><option>Times</option>
-            <option>Verdana</option><option>Courier</option><option>Impact</option><option>Georgia</option>
-          </select>
+        <div class="dots" id="dots"></div>
+      </div>
+
+      <div class="panel-body">
+        <!-- Form -->
+        <div class="grid">
+          <div class="field">
+            <label>📁 Envie seu logo (PNG/JPG, fundo será removido automaticamente)</label>
+            <input id="logo" type="file" accept="image/*" />
+          </div>
+          <div class="field">
+            <label>📝 Texto para gravação (máx. 20)</label>
+            <input id="texto" type="text" maxlength="20" placeholder="Digite o texto (opcional)" />
+          </div>
+          <div class="field">
+            <label>🔤 Fonte</label>
+            <select id="fonte">
+              <option>Arial</option><option>Helvetica</option><option>Verdana</option>
+              <option>Times</option><option>Georgia</option><option>Tahoma</option>
+              <option>Courier</option><option>Impact</option>
+            </select>
+          </div>
+          <div class="field" style="display:flex;align-items:end">
+            <button class="btn btn-black" id="btn-gerar">🔍 Gerar prévia</button>
+          </div>
         </div>
-      </div>
-      <button id="btnPreview" class="btn dark" style="margin-top:12px">🔍 Gerar prévia</button>
-    </div>
 
-    <div id="editSection" class="section hide">
-      <h3>2) Ajuste livre</h3>
-      <div class="grid3" style="margin-top:8px">
-        <button id="btnRotateLogo" class="btn gray">⤴️ Rotacionar Logo 90°</button>
-        <button id="btnRotateText" class="btn gray">↻ Rotacionar Texto 90°</button>
-        <button id="btnReset" class="btn gray">↺ Resetar</button>
-      </div>
-      <div class="grid2" style="margin-top:8px">
-        <button id="btnLogoMinus" class="btn gray">− Logo</button>
-        <button id="btnLogoPlus" class="btn gray">+ Logo</button>
-      </div>
-      <div class="grid2" style="margin-top:8px">
-        <button id="btnTextMinus" class="btn gray">− Texto</button>
-        <button id="btnTextPlus" class="btn gray">+ Texto</button>
-      </div>
-    </div>
+        <!-- Preview + ferramentas -->
+        <div class="preview-block" id="preview-block" style="display:none">
+          <div class="canvas-wrap" id="canvas-wrap">
+            <img id="canvas" class="canvas" src="" alt="Prévia do mockup" />
 
-    <div id="approveSection" class="section hide">
-      <h3>3) Aprovar</h3>
-      <p class="muted" style="margin:0 0 8px">Geraremos a URL final (Cloudinary) com logo e texto aplicados.</p>
-      <button id="btnApprove" class="btn primary">✅ Aprovar este produto</button>
+            <!-- Caixa da LOGO -->
+            <div id="box-logo" class="layer-box" style="display:none">
+              <div class="badge">LOGO</div>
+              <div class="handle tl"></div><div class="handle tr"></div>
+              <div class="handle bl"></div><div class="handle br"></div>
+            </div>
+
+            <!-- Caixa do TEXTO -->
+            <div id="box-texto" class="layer-box text" style="display:none">
+              <div class="badge">TEXTO</div>
+              <div class="handle tl"></div><div class="handle tr"></div>
+              <div class="handle bl"></div><div class="handle br"></div>
+            </div>
+          </div>
+
+          <!-- Ferramentas -->
+          <div class="tools">
+            <h4>Ajustes rápidos</h4>
+            <div class="group stack-8" style="margin-bottom:8px">
+              <button class="btn btn-outline" id="rot-logo">🔄 Rotacionar LOGO 90°</button>
+              <button class="btn btn-outline" id="rot-texto">🔄 Rotacionar TEXTO 90°</button>
+              <button class="btn btn-outline" id="reset">↺ Resetar posições</button>
+            </div>
+            <div class="group stack-8">
+              <button class="btn btn-orange" id="aprovar">✅ Aprovar este produto</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="err" id="err"></div>
+      </div>
+    </section>
+
+    <section class="done" id="done">
+      <h2>🎉 Todos os produtos foram aprovados com sucesso!</h2>
+      <p>Obrigado! Vamos seguir com a produção conforme sua personalização.</p>
+    </section>
+  </main>
+
+  <!-- Modal de Progresso -->
+  <div class="modal" id="modal">
+    <div class="modal-card">
+      <div style="font-weight:700">Gerando sua prévia…</div>
+      <div class="meter" style="margin-top:10px">
+        <i id="bar" style="width:0%"></i>
+        <span id="pct">0%</span>
+      </div>
+      <div style="font-size:12px; color:#374151; margin-top:10px">
+        Geraremos uma prévia de como o produto ficará após a personalização.
+      </div>
     </div>
   </div>
-</div>
 
-<!-- OVERLAY DE PROGRESSO -->
-<div id="overlay" class="overlay" role="dialog" aria-live="polite">
-  <div class="box">
-    <div style="font-weight:800">Gerando prévia…</div>
-    <div class="progress-bar"><div id="progressFill" class="progress-fill"></div></div>
-    <div id="progressValue" class="progress-value">0%</div>
-  </div>
-</div>
+  <script>
+    /*************** CONFIG ***************/
+    const WEBHOOK_PREVIEW   = 'https://gama-laser-n8n.gtyipj.easypanel.host/webhook-test/gerar-preview-mockup';
+    const WEBHOOK_APROVACAO = 'https://gama-laser-n8n.gtyipj.easypanel.host/webhook/aprovar-mockup';
+    const SUPABASE_URL      = 'https://zqaoxvxuznonytzibhhe.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpxYW94dnh1em5vbnl0emliaGhlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk1NDYwMTEsImV4cCI6MjA3NTEyMjAxMX0.anrCkp8mdxVPg1lpCqvnz_OxLk3ljNz1veTMPWSjtpI';
 
-<!-- TELA FINAL -->
-<div id="finalScreen" class="final">
-  <img src="https://zqaoxvxuznonytzibhhe.supabase.co/storage/v1/object/public/imagens_gamalaser/LOGO-GAMA-LASER.png" alt="Gama Laser">
-  <h2>🎉 Todos os produtos foram aprovados!</h2>
-  <p>Obrigado! Seu pedido seguirá para a produção.</p>
-</div>
+    /*************** STATE ***************/
+    let linkId = '';                 // ?p=...
+    let orderNumber = '';
+    let produtos = [];               // array de produtos do link
+    let idxAtual = 0;                // produto atual
 
-<script>
-/* ================= CONFIG ================= */
-const CLOUD_NAME = 'dslzqtajk';
-const WEBHOOK_PREVIEW   = 'https://gama-laser-n8n.gtyipj.easypanel.host/webhook-test/gerar-preview-mockup'; // ajuste quando precisar
-const SUPABASE_URL      = 'https://zqaoxvxuznonytzibhhe.supabase.co';
-const SUPABASE_KEY      = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpxYW94dnh1em5vbnl0emliaGhlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk1NDYwMTEsImV4cCI6MjA3NTEyMjAxMX0.anrCkp8mdxVPg1lpCqvnz_OxLk3ljNz1veTMPWSjtpI';
+    // Dados parseados do preview_url (Cloudinary)
+    let cloud = '';                  // cloud name
+    let baseId = '';                 // mockups/3017d_azul (public id do mockup base)
+    let logoId = '';                 // l_logo_... id da camada de logo (sem "l_")
+    let hasText = false;
 
-/* ================= STATE ================= */
-let linkId='', orderNumber='', produtos=[], idxAtual=0;
-let mockupPublicId='', logoPublicId='', fonte='Arial', texto='', hasText=false;
+    // Geometrias (em coordenadas do asset original)
+    let logoX=0, logoY=400, logoW=100, logoRot=0;
+    let txtX=0,  txtY=520,  txtW=50,   txtRot=0;
+    let fonte='Arial', textoVal='';
 
-const state = { logo:{x:.30,y:.30,w:110,rot:0}, text:{x:.55,y:.30,font:28,rot:0} };
+    // Drag/resize
+    let dragTarget = null; // 'logo' | 'texto' | null
+    let resizing = false;
+    let resizeCorner = null; // 'tl','tr','bl','br'
+    let start = {x:0,y:0, w:0,h:0, X:0,Y:0};
+    let natural = {w:0,h:0}; // natural image size for scale
 
-/* ================= ELTS ================= */
-const msgError=document.getElementById('msgError'), msgOk=document.getElementById('msgOk');
-const orderLine=document.getElementById('orderLine'), orderSub=document.getElementById('orderSub');
-const progress=document.getElementById('progress'), cap=document.getElementById('cap');
-const pNome=document.getElementById('pNome'), pVar=document.getElementById('pVariante'), pSku=document.getElementById('pSku'), pQtd=document.getElementById('pQtd');
+    /*************** HELPERS ***************/
+    const $ = sel => document.querySelector(sel);
+    const show = (el, on=true)=> { el.style.display = on ? '' : 'none' }
+    const setText = (el, t)=> { el.textContent = t }
+    const err = msg => { const e=$("#err"); e.textContent=msg; e.style.display='block'; setTimeout(()=>e.style.display='none', 5000) }
 
-const stage=document.getElementById('stage'), baseImg=document.getElementById('baseImg');
-const textLayer=document.getElementById('textLayer'), textBox=document.getElementById('textBox');
-const logoLayer=document.getElementById('logoLayer'), logoImg=document.getElementById('logoImg');
-const coords=document.getElementById('coords');
+    function q(url){ return fetch(url, { headers:{ 'apikey':SUPABASE_ANON_KEY, 'Authorization':`Bearer ${SUPABASE_ANON_KEY}` }}) }
 
-const logoInput=document.getElementById('logoInput'), textInput=document.getElementById('textInput'), fontSelect=document.getElementById('fontSelect');
-const btnPreview=document.getElementById('btnPreview'), editSection=document.getElementById('editSection'), approveSection=document.getElementById('approveSection');
-const btnRotateLogo=document.getElementById('btnRotateLogo'), btnRotateText=document.getElementById('btnRotateText'), btnReset=document.getElementById('btnReset');
-const btnLogoMinus=document.getElementById('btnLogoMinus'), btnLogoPlus=document.getElementById('btnLogoPlus'), btnTextMinus=document.getElementById('btnTextMinus'), btnTextPlus=document.getElementById('btnTextPlus'), btnApprove=document.getElementById('btnApprove');
+    function clamp(v,min,max){ return Math.max(min, Math.min(max, v)) }
 
-const overlay=document.getElementById('overlay'), progressFill=document.getElementById('progressFill'), progressValue=document.getElementById('progressValue');
-const finalScreen=document.getElementById('finalScreen');
+    // Constrói URL Cloudinary SEM duplicar camadas
+    function buildURL(){
+      if(!cloud || !baseId) return '';
 
-/* ================= UTILS ================= */
-function showError(m){msgError.textContent=m;msgError.style.display='block';setTimeout(()=>msgError.style.display='none',6000);}
-function showOk(m){msgOk.textContent=m;msgOk.style.display='block';setTimeout(()=>msgOk.style.display='none',2500);}
-const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
-const px=n=>`${Math.round(n)}px`;
-function setHidden(el,cond){el.classList.toggle('hide',cond);}
-function stageRect(){return stage.getBoundingClientRect();}
+      const logoParts = [`l_${logoId}`, 'e_bgremoval', `w_${Math.max(10,Math.round(logoW))}`, 'g_north_west', `x_${Math.round(logoX)}`, `y_${Math.round(logoY)}`];
+      if(logoRot % 360 !== 0) logoParts.push(`a_${(logoRot%360+360)%360}`);
+      logoParts.push('fl_layer_apply');
 
-/* ================= CARREGAR PEDIDO ================= */
-async function carregarPedido(){
-  const params=new URLSearchParams(location.search);
-  linkId=params.get('p')||'';
-  if(!linkId){showError('Link inválido. Use ?p=SEU_LINK_ID');return;}
+      let url = `https://res.cloudinary.com/${cloud}/image/upload/${logoParts.join(',')}`;
 
-  try{
-    const r=await fetch(`${SUPABASE_URL}/rest/v1/links_aprovacao?id=eq.${linkId}&select=*`,{headers:{apikey:SUPABASE_KEY,Authorization:`Bearer ${SUPABASE_KEY}`}});
-    const data=await r.json();
-    if(!data?.length){showError('Link não encontrado.');return;}
-    const row=data[0];
-    orderNumber=row.order_number ?? row.order_id ?? '';
-    const arr=typeof row.produtos==='string' ? JSON.parse(row.produtos) : row.produtos;
-    produtos=Array.isArray(arr)?arr:[];
-    if(!produtos.length){showError('Nenhum produto neste link.');return;}
-
-    orderLine.textContent=`Pedido #${orderNumber}`;
-    orderSub.textContent=`${produtos[0].nome} — SKU ${produtos[0].sku}`;
-
-    // Progress dots
-    progress.innerHTML='';
-    produtos.forEach((_,i)=>{const d=document.createElement('div');d.className='dot'+(i===0?' active':'');d.id=`dot-${i}`;progress.appendChild(d);});
-
-    loadProduto(0);
-  }catch(e){console.error(e);showError('Erro ao carregar: '+e.message);}
-}
-
-function loadProduto(idx){
-  idxAtual=idx;
-  const p=produtos[idx];
-  cap.textContent=`Produto ${idx+1} de ${produtos.length}`;
-  pNome.textContent=p?.nome||'-'; pVar.textContent=p?.variante||'-'; pSku.textContent=p?.sku||'-'; pQtd.textContent=p?.quantidade??'-';
-  orderSub.textContent=`${p?.nome||'-'} — SKU ${p?.sku||'-'}`;
-
-  // reset
-  mockupPublicId=''; logoPublicId=''; fonte='Arial'; texto=''; hasText=false;
-  state.logo={x:.30,y:.30,w:110,rot:0}; state.text={x:.55,y:.30,font:28,rot:0};
-  baseImg.removeAttribute('src'); logoImg.removeAttribute('src'); textInput.value=''; fontSelect.value='Arial';
-  setHidden(textLayer,true); setHidden(logoLayer,true); setHidden(editSection,true); setHidden(approveSection,true);
-
-  // progress UI
-  document.querySelectorAll('.dot').forEach((el,i)=>{el.classList.remove('active'); if(i<idx) el.classList.add('done');});
-  document.getElementById(`dot-${idx}`)?.classList.add('active');
-}
-
-/* ================= PREVIEW ================= */
-btnPreview.addEventListener('click', async ()=>{
-  const p=produtos[idxAtual];
-  const file=logoInput.files?.[0];
-  if(!file){showError('Envie um arquivo de logo.');return;}
-
-  texto=(textInput.value||'').trim(); fonte=fontSelect.value||'Arial'; hasText=texto.length>0;
-
-  // overlay progresso
-  overlay.style.display='flex'; progressFill.style.width='0%'; progressValue.textContent='0%';
-  let prog=0; const t=setInterval(()=>{prog=Math.min(90,prog+2); progressFill.style.width=prog+'%'; progressValue.textContent=prog+'%';},120);
-
-  try{
-    const fd=new FormData();
-    fd.append('logo',file); fd.append('texto',texto); fd.append('fonte',fonte);
-    fd.append('sku',p.sku); fd.append('cor',p.variante);
-
-    const resp=await fetch(WEBHOOK_PREVIEW,{method:'POST',body:fd});
-    // se endpoint estiver errado, mostrará 404
-    let data=null;
-    try{ data=await resp.json(); }catch(_){}
-    progressFill.style.width='100%'; progressValue.textContent='100%'; setTimeout(()=>{overlay.style.display='none';},250); clearInterval(t);
-
-    if(!resp.ok || !data?.preview_url){ showError('Erro ao gerar prévia (verifique o endpoint do n8n).'); return; }
-
-    // Parse: manter APENAS o mockup base (remove overlays)
-    mockupPublicId = extractMockupId(data.preview_url);
-    logoPublicId   = extractLogoPublicId(data.preview_url);
-
-    // mockup limpo
-    baseImg.onload=()=>{ fitStageToImage(); applyPositions(); };
-    baseImg.src=`https://res.cloudinary.com/${CLOUD_NAME}/image/upload/${encodeURIComponent(mockupPublicId)}`;
-
-    // logo sem fundo (apenas para visual do editor)
-    logoImg.src=`https://res.cloudinary.com/${CLOUD_NAME}/image/upload/e_bgremoval/${encodeURIComponent(logoPublicId)}.png`;
-
-    // texto (apenas camada local)
-    textBox.textContent=texto||'';
-    setHidden(textLayer,!hasText);
-    setHidden(logoLayer,false);
-    setHidden(editSection,false);
-    setHidden(approveSection,false);
-    showOk('Prévia pronta. Ajuste livremente.');
-  }catch(e){
-    clearInterval(t); overlay.style.display='none';
-    console.error(e); showError('Falha ao conectar: '+e.message);
-  }
-});
-
-// extrai só o caminho final do mockup após último fl_layer_apply/
-function extractMockupId(url){
-  const part=url.split('/upload/')[1]||'';
-  const marker='/fl_layer_apply/';
-  const last=part.lastIndexOf(marker);
-  if(last!==-1) return decodeURIComponent(part.substring(last+marker.length));
-  // fallback: pega após primeira "/"
-  const i=part.indexOf('/');
-  return decodeURIComponent(i>=0?part.substring(i+1):part);
-}
-function extractLogoPublicId(url){
-  const m=url.match(/l_([^,]+)/);
-  if(!m) return '';
-  return decodeURIComponent(m[1]).replaceAll('/',':');
-}
-
-/* ======== STAGE helpers ======== */
-function fitStageToImage(){
-  const nw=baseImg.naturalWidth||0, nh=baseImg.naturalHeight||0;
-  if(nw && nh){
-    const ratio = (nh/nw)*100;
-    stage.style.setProperty('--ratio',ratio);
-    // hack: altera o padding-top do pseudo-elemento via style (criamos um child)
-    stage.querySelector('.padder')?.remove();
-    const d=document.createElement('div'); d.className='padder'; d.style.cssText=`position:absolute;inset:0;opacity:0;pointer-events:none`;
-    stage.appendChild(d);
-    stage.style.setProperty('--pad', ratio.toFixed(2)+'%');
-    stage.style.position='relative';
-    stage.style.setProperty('aspect-ratio', `${nw}/${nh}`); // browsers modernos
-  }
-}
-
-/* ======== APLICA POSIÇÕES ======== */
-function applyPositions(){
-  // LOGO
-  logoLayer.style.left = (state.logo.x*100)+'%';
-  logoLayer.style.top  = (state.logo.y*100)+'%';
-  logoLayer.style.width=px(state.logo.w);
-  logoLayer.style.height=px(state.logo.w);
-  logoLayer.style.transform='translate(-50%,-50%) rotate('+state.logo.rot+'deg)';
-  logoLayer.classList.toggle('small', state.logo.w<60);
-
-  // TEXTO
-  textBox.style.fontSize=px(state.text.font);
-  textBox.style.transform='rotate('+state.text.rot+'deg)';
-  textLayer.style.left=(state.text.x*100)+'%';
-  textLayer.style.top =(state.text.y*100)+'%';
-  // recalcular caixa para acompanhar rotação
-  requestAnimationFrame(()=>{
-    const b=textBox.getBoundingClientRect();
-    textLayer.style.width =px(Math.max(28,b.width));
-    textLayer.style.height=px(Math.max(22,b.height));
-    textLayer.classList.toggle('small', Math.max(b.width,b.height)<60);
-    updateCoords();
-  });
-}
-
-function updateCoords(){
-  const r=stage.getBoundingClientRect();
-  const lx=Math.round(state.logo.x*r.width), ly=Math.round(state.logo.y*r.height);
-  const tx=Math.round(state.text.x*r.width), ty=Math.round(state.text.y*r.height);
-  coords.textContent =
-`📍 Coordenadas
-Logo  — X:${lx} Y:${ly} W:${state.logo.w} Rot:${state.logo.rot}°
-Texto — X:${tx} Y:${ty} Font:${state.text.font} Rot:${state.text.rot}°`;
-}
-
-/* ======== DRAG/RESIZE GENERIC ======== */
-function initLayerDrag(layer, kind){
-  let dragging=false, resizing=false, start={}, rectS, stageR;
-  layer.addEventListener('pointerdown',(e)=>{
-    const isHandle=e.target.classList.contains('handle');
-    dragging=!isHandle; resizing=isHandle?e.target.dataset.resize:false;
-    rectS=layer.getBoundingClientRect(); stageR=stage.getBoundingClientRect();
-    start={x:e.clientX,y:e.clientY};
-    const move=(ev)=>{
-      const dx=(ev.clientX-start.x), dy=(ev.clientY-start.y);
-      if(dragging){
-        const nx=clamp((rectS.left+dx-stageR.left+rectS.width/2)/stageR.width,.02,.98);
-        const ny=clamp((rectS.top +dy-stageR.top +rectS.height/2)/stageR.height,.02,.98);
-        if(kind==='logo'){ state.logo.x=nx; state.logo.y=ny; } else { state.text.x=nx; state.text.y=ny; }
-        applyPositions();
+      if(hasText && textoVal.trim()!==''){
+        const enc = encodeURIComponent(textoVal);
+        const tParts = [
+          `l_text:${fonte}_${Math.max(8,Math.round(txtW))}:${enc}`,
+          'co_rgb:000000',
+          'g_north_west',
+          `x_${Math.round(txtX)}`, `y_${Math.round(txtY)}`
+        ];
+        if(txtRot % 360 !== 0) tParts.push(`a_${(txtRot%360+360)%360}`);
+        tParts.push('fl_layer_apply');
+        url += `/${tParts.join(',')}`;
       }
-      if(resizing){
-        const factor=(rectS.width + dx*(resizing==='br'?1:-1))/rectS.width;
-        if(kind==='logo'){ state.logo.w=Math.max(24,Math.round(state.logo.w*factor)); }
-        else{ state.text.font=Math.max(8,Math.round(state.text.font*factor)); }
-        applyPositions();
-        start={x:ev.clientX,y:ev.clientY}; rectS=layer.getBoundingClientRect();
+
+      url += `/${baseId}`; // sempre por último: o mockup base
+      return url;
+    }
+
+    // Atualiza imagem e caixas
+    function refreshPreview(){
+      const img = $("#canvas");
+      const url = buildURL();
+      if(!url) return;
+      img.src = url;
+      positionBoxes();
+    }
+
+    function parsePreviewURL(url){
+      // cloud
+      const mCloud = url.match(/res\.cloudinary\.com\/([^/]+)\/image\/upload/);
+      cloud = mCloud ? mCloud[1] : '';
+
+      // base public id (após último '/')
+      baseId = url.split('/').pop() || '';
+
+      // l_<id>
+      const mLogo = url.match(/\/l_([^,\/]+)/);
+      logoId = mLogo ? mLogo[1] : '';
+
+      // x_/y_/w_ – primeira ocorrência pertence à logo
+      const ys = [...url.matchAll(/,y_(\d+)/g)].map(m=>parseInt(m[1],10));
+      const xs = [...url.matchAll(/,x_(\d+)/g)].map(m=>parseInt(m[1],10));
+      const ws = [...url.matchAll(/,w_(\d+)/g)].map(m=>parseInt(m[1],10));
+
+      logoY = ys[0] ?? 400;
+      logoX = xs[0] ?? 0;
+      logoW = ws[0] ?? 100;
+
+      // logo rotation (a_ após x,y da logo)
+      const aAll = [...url.matchAll(/,a_(\d+)/g)].map(m=>parseInt(m[1],10));
+      logoRot = aAll.length ? aAll[0] : 0;
+
+      // texto?
+      const tMatch = url.match(/l_text:([^_]+)_(\d+):([^,]+)/);
+      hasText = !!tMatch;
+      if(hasText){
+        fonte = decodeURIComponent(tMatch[1]);
+        txtW = parseInt(tMatch[2],10) || 50;
+        textoVal = decodeURIComponent(tMatch[3] || '');
+        // texto X/Y/rot (segunda ocorrência de x_, y_, a_)
+        txtY = ys[1] ?? 520;
+        txtX = xs[1] ?? 0;
+        txtRot = aAll[1] ?? 0;
+      }else{
+        txtW = 50; txtX=0; txtY=520; txtRot=0; textoVal = ($("#texto").value||'');
       }
-    };
-    const up=()=>{document.removeEventListener('pointermove',move);document.removeEventListener('pointerup',up);};
-    document.addEventListener('pointermove',move); document.addEventListener('pointerup',up);
-  });
-}
-initLayerDrag(logoLayer,'logo'); initLayerDrag(textLayer,'text');
+    }
 
-/* ======== BOTÕES ======== */
-btnRotateLogo.addEventListener('click',()=>{state.logo.rot=(state.logo.rot+90)%360;applyPositions();});
-btnRotateText.addEventListener('click',()=>{state.text.rot=(state.text.rot+90)%360;applyPositions();});
-btnReset.addEventListener('click',()=>{state.logo={x:.30,y:.30,w:110,rot:0};state.text={x:.55,y:.30,font:28,rot:0};applyPositions();});
-btnLogoMinus.addEventListener('click',()=>{state.logo.w=Math.max(24,state.logo.w-6);applyPositions();});
-btnLogoPlus .addEventListener('click',()=>{state.logo.w=Math.min(900,state.logo.w+6);applyPositions();});
-btnTextMinus.addEventListener('click',()=>{state.text.font=Math.max(8,state.text.font-2);applyPositions();});
-btnTextPlus .addEventListener('click',()=>{state.text.font=Math.min(240,state.text.font+2);applyPositions();});
-textInput.addEventListener('input',()=>{texto=textInput.value;hasText=texto.trim().length>0;textBox.textContent=texto;setHidden(textLayer,!hasText);applyPositions();});
-fontSelect.addEventListener('change',()=>{fonte=fontSelect.value;});
+    // Posiciona as caixas em coordenadas de tela (convertendo da resolução original)
+    function positionBoxes(){
+      const img = $("#canvas");
+      if(!img.naturalWidth || !img.naturalHeight) return;
+      natural.w = img.naturalWidth; natural.h = img.naturalHeight;
 
-/* ======== APROVAR ======== */
-btnApprove.addEventListener('click',()=>{
-  if(!mockupPublicId || !logoPublicId){showError('Gere a prévia primeiro.');return;}
-  const r=stage.getBoundingClientRect();
-  const lx=Math.round(state.logo.x*r.width), ly=Math.round(state.logo.y*r.height), logoW=Math.round(state.logo.w);
+      const rect = img.getBoundingClientRect();
+      const scaleX = rect.width / natural.w;
+      const scaleY = rect.height / natural.h;
 
-  // monta URL final (logo + texto)
-  let url=`https://res.cloudinary.com/${CLOUD_NAME}/image/upload/`;
-  url+=`l_${encodeURIComponent(logoPublicId)},e_bgremoval,w_${logoW},g_north_west,x_${lx},y_${ly}`;
-  if(state.logo.rot) url+=`,a_${((state.logo.rot%360)+360)%360}`;
-  url+=`/fl_layer_apply/`;
-  if(hasText && texto){
-    const tx=Math.round(state.text.x*r.width), ty=Math.round(state.text.y*r.height);
-    const fontPx=Math.max(8,Math.round(state.text.font)); const safe=texto.replace(/\//g,'\\/');
-    url+=`l_text:${fonte}_${fontPx}:${encodeURIComponent(safe)},co_rgb:000000,g_north_west,x_${tx},y_${ty}`;
-    if(state.text.rot) url+=`,a_${((state.text.rot%360)+360)%360}`;
-    url+=`/fl_layer_apply/`;
-  }
-  url+=encodeURIComponent(mockupPublicId);
-  console.log('URL FINAL:', url);
+      const $logo = $("#box-logo");
+      const $texto= $("#box-texto");
 
-  // avança para o próximo produto (simulação até integrar o n8n)
-  const next=idxAtual+1;
-  if(next<produtos.length){
-    document.getElementById(`dot-${idxAtual}`)?.classList.add('done');
-    loadProduto(next);
-    showOk('Produto aprovado. Indo para o próximo…');
-  }else{
-    document.getElementById(`dot-${idxAtual}`)?.classList.add('done');
-    document.querySelector('.shell').style.display='none';
-    finalScreen.style.display='block';
-  }
-});
+      // Tamanho da logo: usamos w como largura, altura proporcional (caixa visual)
+      const logoWpx = logoW * scaleX;
+      const logoHpx = Math.max(24, logoW * 0.6 * scaleY);
+      $logo.style.width = `${logoWpx}px`;
+      $logo.style.height= `${logoHpx}px`;
+      $logo.style.left  = `${rect.left + window.scrollX + logoX*scaleX}px`;
+      $logo.style.top   = `${rect.top  + window.scrollY + logoY*scaleY}px`;
+      show($logo, true);
 
-/* ======== BOOT ======== */
-window.addEventListener('load',carregarPedido);
-</script>
+      // Texto: quando rotacionado 90/270, trocamos “largura/altura” da caixa
+      let tW = txtW*scaleX*3; // caixa mais larga pra texto
+      let tH = Math.max(18, txtW*scaleY);
+      if((txtRot%180)!==0){ // vertical
+        const tmp = tW; tW = tH; tH = tmp;
+      }
+      $texto.style.width = `${tW}px`;
+      $texto.style.height= `${tH}px`;
+      $texto.style.left  = `${rect.left + window.scrollX + txtX*scaleX}px`;
+      $texto.style.top   = `${rect.top  + window.scrollY + txtY*scaleY}px`;
+      show($texto, ($("#texto").value||textoVal).trim()!=='');
+
+      // Badge some quando a caixa fica muito pequena
+      [...$logo.querySelectorAll('.badge'), ...$texto.querySelectorAll('.badge')].forEach(b=>{
+        const parent = b.parentElement;
+        const pw = parent.getBoundingClientRect().width;
+        const ph = parent.getBoundingClientRect().height;
+        b.style.opacity = (pw<40 || ph<26) ? '0' : '1';
+      });
+    }
+
+    // Atualiza botões de aprovação conforme índice
+    function setApproveButtonText(){
+      const btn = $("#aprovar");
+      const total = produtos.length;
+      const atual = idxAtual+1;
+      if(atual<total){
+        btn.textContent = `✅ Aprovar próximo produto (${atual+1} de ${total})`;
+      }else{
+        btn.textContent = `✅ Aprovar este produto`;
+      }
+    }
+
+    /*************** LOAD DADOS ***************/
+    async function loadLink(){
+      const params = new URLSearchParams(location.search);
+      linkId = params.get('p') || '';
+      if(!linkId){ err('Link inválido. Use o formato ?p=SEU_ID'); return }
+
+      const r = await q(`${SUPABASE_URL}/rest/v1/links_aprovacao?id=eq.${encodeURIComponent(linkId)}&select=*`);
+      if(!r.ok){ err('Erro ao buscar dados do link.'); return }
+      const js = await r.json();
+      if(!js || !js.length){ err('Link não encontrado.'); return }
+
+      const row = js[0];
+      orderNumber = row.order_number || '—';
+
+      // produtos pode ser array ou string JSON
+      try{
+        produtos = Array.isArray(row.produtos) ? row.produtos : JSON.parse(row.produtos);
+      }catch(_){ produtos = [] }
+
+      // Header
+      setText($("#order-number"), orderNumber);
+      setText($("#headline-order"), `Pedido #${orderNumber}`);
+
+      // Dots
+      const dots = $("#dots"); dots.innerHTML='';
+      produtos.forEach((_,i)=>{
+        const d=document.createElement('div'); d.className='dot'; d.id=`dot-${i}`; dots.appendChild(d);
+      });
+
+      // Primeiro produto
+      loadProduto(0);
+    }
+
+    function loadProduto(i){
+      idxAtual = i;
+      const p = produtos[i] || {};
+      const sku = p.sku || '—';
+      const nome = p.nome || p.name || '—';
+
+      setText($("#produto-sku"), sku);
+      setText($("#produto-nome"), nome);
+      setText($("#order-number"), orderNumber);
+
+      // Progress dots
+      produtos.forEach((_,k)=>{
+        const d = $(`#dot-${k}`);
+        d.classList.toggle('active', k===i);
+      });
+
+      // Limpa UI de preview até gerar novamente
+      $("#canvas").src = '';
+      show($("#preview-block"), false);
+      $("#logo").value = '';         // não reaproveitar arquivo (corrige bug de “não pediu logo”)
+      $("#texto").value = '';        // não duplicar texto
+      fonte = 'Arial'; textoVal=''; hasText=false;
+      logoRot=0; txtRot=0;
+      logoX=0; logoY=400; logoW=100;
+      txtX=0; txtY=520; txtW=50;
+
+      setApproveButtonText();
+    }
+
+    /*************** MODAL PROGRESS ***************/
+    let progTimer=null, prog=0;
+    function openModal(){
+      $("#modal").style.display='flex';
+      prog=0; updateBar(0);
+      progTimer=setInterval(()=>{
+        prog = Math.min(92, prog+1.2);
+        updateBar(prog);
+      }, 160);
+    }
+    function closeModal(){
+      if(progTimer) { clearInterval(progTimer); progTimer=null }
+      updateBar(100);
+      setTimeout(()=>$("#modal").style.display='none', 250);
+    }
+    function updateBar(v){
+      $("#bar").style.width = `${Math.round(v)}%`;
+      setText($("#pct"), `${Math.round(v)}%`);
+    }
+
+    /*************** PREVIEW ***************/
+    async function gerarPrevia(){
+      const p = produtos[idxAtual] || {};
+      const file = $("#logo").files[0];
+      const t = $("#texto").value.trim();
+      const f = $("#fonte").value;
+
+      if(!file){ err('Envie seu logo para gerar a prévia.'); return }
+
+      openModal();
+
+      const fd = new FormData();
+      fd.append('logo', file);
+      fd.append('texto', t);
+      fd.append('fonte', f);
+      fd.append('sku', p.sku || '');
+      fd.append('cor', p.variante || p.variant || '');
+
+      try{
+        const r = await fetch(WEBHOOK_PREVIEW, { method:'POST', body:fd });
+        // a resposta pode vir como [ {...} ] ou { ... }
+        const raw = await r.text();
+        let data = null;
+        try{ data = JSON.parse(raw) }catch(_){}
+        if(Array.isArray(data)) data = data[0];
+
+        if(!r.ok || !data || !data.preview_url){
+          closeModal();
+          err('Erro ao gerar a prévia.'); return;
+        }
+
+        // Parse e “limpeza” de camadas
+        parsePreviewURL(data.preview_url);
+
+        // Força o texto a considerar o campo atual (evita duplicação vinda do preview inicial)
+        const finalText = t;
+        if(finalText===''){ hasText=false; textoVal='' } else { hasText=true; textoVal=finalText; fonte=f }
+
+        // Render base já com 1x logo e (se houver) 1x texto
+        const finalURL = buildURL();
+        const img = $("#canvas");
+        img.onload = ()=>{ positionBoxes(); show($("#preview-block"), true); closeModal() };
+        img.onerror = ()=>{ closeModal(); err('Falha ao carregar a imagem da prévia.') };
+        img.src = finalURL;
+
+      }catch(e){
+        closeModal();
+        err('Falha de conexão ao gerar a prévia.');
+      }
+    }
+
+    /*************** DRAG & RESIZE ***************/
+    function boxFromTarget(el){
+      if(!el) return null;
+      if(el.id==='box-logo') return 'logo';
+      if(el.id==='box-texto') return 'texto';
+      const par = el.closest('.layer-box');
+      if(!par) return null;
+      return par.id==='box-logo' ? 'logo' : 'texto';
+    }
+
+    function toImageSpace(dx, dy){
+      const img=$("#canvas");
+      const rect=img.getBoundingClientRect();
+      const sx = natural.w/rect.width;
+      const sy = natural.h/rect.height;
+      return { dx: dx*sx, dy: dy*sy };
+    }
+
+    function onPointerDown(e){
+      const target = e.target;
+      const which = boxFromTarget(target);
+      if(!which) return;
+
+      e.preventDefault();
+
+      dragTarget = which;
+      resizing = target.classList.contains('handle');
+      resizeCorner = resizing ? [...target.classList].find(c=>/^(tl|tr|bl|br)$/.test(c)) : null;
+
+      const box = which==='logo' ? $("#box-logo") : $("#box-texto");
+      const r = box.getBoundingClientRect();
+
+      start.x = e.clientX; start.y = e.clientY;
+      start.w = r.width; start.h = r.height;
+
+      if(which==='logo'){ start.X = logoX; start.Y = logoY }
+      else{ start.X = txtX; start.Y = txtY }
+
+      document.addEventListener('pointermove', onPointerMove);
+      document.addEventListener('pointerup', onPointerUp);
+    }
+    function onPointerMove(e){
+      if(!dragTarget) return;
+      const dx = e.clientX - start.x;
+      const dy = e.clientY - start.y;
+      const {dx:ix, dy:iy} = toImageSpace(dx, dy);
+
+      if(dragTarget==='logo'){
+        if(resizing){
+          // resize proporcional pela largura
+          const sign = (resizeCorner==='tr'||resizeCorner==='br') ? 1 : -1;
+          logoW = clamp(start.w + dx*sign, 20, 2000) * (natural.w / $("#canvas").getBoundingClientRect().width);
+        }else{
+          logoX = clamp(start.X + ix, 0, natural.w-24);
+          logoY = clamp(start.Y + iy, 0, natural.h-24);
+        }
+      }else{
+        if(resizing){
+          const sign = (resizeCorner==='tr'||resizeCorner==='br') ? 1 : -1;
+          txtW = clamp(start.w + dx*sign, 10, 2000) * (natural.w / $("#canvas").getBoundingClientRect().width) / ( (txtRot%180)===0 ? 1 : 3 );
+        }else{
+          txtX = clamp(start.X + ix, 0, natural.w-24);
+          txtY = clamp(start.Y + iy, 0, natural.h-24);
+        }
+      }
+      positionBoxes();
+      // Atualiza imagem “de verdade” só quando parar de arrastar? Aqui atualizamos “ao vivo”:
+      refreshPreview();
+    }
+    function onPointerUp(){
+      dragTarget=null; resizing=false; resizeCorner=null;
+      document.removeEventListener('pointermove', onPointerMove);
+      document.removeEventListener('pointerup', onPointerUp);
+    }
+
+    /*************** BUTTONS ***************/
+    function rotLogo(){ logoRot = (logoRot+90)%360; refreshPreview() }
+    function rotTexto(){ txtRot  = (txtRot +90)%360; refreshPreview() }
+    function resetAll(){
+      logoX=0; logoY=400; logoW=100; logoRot=0;
+      txtX=0;  txtY=520;  txtW=50;  txtRot=0;
+      positionBoxes(); refreshPreview();
+    }
+
+    async function aprovar(){
+      const p = produtos[idxAtual] || {};
+      const finalURL = buildURL();
+      if(!finalURL){ err('Gere a prévia primeiro.'); return }
+
+      const payload = {
+        link_id: linkId,
+        order_number: orderNumber,
+        produto_index: idxAtual,
+        produto_sku: p.sku || '',
+        produto_nome: p.nome || p.name || '',
+        produto_variante: p.variante || '',
+        mockup_url: finalURL,
+        logo: { x:logoX, y:logoY, w:logoW, rot:logoRot, id:logoId },
+        texto: { x:txtX, y:txtY, w:txtW, rot:txtRot, fonte, conteudo: ($("#texto").value||textoVal||'') },
+        timestamp: new Date().toISOString()
+      };
+
+      $("#aprovar").disabled = true;
+      try{
+        const r = await fetch(WEBHOOK_APROVACAO, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
+        if(!r.ok) throw new Error('Falha no salvamento');
+      }catch(e){
+        $("#aprovar").disabled = false;
+        err('Erro ao aprovar. Tente novamente.'); return;
+      }
+
+      // Marca dot e segue
+      $(`#dot-${idxAtual}`)?.classList.add('done');
+
+      if(idxAtual < produtos.length-1){
+        loadProduto(idxAtual+1);
+      }else{
+        // Fim
+        $(".panel").style.display='none';
+        $("#done").style.display='block';
+      }
+      $("#aprovar").disabled = false;
+    }
+
+    /*************** WIRE UP ***************/
+    window.addEventListener('resize', positionBoxes);
+    window.addEventListener('load', loadLink);
+
+    $("#btn-gerar").addEventListener('click', gerarPrevia);
+    $("#rot-logo").addEventListener('click', rotLogo);
+    $("#rot-texto").addEventListener('click', rotTexto);
+    $("#reset").addEventListener('click', resetAll);
+    $("#aprovar").addEventListener('click', aprovar);
+
+    // Pointer listeners para as caixas
+    $("#box-logo").addEventListener('pointerdown', onPointerDown);
+    $("#box-texto").addEventListener('pointerdown', onPointerDown);
+
+    // Inicial: esconde preview até gerar
+    show($("#preview-block"), false);
+  </script>
 </body>
 </html>
