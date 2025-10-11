@@ -1,522 +1,489 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Aprovação de Mockup – Gama Laser</title>
+
+<!-- FAVICON (sol laranja) -->
+<link rel="icon" href="https://zqaoxvxuznonytzibhhe.supabase.co/storage/v1/object/public/imagens_gamalaser/LOGO-GAMA-LASER.png" />
+
 <style>
-  :root{
-    --orange:#f68729; --bg:#0b0b0b; --white:#fff; --muted:#6b7280; --shadow:0 10px 30px rgba(0,0,0,.15);
-  }
-  *{box-sizing:border-box}
-  body{margin:0; background:var(--bg); color:#111; font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Arial}
-  .header-wrap{background:#fff; padding:22px 16px; border-bottom:3px solid var(--orange)}
-  .header{max-width:1100px; margin:0 auto; text-align:center}
-  .brand img{width:200px; height:auto}
-  .order-info{margin-top:10px; color:var(--orange); font-weight:700}
-  .order-info small{display:block; color:#c2410c; font-weight:600; opacity:.9}
-  .app{max-width:1100px; margin:26px auto; padding:0 16px; display:grid; grid-template-columns:1fr 340px; gap:18px}
-  @media (max-width:950px){ .app{grid-template-columns:1fr} }
-  .card{background:#fff; border-radius:16px; box-shadow:var(--shadow)}
-  .card.pad{padding:18px}
-  .row{display:flex; gap:12px; flex-wrap:wrap}
-  .muted{color:var(--muted); font-size:14px}
-  /* Progress */
-  .progress{display:flex; gap:10px; justify-content:center; margin-bottom:12px}
-  .dot{width:10px; height:10px; border-radius:999px; background:#e5e7eb; transition:.2s}
-  .dot.active{background:var(--orange); transform:scale(1.2)}
-  .dot.done{background:#22c55e}
-  /* Stage */
-  .stage-wrap{padding:18px}
-  .stage{position:relative; width:100%; background:#fafafa; border-radius:12px; overflow:hidden; box-shadow:inset 0 0 0 1px #eee}
-  .stage::after{content:""; display:block; padding-top:75%} /* 4:3 default */
-  .stage > img.base{position:absolute; inset:0; width:100%; height:100%; object-fit:contain; background:#fff}
-  /* Layers (editor) */
-  .layer{position:absolute; translate:-50% -50%; outline:2px dashed rgba(0,0,0,.25); border-radius:8px; user-select:none; touch-action:none}
-  .layer .tag{position:absolute; top:-24px; left:0; background:#111; color:#fff; font-size:11px; font-weight:700; padding:3px 6px; border-radius:6px}
-  .handles{position:absolute; inset:-8px; pointer-events:none}
-  .handle{position:absolute; width:12px; height:12px; border:2px solid #0ea5e9; background:#fff; border-radius:2px; pointer-events:auto; cursor:nwse-resize}
-  .handle.tl{left:-6px; top:-6px}
-  .handle.br{right:-6px; bottom:-6px}
-  .text-box{display:flex; align-items:center; justify-content:center; padding:6px 8px; line-height:1; white-space:pre; color:#000; transform-origin:center}
-  .text-vertical{writing-mode:vertical-rl}
-  .logo-box img{display:block; width:100%; height:100%; object-fit:contain; pointer-events:none}
-  /* Side panel */
-  .panel .section{padding:14px; border-bottom:1px solid #eee}
-  .panel .section:last-child{border-bottom:0}
-  .panel h3{margin:0 0 8px; font-size:16px}
-  label{font-size:13px; font-weight:600; color:#111; margin-bottom:6px; display:block}
-  input[type="text"], select{width:100%; padding:10px 12px; border:1px solid #e5e7eb; border-radius:10px; background:#fff; font-size:14px}
-  .btn{display:inline-flex; align-items:center; justify-content:center; gap:8px; width:100%; border:0; border-radius:10px; padding:12px; font-weight:800; cursor:pointer}
-  .btn.primary{background:var(--orange); color:#fff}
-  .btn.dark{background:#111; color:#fff}
-  .btn.gray{background:#e5e7eb}
-  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:10px}
-  .grid3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px}
-  .coords{font-family:ui-monospace,Menlo,Consolas,monospace; background:#0f172a; color:#93c5fd; padding:10px 12px; border-radius:10px; font-size:12px; white-space:pre-wrap}
-  .error{background:#fee2e2; border:1px solid #ef4444; color:#991b1b; padding:10px 12px; border-radius:10px; display:none}
-  .success{background:#ecfdf5; border:1px solid #10b981; color:#065f46; padding:12px; border-radius:10px; display:none}
-  .hide{display:none!important}
+:root{
+  --orange:#f68729; --bg:#000; --white:#fff; --muted:#6b7280; --shadow:0 10px 30px rgba(0,0,0,.18);
+  --border:#eaeaea; --panel:#ffffff; --ink:#111827; --tag:#111;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Arial}
+/* ======== HEADER BRANCO ======== */
+.top-white{background:#fff;border-bottom:3px solid var(--orange)}
+.top-inner{max-width:1100px;margin:0 auto;padding:22px 16px;text-align:center}
+.top-inner .brand img{width:200px;height:auto}
+.top-inner .order{margin-top:10px;color:var(--orange);font-weight:800}
+.top-inner .order small{display:block;color:#d97706;font-weight:700;opacity:.95}
+
+/* ======== LAYOUT ======== */
+.shell{max-width:1100px;margin:26px auto;padding:0 16px;display:grid;grid-template-columns:1fr 340px;gap:18px}
+@media (max-width:980px){.shell{grid-template-columns:1fr}}
+.card{background:var(--panel);border-radius:16px;box-shadow:var(--shadow)}
+.pad{padding:16px}
+
+/* progresso de produtos */
+.progress{display:flex;gap:8px;justify-content:center;margin:6px 0 12px}
+.dot{width:10px;height:10px;border-radius:99px;background:#e5e7eb;transition:.2s}
+.dot.active{background:var(--orange);transform:scale(1.15)}
+.dot.done{background:#22c55e}
+
+/* linha do produto */
+.meta{color:#374151;font-size:15px;margin:4px 0 12px}
+.meta strong{color:#111}
+
+/* ======== STAGE / EDITOR ======== */
+.stage-wrap{padding:18px}
+.stage{position:relative;width:100%;background:#fafafa;border-radius:14px;overflow:hidden;box-shadow:inset 0 0 0 1px #eee}
+.stage::after{content:"";display:block;padding-top:75%} /* 4:3 default; será substituído no onload */
+.stage > img.base{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#fff}
+
+/* camadas */
+.layer{position:absolute;translate:-50% -50%;outline:2px dashed rgba(0,0,0,.25);border-radius:10px;user-select:none;touch-action:none}
+.layer .tag{position:absolute;top:-24px;left:0;background:rgba(17,17,17,.7);color:#fff;font-size:11px;font-weight:800;padding:3px 6px;border-radius:6px}
+.layer.small .tag{display:none} /* oculta tag quando pequeno */
+.handles{position:absolute;inset:-8px;pointer-events:none}
+.handle{position:absolute;width:12px;height:12px;border:2px solid #0ea5e9;background:#fff;border-radius:2px;pointer-events:auto;cursor:nwse-resize}
+.handle.tl{left:-6px;top:-6px}
+.handle.br{right:-6px;bottom:-6px}
+
+.logo-box img{display:block;width:100%;height:100%;object-fit:contain;pointer-events:none}
+.text-box{display:flex;align-items:center;justify-content:center;line-height:1;white-space:pre;color:#000;padding:6px 8px;transform-origin:center}
+.text-vertical{writing-mode:vertical-rl}
+
+/* ======== PANEL LATERAL ======== */
+.section{padding:14px;border-bottom:1px solid var(--border)}
+.section:last-child{border-bottom:0}
+h3{margin:0 0 8px;font-size:16px}
+label{display:block;font-size:13px;font-weight:700;margin:6px 0}
+input[type="text"],select{width:100%;padding:10px 12px;border:1px solid #e5e7eb;border-radius:10px;background:#fff;font-size:14px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;width:100%;border:0;border-radius:10px;padding:12px;font-weight:800;cursor:pointer}
+.btn.primary{background:var(--orange);color:#fff}
+.btn.dark{background:#111;color:#fff}
+.btn.gray{background:#e5e7eb}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+
+.coords{font-family:ui-monospace,Menlo,Consolas,monospace;background:#0f172a;color:#93c5fd;padding:10px 12px;border-radius:10px;font-size:12px;white-space:pre-wrap;margin-top:10px}
+
+.error{background:#fee2e2;border:1px solid #ef4444;color:#991b1b;padding:10px 12px;border-radius:10px;display:none}
+.success{background:#ecfdf5;border:1px solid #10b981;color:#065f46;padding:12px;border-radius:10px;display:none}
+.hide{display:none!important}
+
+/* ======== OVERLAY DE PROGRESSO ======== */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:99}
+.overlay .box{background:#fff;border-radius:14px;box-shadow:var(--shadow);width:min(420px,92vw);padding:22px 18px;text-align:center}
+.progress-bar{position:relative;height:12px;background:#eee;border-radius:999px;overflow:hidden;margin-top:14px}
+.progress-fill{position:absolute;left:0;top:0;height:100%;width:0%;background:var(--orange);transition:width .3s ease}
+.progress-value{margin-top:10px;color:#374151;font-weight:700}
+
+/* ======== TELA FINAL ======== */
+.final{display:none;max-width:760px;margin:28px auto;padding:22px;background:#fff;border-radius:16px;box-shadow:var(--shadow);text-align:center}
+.final img{width:180px}
+.final h2{color:#16a34a}
 </style>
 </head>
 <body>
 
-  <!-- HEADER -->
-  <div class="header-wrap">
-    <div class="header">
-      <div class="brand">
-        <img src="https://zqaoxvxuznonytzibhhe.supabase.co/storage/v1/object/sign/imagens_gamalaser/LOGO-GAMA-LASER.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV8xYjVlYTRkMi03MGI2LTQ1MjgtODE0Mi1kZDUyYmZjZTM2ZTUiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJpbWFnZW5zX2dhbWFsYXNlci9MT0dPLUdBTUEtTEFTRVIucG5nIiwiaWF0IjoxNzYwMTM3NzE5LCJleHAiOjIwNzU0OTc3MTl9.HYRTr9yYjrRMoWLZKmefCOKOfHjdXXj6z26QL7rshKc" alt="Gama Laser" />
-      </div>
-      <div class="order-info">
-        <div id="orderLine">Pedido #—</div>
-        <small id="orderSub">Produto — SKU —</small>
-      </div>
+<!-- HEADER BRANCO COM LOGO E DADOS DO PEDIDO -->
+<div class="top-white">
+  <div class="top-inner">
+    <div class="brand">
+      <img src="https://zqaoxvxuznonytzibhhe.supabase.co/storage/v1/object/public/imagens_gamalaser/LOGO-GAMA-LASER.png" alt="Gama Laser">
+    </div>
+    <div class="order">
+      <div id="orderLine">Pedido #—</div>
+      <small id="orderSub">—</small>
     </div>
   </div>
+</div>
 
-  <!-- APP -->
-  <div class="app">
-    <!-- LEFT: Editor -->
-    <div class="card stage-wrap">
-      <!-- Loading / mensagens -->
-      <div id="msgError" class="error">Erro…</div>
-      <div id="msgOk" class="success">OK</div>
+<!-- APP -->
+<div class="shell">
+  <!-- Painel branco com editor -->
+  <div class="card pad">
+    <div id="msgError" class="error">—</div>
+    <div id="msgOk" class="success">—</div>
 
-      <!-- Progress dos produtos -->
-      <div id="progress" class="progress"></div>
+    <!-- indicador “Produto x de y” -->
+    <div id="progress" class="progress"></div>
 
-      <!-- Painel de dados do produto atual -->
-      <div class="row" style="justify-content:space-between; align-items:center; margin:8px 0 14px">
-        <div class="muted">
-          <strong>Produto atual:</strong> <span id="pNome">—</span> ·
-          <strong>Variante:</strong> <span id="pVariante">—</span> ·
-          <strong>SKU:</strong> <span id="pSku">—</span> ·
-          <strong>Qtd:</strong> <span id="pQtd">—</span>
-        </div>
-      </div>
-
-      <!-- Stage (mockup base + layers editáveis) -->
-      <div id="stage" class="stage">
-        <img id="baseImg" class="base" alt="mockup" />
-        <!-- Texto -->
-        <div id="textLayer" class="layer hide" data-type="text">
-          <div class="tag">✏️ TEXTO</div>
-          <div id="textBox" class="text-box">Seu texto</div>
-          <div class="handles">
-            <div class="handle tl" data-resize="tl"></div>
-            <div class="handle br" data-resize="br"></div>
-          </div>
-        </div>
-        <!-- Logo -->
-        <div id="logoLayer" class="layer hide" data-type="logo" style="width:110px; height:110px;">
-          <div class="tag">📷 LOGO</div>
-          <div class="logo-box"><img id="logoImg" alt="logo" /></div>
-          <div class="handles">
-            <div class="handle tl" data-resize="tl"></div>
-            <div class="handle br" data-resize="br"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Coordenadas -->
-      <div id="coords" class="coords" style="margin-top:12px">—</div>
+    <div class="meta">
+      <strong id="cap">Produto 1 de 1</strong> — <span id="pNome">—</span> ·
+      <strong>Variante:</strong> <span id="pVariante">—</span> ·
+      <strong>SKU:</strong> <span id="pSku">—</span> ·
+      <strong>Qtd:</strong> <span id="pQtd">—</span>
     </div>
 
-    <!-- RIGHT: Painel -->
-    <div class="card panel">
-      <!-- Entrada -->
-      <div class="section">
-        <h3>1) Selecione e gere a prévia</h3>
-        <label>Logo (arquivo)</label>
-        <input id="logoInput" type="file" accept="image/*" />
-        <div class="grid2" style="margin-top:10px">
-          <div>
-            <label>Texto (20 caract.)</label>
-            <input id="textInput" type="text" maxlength="20" placeholder="Digite o texto…" />
-          </div>
-          <div>
-            <label>Fonte</label>
-            <select id="fontSelect">
-              <option>Arial</option><option>Helvetica</option><option>Times</option>
-              <option>Verdana</option><option>Courier</option><option>Impact</option>
-              <option>Georgia</option>
-            </select>
-          </div>
-        </div>
-        <button id="btnPreview" class="btn dark" style="margin-top:12px">🔍 Gerar prévia</button>
+    <!-- STAGE -->
+    <div id="stage" class="stage">
+      <img id="baseImg" class="base" alt="mockup">
+
+      <!-- TEXTO (drag/resize/rotate) -->
+      <div id="textLayer" class="layer hide" data-type="text">
+        <div class="tag">✏️ TEXTO</div>
+        <div id="textBox" class="text-box">Seu texto</div>
+        <div class="handles"><div class="handle tl" data-resize="tl"></div><div class="handle br" data-resize="br"></div></div>
       </div>
 
-      <!-- Edição -->
-      <div id="editSection" class="section hide">
-        <h3>2) Ajuste livre (arraste, redimensione, gire)</h3>
-        <div class="grid3" style="margin-top:8px">
-          <button id="btnRotateLogo" class="btn gray">⤴️ Rotacionar Logo 90°</button>
-          <button id="btnTextVertical" class="btn gray">↕️ Texto Vertical</button>
-          <button id="btnReset" class="btn gray">↺ Resetar</button>
-        </div>
-        <div class="grid2" style="margin-top:8px">
-          <button id="btnLogoMinus" class="btn gray">− Logo</button>
-          <button id="btnLogoPlus" class="btn gray">+ Logo</button>
-        </div>
-        <div class="grid2" style="margin-top:8px">
-          <button id="btnTextMinus" class="btn gray">− Texto</button>
-          <button id="btnTextPlus" class="btn gray">+ Texto</button>
-        </div>
+      <!-- LOGO (drag/resize/rotate) -->
+      <div id="logoLayer" class="layer hide" data-type="logo" style="width:110px;height:110px;">
+        <div class="tag">📷 LOGO</div>
+        <div class="logo-box"><img id="logoImg" alt="logo"></div>
+        <div class="handles"><div class="handle tl" data-resize="tl"></div><div class="handle br" data-resize="br"></div></div>
       </div>
+    </div>
 
-      <!-- Aprovar -->
-      <div id="approveSection" class="section hide">
-        <h3>3) Aprovar produto</h3>
-        <p class="muted" style="margin:0 0 8px">Ao aprovar, geramos a URL final (Cloudinary) com logo e texto aplicados.</p>
-        <button id="btnApprove" class="btn primary">✅ Aprovar este produto</button>
+    <div id="coords" class="coords">—</div>
+  </div>
+
+  <!-- Painel de controles -->
+  <div class="card">
+    <div class="section">
+      <h3>1) Selecione e gere a prévia</h3>
+      <label>Logo (arquivo)</label>
+      <input id="logoInput" type="file" accept="image/*">
+      <div class="grid2" style="margin-top:10px">
+        <div>
+          <label>Texto (20 caract.)</label>
+          <input id="textInput" type="text" maxlength="20" placeholder="Digite o texto…">
+        </div>
+        <div>
+          <label>Fonte</label>
+          <select id="fontSelect">
+            <option>Arial</option><option>Helvetica</option><option>Times</option>
+            <option>Verdana</option><option>Courier</option><option>Impact</option><option>Georgia</option>
+          </select>
+        </div>
       </div>
+      <button id="btnPreview" class="btn dark" style="margin-top:12px">🔍 Gerar prévia</button>
+    </div>
+
+    <div id="editSection" class="section hide">
+      <h3>2) Ajuste livre</h3>
+      <div class="grid3" style="margin-top:8px">
+        <button id="btnRotateLogo" class="btn gray">⤴️ Rotacionar Logo 90°</button>
+        <button id="btnRotateText" class="btn gray">↻ Rotacionar Texto 90°</button>
+        <button id="btnReset" class="btn gray">↺ Resetar</button>
+      </div>
+      <div class="grid2" style="margin-top:8px">
+        <button id="btnLogoMinus" class="btn gray">− Logo</button>
+        <button id="btnLogoPlus" class="btn gray">+ Logo</button>
+      </div>
+      <div class="grid2" style="margin-top:8px">
+        <button id="btnTextMinus" class="btn gray">− Texto</button>
+        <button id="btnTextPlus" class="btn gray">+ Texto</button>
+      </div>
+    </div>
+
+    <div id="approveSection" class="section hide">
+      <h3>3) Aprovar</h3>
+      <p class="muted" style="margin:0 0 8px">Geraremos a URL final (Cloudinary) com logo e texto aplicados.</p>
+      <button id="btnApprove" class="btn primary">✅ Aprovar este produto</button>
     </div>
   </div>
+</div>
+
+<!-- OVERLAY DE PROGRESSO -->
+<div id="overlay" class="overlay" role="dialog" aria-live="polite">
+  <div class="box">
+    <div style="font-weight:800">Gerando prévia…</div>
+    <div class="progress-bar"><div id="progressFill" class="progress-fill"></div></div>
+    <div id="progressValue" class="progress-value">0%</div>
+  </div>
+</div>
+
+<!-- TELA FINAL -->
+<div id="finalScreen" class="final">
+  <img src="https://zqaoxvxuznonytzibhhe.supabase.co/storage/v1/object/public/imagens_gamalaser/LOGO-GAMA-LASER.png" alt="Gama Laser">
+  <h2>🎉 Todos os produtos foram aprovados!</h2>
+  <p>Obrigado! Seu pedido seguirá para a produção.</p>
+</div>
 
 <script>
-/* ===================== CONFIG ===================== */
+/* ================= CONFIG ================= */
 const CLOUD_NAME = 'dslzqtajk';
-const WEBHOOK_PREVIEW   = 'https://gama-laser-n8n.gtyipj.easypanel.host/webhook-test/gerar-preview-mockup';
-const WEBHOOK_APROVACAO = 'https://gama-laser-n8n.gtyipj.easypanel.host/webhook-test/aprovar-mockup'; // usar quando integrar
+const WEBHOOK_PREVIEW   = 'https://gama-laser-n8n.gtyipj.easypanel.host/webhook-test/gerar-preview-mockup'; // ajuste quando precisar
 const SUPABASE_URL      = 'https://zqaoxvxuznonytzibhhe.supabase.co';
 const SUPABASE_KEY      = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpxYW94dnh1em5vbnl0emliaGhlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk1NDYwMTEsImV4cCI6MjA3NTEyMjAxMX0.anrCkp8mdxVPg1lpCqvnz_OxLk3ljNz1veTMPWSjtpI';
 
-/* ===================== STATE ===================== */
-let linkId = '';
-let orderNumber = '';
-let produtos = [];
-let idxAtual = 0;
+/* ================= STATE ================= */
+let linkId='', orderNumber='', produtos=[], idxAtual=0;
+let mockupPublicId='', logoPublicId='', fonte='Arial', texto='', hasText=false;
 
-let mockupPublicId = '';  // ex.: "mockups/3017d_azul"
-let logoPublicId   = '';  // ex.: "logo_3017D_1760..."
-let fonte = 'Arial';
-let texto = '';
-let hasText = false;
+const state = { logo:{x:.30,y:.30,w:110,rot:0}, text:{x:.55,y:.30,font:28,rot:0} };
 
-// geometria relativa ao STAGE (percentuais através do centro)
-const state = {
-  logo: { x: 0.30, y: 0.30, w: 120, rot: 0 },
-  text: { x: 0.55, y: 0.30, font: 28, rot: 0, vertical: false }
-};
+/* ================= ELTS ================= */
+const msgError=document.getElementById('msgError'), msgOk=document.getElementById('msgOk');
+const orderLine=document.getElementById('orderLine'), orderSub=document.getElementById('orderSub');
+const progress=document.getElementById('progress'), cap=document.getElementById('cap');
+const pNome=document.getElementById('pNome'), pVar=document.getElementById('pVariante'), pSku=document.getElementById('pSku'), pQtd=document.getElementById('pQtd');
 
-/* ===================== ELTs ===================== */
-const msgError = document.getElementById('msgError');
-const msgOk    = document.getElementById('msgOk');
+const stage=document.getElementById('stage'), baseImg=document.getElementById('baseImg');
+const textLayer=document.getElementById('textLayer'), textBox=document.getElementById('textBox');
+const logoLayer=document.getElementById('logoLayer'), logoImg=document.getElementById('logoImg');
+const coords=document.getElementById('coords');
 
-const orderLine = document.getElementById('orderLine');
-const orderSub  = document.getElementById('orderSub');
+const logoInput=document.getElementById('logoInput'), textInput=document.getElementById('textInput'), fontSelect=document.getElementById('fontSelect');
+const btnPreview=document.getElementById('btnPreview'), editSection=document.getElementById('editSection'), approveSection=document.getElementById('approveSection');
+const btnRotateLogo=document.getElementById('btnRotateLogo'), btnRotateText=document.getElementById('btnRotateText'), btnReset=document.getElementById('btnReset');
+const btnLogoMinus=document.getElementById('btnLogoMinus'), btnLogoPlus=document.getElementById('btnLogoPlus'), btnTextMinus=document.getElementById('btnTextMinus'), btnTextPlus=document.getElementById('btnTextPlus'), btnApprove=document.getElementById('btnApprove');
 
-const progress  = document.getElementById('progress');
-const pNome = document.getElementById('pNome');
-const pVar  = document.getElementById('pVariante');
-const pSku  = document.getElementById('pSku');
-const pQtd  = document.getElementById('pQtd');
+const overlay=document.getElementById('overlay'), progressFill=document.getElementById('progressFill'), progressValue=document.getElementById('progressValue');
+const finalScreen=document.getElementById('finalScreen');
 
-const stage = document.getElementById('stage');
-const baseImg = document.getElementById('baseImg');
-const textLayer = document.getElementById('textLayer');
-const textBox   = document.getElementById('textBox');
-const logoLayer = document.getElementById('logoLayer');
-const logoImg   = document.getElementById('logoImg');
-const coords    = document.getElementById('coords');
+/* ================= UTILS ================= */
+function showError(m){msgError.textContent=m;msgError.style.display='block';setTimeout(()=>msgError.style.display='none',6000);}
+function showOk(m){msgOk.textContent=m;msgOk.style.display='block';setTimeout(()=>msgOk.style.display='none',2500);}
+const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
+const px=n=>`${Math.round(n)}px`;
+function setHidden(el,cond){el.classList.toggle('hide',cond);}
+function stageRect(){return stage.getBoundingClientRect();}
 
-const logoInput = document.getElementById('logoInput');
-const textInput = document.getElementById('textInput');
-const fontSelect= document.getElementById('fontSelect');
-const btnPreview= document.getElementById('btnPreview');
-
-const editSection    = document.getElementById('editSection');
-const approveSection = document.getElementById('approveSection');
-
-const btnRotateLogo  = document.getElementById('btnRotateLogo');
-const btnTextVertical= document.getElementById('btnTextVertical');
-const btnReset       = document.getElementById('btnReset');
-const btnLogoMinus   = document.getElementById('btnLogoMinus');
-const btnLogoPlus    = document.getElementById('btnLogoPlus');
-const btnTextMinus   = document.getElementById('btnTextMinus');
-const btnTextPlus    = document.getElementById('btnTextPlus');
-const btnApprove     = document.getElementById('btnApprove');
-
-/* ===================== UTILS ===================== */
-function showError(msg){ msgError.textContent = msg; msgError.style.display = 'block'; setTimeout(()=>msgError.style.display='none', 6000); }
-function showOk(msg){ msgOk.textContent = msg; msgOk.style.display='block'; setTimeout(()=>msgOk.style.display='none', 2000); }
-function setHidden(el, cond){ el.classList.toggle('hide', cond); }
-const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
-const px = n => `${Math.round(n)}px`;
-
-/* ===================== SUPABASE LOAD ===================== */
+/* ================= CARREGAR PEDIDO ================= */
 async function carregarPedido(){
-  const params = new URLSearchParams(location.search);
-  linkId = params.get('p') || '';
-  if(!linkId){ showError('Link inválido. Use ?p=SEU_LINK_ID'); return; }
+  const params=new URLSearchParams(location.search);
+  linkId=params.get('p')||'';
+  if(!linkId){showError('Link inválido. Use ?p=SEU_LINK_ID');return;}
 
   try{
-    const r = await fetch(`${SUPABASE_URL}/rest/v1/links_aprovacao?id=eq.${linkId}&select=*`,{
-      headers:{ 'apikey':SUPABASE_KEY, 'Authorization':`Bearer ${SUPABASE_KEY}` }
-    });
-    const data = await r.json();
-    if(!data?.length){ showError('Link não encontrado.'); return; }
+    const r=await fetch(`${SUPABASE_URL}/rest/v1/links_aprovacao?id=eq.${linkId}&select=*`,{headers:{apikey:SUPABASE_KEY,Authorization:`Bearer ${SUPABASE_KEY}`}});
+    const data=await r.json();
+    if(!data?.length){showError('Link não encontrado.');return;}
+    const row=data[0];
+    orderNumber=row.order_number ?? row.order_id ?? '';
+    const arr=typeof row.produtos==='string' ? JSON.parse(row.produtos) : row.produtos;
+    produtos=Array.isArray(arr)?arr:[];
+    if(!produtos.length){showError('Nenhum produto neste link.');return;}
 
-    const row = data[0];
-    orderNumber = row.order_number ?? row.order_id ?? '';
-    const arr = typeof row.produtos === 'string' ? JSON.parse(row.produtos) : row.produtos;
-    produtos = Array.isArray(arr) ? arr : [];
-    if(!produtos.length){ showError('Nenhum produto neste link.'); return; }
+    orderLine.textContent=`Pedido #${orderNumber}`;
+    orderSub.textContent=`${produtos[0].nome} — SKU ${produtos[0].sku}`;
 
-    orderLine.textContent = `Pedido #${orderNumber}`;
+    // Progress dots
+    progress.innerHTML='';
+    produtos.forEach((_,i)=>{const d=document.createElement('div');d.className='dot'+(i===0?' active':'');d.id=`dot-${i}`;progress.appendChild(d);});
+
     loadProduto(0);
-    // progress
-    progress.innerHTML = '';
-    produtos.forEach((_,i)=>{
-      const d = document.createElement('div'); d.className='dot'+(i===0?' active':''); d.id=`dot-${i}`; progress.appendChild(d);
-    });
-  }catch(e){
-    console.error(e); showError('Erro ao carregar pedido: '+e.message);
-  }
+  }catch(e){console.error(e);showError('Erro ao carregar: '+e.message);}
 }
 
 function loadProduto(idx){
-  idxAtual = idx;
-  const p = produtos[idx];
-  pNome.textContent = p?.nome || '-';
-  pVar .textContent = p?.variante || '-';
-  pSku .textContent = p?.sku || '-';
-  pQtd .textContent = p?.quantidade ?? '-';
-  orderSub.textContent = `${p?.nome || '-'} — SKU ${p?.sku || '-'}`;
+  idxAtual=idx;
+  const p=produtos[idx];
+  cap.textContent=`Produto ${idx+1} de ${produtos.length}`;
+  pNome.textContent=p?.nome||'-'; pVar.textContent=p?.variante||'-'; pSku.textContent=p?.sku||'-'; pQtd.textContent=p?.quantidade??'-';
+  orderSub.textContent=`${p?.nome||'-'} — SKU ${p?.sku||'-'}`;
 
-  // Reset editor state
-  mockupPublicId = '';
-  logoPublicId   = '';
-  fonte = 'Arial'; texto = ''; hasText = false;
-  state.logo = { x:0.30,y:0.30,w:120, rot:0 };
-  state.text = { x:0.55,y:0.30,font:28, rot:0, vertical:false };
+  // reset
+  mockupPublicId=''; logoPublicId=''; fonte='Arial'; texto=''; hasText=false;
+  state.logo={x:.30,y:.30,w:110,rot:0}; state.text={x:.55,y:.30,font:28,rot:0};
+  baseImg.removeAttribute('src'); logoImg.removeAttribute('src'); textInput.value=''; fontSelect.value='Arial';
+  setHidden(textLayer,true); setHidden(logoLayer,true); setHidden(editSection,true); setHidden(approveSection,true);
 
-  baseImg.removeAttribute('src');
-  logoImg.removeAttribute('src');
-  setHidden(textLayer,true);
-  setHidden(logoLayer,true);
-  setHidden(editSection,true);
-  setHidden(approveSection,true);
-
-  // marcar progresso
-  document.querySelectorAll('.dot').forEach((el,i)=>{
-    el.classList.remove('active');
-    if(i<idx) el.classList.add('done');
-  });
-  const cur = document.getElementById(`dot-${idx}`);
-  cur?.classList.add('active');
+  // progress UI
+  document.querySelectorAll('.dot').forEach((el,i)=>{el.classList.remove('active'); if(i<idx) el.classList.add('done');});
+  document.getElementById(`dot-${idx}`)?.classList.add('active');
 }
 
-/* ===================== PREVIEW (via n8n) ===================== */
+/* ================= PREVIEW ================= */
 btnPreview.addEventListener('click', async ()=>{
-  const p = produtos[idxAtual];
-  const file = logoInput.files?.[0];
-  if(!file){ showError('Envie um arquivo de logo.'); return; }
+  const p=produtos[idxAtual];
+  const file=logoInput.files?.[0];
+  if(!file){showError('Envie um arquivo de logo.');return;}
 
-  texto = (textInput.value || '').trim();
-  fonte = fontSelect.value || 'Arial';
-  hasText = texto.length>0;
+  texto=(textInput.value||'').trim(); fonte=fontSelect.value||'Arial'; hasText=texto.length>0;
+
+  // overlay progresso
+  overlay.style.display='flex'; progressFill.style.width='0%'; progressValue.textContent='0%';
+  let prog=0; const t=setInterval(()=>{prog=Math.min(90,prog+2); progressFill.style.width=prog+'%'; progressValue.textContent=prog+'%';},120);
 
   try{
-    const fd = new FormData();
-    fd.append('logo', file);
-    fd.append('texto', texto);
-    fd.append('fonte', fonte);
-    fd.append('sku', p.sku);
-    fd.append('cor', p.variante);
+    const fd=new FormData();
+    fd.append('logo',file); fd.append('texto',texto); fd.append('fonte',fonte);
+    fd.append('sku',p.sku); fd.append('cor',p.variante);
 
-    const resp = await fetch(WEBHOOK_PREVIEW,{method:'POST', body:fd});
-    const data = await resp.json();
+    const resp=await fetch(WEBHOOK_PREVIEW,{method:'POST',body:fd});
+    // se endpoint estiver errado, mostrará 404
+    let data=null;
+    try{ data=await resp.json(); }catch(_){}
+    progressFill.style.width='100%'; progressValue.textContent='100%'; setTimeout(()=>{overlay.style.display='none';},250); clearInterval(t);
 
-    if(!data?.preview_url){ showError('Erro ao gerar prévia.'); return; }
+    if(!resp.ok || !data?.preview_url){ showError('Erro ao gerar prévia (verifique o endpoint do n8n).'); return; }
 
-    // Extrair mockup public_id (apenas o caminho final)
+    // Parse: manter APENAS o mockup base (remove overlays)
     mockupPublicId = extractMockupId(data.preview_url);
-    // Extrair logo public_id (l_… -> respeitando subpasta se existir)
     logoPublicId   = extractLogoPublicId(data.preview_url);
 
-    // Mostrar mockup LIMPO
-    baseImg.src = `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/${encodeURIComponent(mockupPublicId)}`;
-    // Mostrar logo SEM FUNDO no editor
-    logoImg.src = `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/e_bgremoval/${encodeURIComponent(logoPublicId)}.png`;
+    // mockup limpo
+    baseImg.onload=()=>{ fitStageToImage(); applyPositions(); };
+    baseImg.src=`https://res.cloudinary.com/${CLOUD_NAME}/image/upload/${encodeURIComponent(mockupPublicId)}`;
 
-    // Preparar camadas
-    textBox.textContent = texto || '';
-    state.text.vertical = false; state.text.rot = 0;
-    applyPositions();
+    // logo sem fundo (apenas para visual do editor)
+    logoImg.src=`https://res.cloudinary.com/${CLOUD_NAME}/image/upload/e_bgremoval/${encodeURIComponent(logoPublicId)}.png`;
 
-    setHidden(textLayer, !hasText);
-    setHidden(logoLayer, false);
+    // texto (apenas camada local)
+    textBox.textContent=texto||'';
+    setHidden(textLayer,!hasText);
+    setHidden(logoLayer,false);
     setHidden(editSection,false);
     setHidden(approveSection,false);
     showOk('Prévia pronta. Ajuste livremente.');
   }catch(e){
-    console.error(e); showError('Falha na conexão: '+e.message);
+    clearInterval(t); overlay.style.display='none';
+    console.error(e); showError('Falha ao conectar: '+e.message);
   }
 });
 
+// extrai só o caminho final do mockup após último fl_layer_apply/
 function extractMockupId(url){
-  // trecho após /upload/ e depois do último '/fl_layer_apply/'
-  const after = url.split('/upload/')[1] || '';
-  const last = after.lastIndexOf('/fl_layer_apply/');
-  if(last!==-1) return decodeURIComponent(after.substring(last + '/fl_layer_apply/'.length));
-  // fallback: pega o que vem após a primeira “/”
-  const i = after.indexOf('/');
-  return decodeURIComponent(i>=0 ? after.substring(i+1) : after);
+  const part=url.split('/upload/')[1]||'';
+  const marker='/fl_layer_apply/';
+  const last=part.lastIndexOf(marker);
+  if(last!==-1) return decodeURIComponent(part.substring(last+marker.length));
+  // fallback: pega após primeira "/"
+  const i=part.indexOf('/');
+  return decodeURIComponent(i>=0?part.substring(i+1):part);
 }
 function extractLogoPublicId(url){
-  const m = url.match(/l_([^,]+)/);
+  const m=url.match(/l_([^,]+)/);
   if(!m) return '';
-  return decodeURIComponent(m[1]).replaceAll('/',':'); // Cloudinary overlay usa ":" para subpasta
+  return decodeURIComponent(m[1]).replaceAll('/',':');
 }
 
-/* ===================== EDITOR ===================== */
-function stageRect(){ return stage.getBoundingClientRect(); }
+/* ======== STAGE helpers ======== */
+function fitStageToImage(){
+  const nw=baseImg.naturalWidth||0, nh=baseImg.naturalHeight||0;
+  if(nw && nh){
+    const ratio = (nh/nw)*100;
+    stage.style.setProperty('--ratio',ratio);
+    // hack: altera o padding-top do pseudo-elemento via style (criamos um child)
+    stage.querySelector('.padder')?.remove();
+    const d=document.createElement('div'); d.className='padder'; d.style.cssText=`position:absolute;inset:0;opacity:0;pointer-events:none`;
+    stage.appendChild(d);
+    stage.style.setProperty('--pad', ratio.toFixed(2)+'%');
+    stage.style.position='relative';
+    stage.style.setProperty('aspect-ratio', `${nw}/${nh}`); // browsers modernos
+  }
+}
+
+/* ======== APLICA POSIÇÕES ======== */
 function applyPositions(){
-  // Texto
-  textBox.style.fontSize = px(state.text.font);
-  textBox.classList.toggle('text-vertical', state.text.vertical);
-  const txtRot = `rotate(${state.text.rot}deg)`;
-  textBox.style.transform = txtRot;
-  textLayer.style.left = `${state.text.x*100}%`;
-  textLayer.style.top  = `${state.text.y*100}%`;
-  // Recalcular bounding do texto (para o “quadrado” acompanhar rotação)
+  // LOGO
+  logoLayer.style.left = (state.logo.x*100)+'%';
+  logoLayer.style.top  = (state.logo.y*100)+'%';
+  logoLayer.style.width=px(state.logo.w);
+  logoLayer.style.height=px(state.logo.w);
+  logoLayer.style.transform='translate(-50%,-50%) rotate('+state.logo.rot+'deg)';
+  logoLayer.classList.toggle('small', state.logo.w<60);
+
+  // TEXTO
+  textBox.style.fontSize=px(state.text.font);
+  textBox.style.transform='rotate('+state.text.rot+'deg)';
+  textLayer.style.left=(state.text.x*100)+'%';
+  textLayer.style.top =(state.text.y*100)+'%';
+  // recalcular caixa para acompanhar rotação
   requestAnimationFrame(()=>{
-    const b = textBox.getBoundingClientRect();
-    const w = Math.max(30, b.width);
-    const h = Math.max(24, b.height);
-    textLayer.style.width  = px(w);
-    textLayer.style.height = px(h);
+    const b=textBox.getBoundingClientRect();
+    textLayer.style.width =px(Math.max(28,b.width));
+    textLayer.style.height=px(Math.max(22,b.height));
+    textLayer.classList.toggle('small', Math.max(b.width,b.height)<60);
     updateCoords();
   });
-
-  // Logo
-  logoLayer.style.left = `${state.logo.x*100}%`;
-  logoLayer.style.top  = `${state.logo.y*100}%`;
-  logoLayer.style.width  = px(state.logo.w);
-  logoLayer.style.height = px(state.logo.w); // proporção 1:1
-  logoLayer.style.transform = `translate(-50%,-50%) rotate(${state.logo.rot}deg)`;
-  updateCoords();
 }
 
 function updateCoords(){
-  const r = stageRect();
-  const lx = Math.round(state.logo.x * r.width);
-  const ly = Math.round(state.logo.y * r.height);
-  const tx = Math.round(state.text.x * r.width);
-  const ty = Math.round(state.text.y * r.height);
+  const r=stage.getBoundingClientRect();
+  const lx=Math.round(state.logo.x*r.width), ly=Math.round(state.logo.y*r.height);
+  const tx=Math.round(state.text.x*r.width), ty=Math.round(state.text.y*r.height);
   coords.textContent =
 `📍 Coordenadas
 Logo  — X:${lx} Y:${ly} W:${state.logo.w} Rot:${state.logo.rot}°
-Texto — X:${tx} Y:${ty} Font:${state.text.font} Rot:${state.text.rot}° ${state.text.vertical?'(vertical)':''}`;
+Texto — X:${tx} Y:${ty} Font:${state.text.font} Rot:${state.text.rot}°`;
 }
 
-/* Drag & Resize independentes */
+/* ======== DRAG/RESIZE GENERIC ======== */
 function initLayerDrag(layer, kind){
-  let dragging=false, resizing=false, start={};
-  let rectS, stageR;
-
-  const onPointerDown = (e)=>{
-    const isHandle = e.target.classList.contains('handle');
-    dragging = !isHandle;
-    resizing = isHandle ? e.target.dataset.resize : false;
-    rectS = layer.getBoundingClientRect();
-    stageR = stageRect();
-    start = { x:(e.clientX ?? e.touches?.[0]?.clientX), y:(e.clientY ?? e.touches?.[0]?.clientY) };
-    document.addEventListener('pointermove', onPointerMove);
-    document.addEventListener('pointerup', onPointerUp, {once:true});
-  };
-  const onPointerMove = (e)=>{
-    const cx = e.clientX ?? e.touches?.[0]?.clientX;
-    const cy = e.clientY ?? e.touches?.[0]?.clientY;
-    const dx = cx - start.x;
-    const dy = cy - start.y;
-
-    if(dragging){
-      const nx = clamp((rectS.left + dx - stageR.left + rectS.width/2) / stageR.width, 0.02, 0.98);
-      const ny = clamp((rectS.top  + dy - stageR.top  + rectS.height/2) / stageR.height, 0.02, 0.98);
-      if(kind==='logo'){ state.logo.x = nx; state.logo.y = ny; }
-      else { state.text.x = nx; state.text.y = ny; }
-      applyPositions();
-    }
-    if(resizing){
-      // usamos apenas o canto BR/TL para variação de tamanho (escala)
-      const factor = (rectS.width + dx * (resizing==='br'?1:-1)) / rectS.width;
-      if(kind==='logo'){
-        state.logo.w = Math.max(24, Math.round(state.logo.w * factor));
-      }else{
-        state.text.font = Math.max(8, Math.round(state.text.font * factor));
+  let dragging=false, resizing=false, start={}, rectS, stageR;
+  layer.addEventListener('pointerdown',(e)=>{
+    const isHandle=e.target.classList.contains('handle');
+    dragging=!isHandle; resizing=isHandle?e.target.dataset.resize:false;
+    rectS=layer.getBoundingClientRect(); stageR=stage.getBoundingClientRect();
+    start={x:e.clientX,y:e.clientY};
+    const move=(ev)=>{
+      const dx=(ev.clientX-start.x), dy=(ev.clientY-start.y);
+      if(dragging){
+        const nx=clamp((rectS.left+dx-stageR.left+rectS.width/2)/stageR.width,.02,.98);
+        const ny=clamp((rectS.top +dy-stageR.top +rectS.height/2)/stageR.height,.02,.98);
+        if(kind==='logo'){ state.logo.x=nx; state.logo.y=ny; } else { state.text.x=nx; state.text.y=ny; }
+        applyPositions();
       }
-      applyPositions();
-      start.x = cx; start.y = cy; rectS = layer.getBoundingClientRect(); // incremental suave
-    }
-  };
-  const onPointerUp = ()=>{ dragging=false; resizing=false; document.removeEventListener('pointermove', onPointerMove); };
-
-  layer.addEventListener('pointerdown', (e)=>{ e.stopPropagation(); onPointerDown(e); });
+      if(resizing){
+        const factor=(rectS.width + dx*(resizing==='br'?1:-1))/rectS.width;
+        if(kind==='logo'){ state.logo.w=Math.max(24,Math.round(state.logo.w*factor)); }
+        else{ state.text.font=Math.max(8,Math.round(state.text.font*factor)); }
+        applyPositions();
+        start={x:ev.clientX,y:ev.clientY}; rectS=layer.getBoundingClientRect();
+      }
+    };
+    const up=()=>{document.removeEventListener('pointermove',move);document.removeEventListener('pointerup',up);};
+    document.addEventListener('pointermove',move); document.addEventListener('pointerup',up);
+  });
 }
-initLayerDrag(logoLayer, 'logo');
-initLayerDrag(textLayer, 'text');
+initLayerDrag(logoLayer,'logo'); initLayerDrag(textLayer,'text');
 
-/* Botões de edição */
-btnRotateLogo.addEventListener('click', ()=>{ state.logo.rot = (state.logo.rot+90)%360; applyPositions(); });
-btnTextVertical.addEventListener('click', ()=>{ state.text.vertical = !state.text.vertical; applyPositions(); });
-btnReset.addEventListener('click', ()=>{
-  state.logo = { x:0.30, y:0.30, w:120, rot:0 };
-  state.text = { x:0.55, y:0.30, font:28, rot:0, vertical:false };
-  applyPositions();
-});
-btnLogoMinus.addEventListener('click', ()=>{ state.logo.w = Math.max(24, state.logo.w-6); applyPositions(); });
-btnLogoPlus .addEventListener('click', ()=>{ state.logo.w = Math.min(900, state.logo.w+6); applyPositions(); });
-btnTextMinus.addEventListener('click', ()=>{ state.text.font = Math.max(8, state.text.font-2); applyPositions(); });
-btnTextPlus .addEventListener('click', ()=>{ state.text.font = Math.min(240, state.text.font+2); applyPositions(); });
+/* ======== BOTÕES ======== */
+btnRotateLogo.addEventListener('click',()=>{state.logo.rot=(state.logo.rot+90)%360;applyPositions();});
+btnRotateText.addEventListener('click',()=>{state.text.rot=(state.text.rot+90)%360;applyPositions();});
+btnReset.addEventListener('click',()=>{state.logo={x:.30,y:.30,w:110,rot:0};state.text={x:.55,y:.30,font:28,rot:0};applyPositions();});
+btnLogoMinus.addEventListener('click',()=>{state.logo.w=Math.max(24,state.logo.w-6);applyPositions();});
+btnLogoPlus .addEventListener('click',()=>{state.logo.w=Math.min(900,state.logo.w+6);applyPositions();});
+btnTextMinus.addEventListener('click',()=>{state.text.font=Math.max(8,state.text.font-2);applyPositions();});
+btnTextPlus .addEventListener('click',()=>{state.text.font=Math.min(240,state.text.font+2);applyPositions();});
+textInput.addEventListener('input',()=>{texto=textInput.value;hasText=texto.trim().length>0;textBox.textContent=texto;setHidden(textLayer,!hasText);applyPositions();});
+fontSelect.addEventListener('change',()=>{fonte=fontSelect.value;});
 
-/* Inputs */
-textInput.addEventListener('input', ()=>{ texto = textInput.value; hasText = texto.trim().length>0; textBox.textContent = texto; setHidden(textLayer,!hasText); applyPositions(); });
-fontSelect.addEventListener('change', ()=>{ fonte = fontSelect.value; /* aplicado só na URL final */ });
+/* ======== APROVAR ======== */
+btnApprove.addEventListener('click',()=>{
+  if(!mockupPublicId || !logoPublicId){showError('Gere a prévia primeiro.');return;}
+  const r=stage.getBoundingClientRect();
+  const lx=Math.round(state.logo.x*r.width), ly=Math.round(state.logo.y*r.height), logoW=Math.round(state.logo.w);
 
-/* ===================== URL FINAL (Aprovar) ===================== */
-btnApprove.addEventListener('click', async ()=>{
-  if(!mockupPublicId || !logoPublicId){ showError('Gere a prévia primeiro.'); return; }
-  const r = stageRect();
-
-  // Coordenadas absolutas (px) no canvas para Cloudinary
-  const lx = Math.round(state.logo.x * r.width);
-  const ly = Math.round(state.logo.y * r.height);
-  const logoW = Math.round(state.logo.w);
-
-  let url = `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/`;
-
-  // LOGO overlay (mantém e_bgremoval no processamento final)
-  url += `l_${encodeURIComponent(logoPublicId)},e_bgremoval,w_${logoW},g_north_west,x_${lx},y_${ly}`;
-  if(state.logo.rot) url += `,a_${((state.logo.rot%360)+360)%360}`;
-  url += `/fl_layer_apply/`;
-
-  // TEXT overlay (se houver)
+  // monta URL final (logo + texto)
+  let url=`https://res.cloudinary.com/${CLOUD_NAME}/image/upload/`;
+  url+=`l_${encodeURIComponent(logoPublicId)},e_bgremoval,w_${logoW},g_north_west,x_${lx},y_${ly}`;
+  if(state.logo.rot) url+=`,a_${((state.logo.rot%360)+360)%360}`;
+  url+=`/fl_layer_apply/`;
   if(hasText && texto){
-    const extraRot = state.text.vertical ? 90 : 0;
-    const tRot = ((state.text.rot + extraRot)%360+360)%360;
-    const tx = Math.round(state.text.x * r.width);
-    const ty = Math.round(state.text.y * r.height);
-    const fontPx = Math.max(8, Math.round(state.text.font));
-    const safeText = texto.replace(/\//g,'\\/');
-
-    url += `l_text:${fonte}_${fontPx}:${encodeURIComponent(safeText)},co_rgb:000000,g_north_west,x_${tx},y_${ty}`;
-    if(tRot) url += `,a_${tRot}`;
-    url += `/fl_layer_apply/`;
+    const tx=Math.round(state.text.x*r.width), ty=Math.round(state.text.y*r.height);
+    const fontPx=Math.max(8,Math.round(state.text.font)); const safe=texto.replace(/\//g,'\\/');
+    url+=`l_text:${fonte}_${fontPx}:${encodeURIComponent(safe)},co_rgb:000000,g_north_west,x_${tx},y_${ty}`;
+    if(state.text.rot) url+=`,a_${((state.text.rot%360)+360)%360}`;
+    url+=`/fl_layer_apply/`;
   }
-
-  url += encodeURIComponent(mockupPublicId);
-
-  // 👉 aqui você integra com seu webhook de aprovação (quando o fluxo estiver pronto)
+  url+=encodeURIComponent(mockupPublicId);
   console.log('URL FINAL:', url);
-  showOk('URL final gerada (copiada no console).');
-  // Exemplo de envio:
-  // await fetch(WEBHOOK_APROVACAO,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ order_number: orderNumber, produto: produtos[idxAtual], url })})
+
+  // avança para o próximo produto (simulação até integrar o n8n)
+  const next=idxAtual+1;
+  if(next<produtos.length){
+    document.getElementById(`dot-${idxAtual}`)?.classList.add('done');
+    loadProduto(next);
+    showOk('Produto aprovado. Indo para o próximo…');
+  }else{
+    document.getElementById(`dot-${idxAtual}`)?.classList.add('done');
+    document.querySelector('.shell').style.display='none';
+    finalScreen.style.display='block';
+  }
 });
 
-/* ===================== BOOT ===================== */
-window.addEventListener('load', carregarPedido);
+/* ======== BOOT ======== */
+window.addEventListener('load',carregarPedido);
 </script>
 </body>
 </html>
