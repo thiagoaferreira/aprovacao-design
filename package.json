@@ -1,12 +1,13 @@
 {
-  "name": "gamalaser-aprovacao",
+  "name": "gamalaser-aprovacao-design",
   "version": "1.0.0",
+  "description": "Sistema de aprovação de mockups da Gama Laser (Nuvemshop + n8n + Cloudinary).",
   "scripts": {
-    "build": "npx nunjucks src index.html -o dist",
-    "start": "npx serve dist"
+    "start": "npx serve ."
   },
   "dependencies": {
-    "nunjucks-cli": "^1.1.0",
-    "serve": "^14.2.1"
-  }
+    "serve": "^14.2.0"
+  },
+  "author": "Gama Laser",
+  "license": "MIT"
 }
