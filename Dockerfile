@@ -13,5 +13,5 @@ RUN npm install -g serve
 # Define a porta de saída
 EXPOSE 3000
 
-# Comando que serve o index.html na raiz
-CMD ["npx", "serve", ".", "-s", "-l", "3000"]
+# Comando para manter o servidor ativo e acessível externamente
+CMD ["npx", "serve", ".", "-s", "-l", "0.0.0.0:3000"]
