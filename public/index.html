@@ -5,12 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Aprovar Design – Gama Laser</title>
     {% include "src/components/header.html" %}
-    <link rel="stylesheet" href="/css/style.css">
+    <!-- Caminho corrigido -->
+    <link rel="stylesheet" href="/src/css/style.css">
   </head>
 
   <body>
     {% include "src/components/panel.html" %}
     {% include "src/components/modal.html" %}
+
     <script>
       window.CONFIG = {
         SUPABASE_URL: "{{ SUPABASE_URL | default('') }}",
@@ -20,14 +22,16 @@
         CLOUDINARY_CLOUD: "{{ CLOUDINARY_CLOUD | default('dslzqtajk') }}"
       };
     </script>
-        <!-- Overlay de progresso -->
+
+    <!-- Overlay de progresso (mantido) -->
     <div id="overlay" class="overlay" hidden>
       <div class="overlay-modal">
         <div class="spinner" aria-hidden="true"></div>
         <p>Gerando prévia…</p>
       </div>
     </div>
-    <script type="module" src="/js/main.js"></script>
 
+    <!-- Caminho corrigido -->
+    <script type="module" src="/src/js/main.js"></script>
   </body>
 </html>
