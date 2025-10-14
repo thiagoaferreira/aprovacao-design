@@ -1,3 +1,4 @@
+// js/main.js
 import { buildURL, centerDefaults } from "./preview.js";
 import { enableDragAndResize } from "./drag.js";
 
@@ -5,6 +6,7 @@ const WEBHOOK_PREVIEW = "https://gama-laser-n8n.gtyipj.easypanel.host/webhook-te
 const WEBHOOK_APROVACAO = "https://gama-laser-n8n.gtyipj.easypanel.host/webhook/aprovar-mockup";
 
 const img = document.querySelector("#canvas");
+
 let state = {
   cloud: "dslzqtajk",
   baseId: "",
@@ -14,15 +16,10 @@ let state = {
   text: { x: 0, y: 520, w: 50 },
   fonte: "Arial",
   textoVal: "",
-  hasText: false
+  hasText: false,
+  logoRot: 0,
+  textRot: 0
 };
-
-function refresh() {
-  const url = buildURL(state);
-  if (!url) return;
-  img.src = url;
-  positionBoxes();
-}
 
 function positionBoxes() {
   const rect = img.getBoundingClientRect();
@@ -44,15 +41,23 @@ function positionBoxes() {
     setBox("#box-texto", state.text, "#38bdf8");
 }
 
+function refresh() {
+  const url = buildURL(state);
+  if (!url) return;
+  img.src = url;
+}
+
+// Gera preview chamando o webhook e centraliza boxes
 async function gerarPrevia() {
   const file = document.querySelector("#logo").files[0];
   const texto = document.querySelector("#texto").value.trim();
+  const fonteSel = document.querySelector("#fonte").value || "Arial";
   if (!file) return alert("Envie o logo primeiro");
 
   const fd = new FormData();
   fd.append("logo", file);
   fd.append("texto", texto);
-  fd.append("fonte", "Arial");
+  fd.append("fonte", fonteSel);
   fd.append("sku", "3017D");
   fd.append("cor", "Azul");
 
@@ -63,26 +68,33 @@ async function gerarPrevia() {
   state.baseId = preview.mockup_public_id;
   state.logoId = preview.logo_public_id;
   state.textoVal = texto;
+  state.fonte = fonteSel;
   state.hasText = texto !== "";
 
-  const c = centerDefaults(img, state.natural);
-  state.logo = c.logo;
-  state.text = c.text;
-
+  // Quando a imagem carregar: atualiza dimensões naturais e posiciona boxes
   img.onload = () => {
+    state.natural = { w: img.naturalWidth, h: img.naturalHeight };
+    const c = centerDefaults(img, state.natural);
+    state.logo = c.logo;
+    state.text = c.text;
     positionBoxes();
     document.querySelector("#preview-block").style.display = "block";
   };
+
   refresh();
 }
 
+// Eventos
 document.querySelector("#btn-gerar").addEventListener("click", gerarPrevia);
-document.querySelector("#rot-logo").addEventListener("click", () => { state.logoRot = (state.logoRot + 90) % 360; refresh(); });
-document.querySelector("#rot-texto").addEventListener("click", () => { state.textRot = (state.textRot + 90) % 360; refresh(); });
+document.querySelector("#rot-logo").addEventListener("click", () => {
+  state.logoRot = ((state.logoRot || 0) + 90) % 360; refresh();
+});
+document.querySelector("#rot-texto").addEventListener("click", () => {
+  state.textRot = ((state.textRot || 0) + 90) % 360; refresh();
+});
 document.querySelector("#reset").addEventListener("click", () => {
   const c = centerDefaults(img, state.natural);
-  state.logo = c.logo; state.text = c.text;
-  refresh();
+  state.logo = c.logo; state.text = c.text; refresh();
 });
 
-enableDragAndResize(state, refresh);
+enableDragAndResize(state, () => { refresh(); positionBoxes(); });
