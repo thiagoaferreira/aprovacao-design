@@ -1,14 +1,29 @@
-// js/main.js
+// public/js/main.js
 import { buildURL, centerDefaults } from "./preview.js";
 import { enableDragAndResize } from "./drag.js";
 
-const WEBHOOK_PREVIEW = "https://gama-laser-n8n.gtyipj.easypanel.host/webhook-test/gerar-preview-mockup";
-const WEBHOOK_APROVACAO = "https://gama-laser-n8n.gtyipj.easypanel.host/webhook/aprovar-mockup";
+/* ========= CONFIG vindas do index.html ========= */
+const CFG = window.CONFIG || {};
+const SUPA_URL  = CFG.SUPABASE_URL;
+const SUPA_KEY  = CFG.SUPABASE_ANON_KEY;
+const WEBHOOK_PREVIEW   = CFG.WEBHOOK_PREVIEW;
+const WEBHOOK_APROVACAO = CFG.WEBHOOK_APROVACAO;
 
+/* ========= DOM ========= */
 const img = document.querySelector("#canvas");
+const $orderNum = document.querySelector("#order-number");
+const $prodNome = document.querySelector("#produto-nome");
+const $prodSKU  = document.querySelector("#produto-sku");
+const $overlay  = document.querySelector("#overlay");
+const busy = (on) => { if ($overlay) $overlay.hidden = !on; };
+
+/* ========= Estado ========= */
+let linkData = null; // { id, order_id, order_number, produtos: [...] }
+let fila = [];       // produtos do link
+let atual = 0;       // índice do produto atual
 
 let state = {
-  cloud: "dslzqtajk",
+  cloud: CFG.CLOUDINARY_CLOUD || "dslzqtajk",
   baseId: "",
   logoId: "",
   natural: { w: 1000, h: 1000 },
@@ -18,9 +33,36 @@ let state = {
   textoVal: "",
   hasText: false,
   logoRot: 0,
-  textRot: 0
+  textRot: 0,
 };
 
+/* ========= Helpers ========= */
+function getLinkId() {
+  const u = new URL(location.href);
+  const p = u.searchParams.get("p");
+  if (p) return p;
+  const parts = u.pathname.split("/").filter(Boolean);
+  if (parts[0] === "p" && parts[1]) return parts[1];
+  return "";
+}
+
+async function supaGET(pathAndQuery) {
+  const r = await fetch(`${SUPA_URL}/rest/v1/${pathAndQuery}`, {
+    headers: { apikey: SUPA_KEY, Authorization: `Bearer ${SUPA_KEY}` }
+  });
+  if (!r.ok) throw new Error(`Supabase GET ${r.status}`);
+  return r.json();
+}
+
+function extractBaseId(url) {
+  try { return new URL(url).pathname.split("/").pop() || ""; } catch { return ""; }
+}
+function extractLogoId(url) {
+  const m = (url || "").match(/\/l_([^,\/]+)/);
+  return m ? m[1].replace(/:/g, "/") : "";
+}
+
+/* ========= Desenho ========= */
 function positionBoxes() {
   const rect = img.getBoundingClientRect();
   const scaleX = rect.width / state.natural.w;
@@ -37,54 +79,88 @@ function positionBoxes() {
   };
 
   setBox("#box-logo", state.logo, "#f68729");
-  if (state.textoVal.trim() !== "")
-    setBox("#box-texto", state.text, "#38bdf8");
+  if (state.textoVal.trim() !== "") setBox("#box-texto", state.text, "#38bdf8");
 }
 
 function refresh() {
   const url = buildURL(state);
   if (!url) return;
   img.src = url;
+  positionBoxes();
 }
 
-// Gera preview chamando o webhook e centraliza boxes
+/* ========= Link curto → cabeçalho e fila ========= */
+async function carregarLinkCurto() {
+  const id = getLinkId();
+  if (!id) return; // página neutra (sem p=)
+  const arr = await supaGET(
+    `links_aprovacao?id=eq.${encodeURIComponent(id)}&select=id,order_id,order_number,produtos`
+  );
+  linkData = arr[0];
+  if (!linkData) throw new Error("Link não encontrado");
+
+  fila = Array.isArray(linkData.produtos) ? linkData.produtos : [];
+  if (!fila.length) throw new Error("Nenhum produto no link");
+
+  atual = 0;
+  const p = fila[0];
+  $orderNum.textContent = linkData.order_number ?? "—";
+  $prodNome.textContent = p?.nome ?? "—";
+  $prodSKU.textContent  = p?.sku  ?? "—";
+}
+
+/* ========= Geração de prévia ========= */
 async function gerarPrevia() {
-  const file = document.querySelector("#logo").files[0];
-  const texto = document.querySelector("#texto").value.trim();
-  const fonteSel = document.querySelector("#fonte").value || "Arial";
+  const file   = document.querySelector("#logo").files[0];
+  const texto  = document.querySelector("#texto").value.trim();
+  const fonte  = document.querySelector("#fonte").value || "Arial";
   if (!file) return alert("Envie o logo primeiro");
 
-  const fd = new FormData();
-  fd.append("logo", file);
-  fd.append("texto", texto);
-  fd.append("fonte", fonteSel);
-  fd.append("sku", "3017D");
-  fd.append("cor", "Azul");
+  // produto atual vindo do link curto
+  const prod = fila[atual] || {};
+  const SKU  = prod.sku || "";
+  const COR  = prod.cor || "";
 
-  const r = await fetch(WEBHOOK_PREVIEW, { method: "POST", body: fd });
-  const data = await r.json();
-  const preview = Array.isArray(data) ? data[0] : data;
+  busy(true);
+  try {
+    const fd = new FormData();
+    fd.append("logo", file);
+    fd.append("texto", texto);
+    fd.append("fonte", fonte);
+    fd.append("sku", SKU);
+    fd.append("cor", COR);
 
-  state.baseId = preview.mockup_public_id;
-  state.logoId = preview.logo_public_id;
-  state.textoVal = texto;
-  state.fonte = fonteSel;
-  state.hasText = texto !== "";
+    const r = await fetch(WEBHOOK_PREVIEW, { method: "POST", body: fd });
+    const data = await r.json();
+    const preview = Array.isArray(data) ? data[0] : data;
 
-  // Quando a imagem carregar: atualiza dimensões naturais e posiciona boxes
-  img.onload = () => {
-    state.natural = { w: img.naturalWidth, h: img.naturalHeight };
-    const c = centerDefaults(img, state.natural);
-    state.logo = c.logo;
-    state.text = c.text;
-    positionBoxes();
-    document.querySelector("#preview-block").style.display = "block";
-  };
+    // IDs vindos do webhook OU extraídos da preview_url
+    state.baseId   = preview?.mockup_public_id || extractBaseId(preview?.preview_url) || state.baseId;
+    state.logoId   = preview?.logo_public_id   || extractLogoId(preview?.preview_url) || state.logoId;
+    state.textoVal = texto;
+    state.fonte    = fonte;
+    state.hasText  = !!texto;
 
-  refresh();
+    // Quando a imagem carregar, medimos e centralizamos as caixas
+    img.onload = () => {
+      state.natural = { w: img.naturalWidth, h: img.naturalHeight };
+      const c = centerDefaults(img, state.natural);
+      state.logo = c.logo;
+      state.text = c.text;
+      document.querySelector("#preview-block").style.display = "block";
+      positionBoxes();
+    };
+
+    refresh(); // atualiza a imagem/URL
+  } catch (e) {
+    console.error(e);
+    alert("Falha ao gerar prévia. Tente novamente.");
+  } finally {
+    busy(false);
+  }
 }
 
-// Eventos
+/* ========= Eventos ========= */
 document.querySelector("#btn-gerar").addEventListener("click", gerarPrevia);
 document.querySelector("#rot-logo").addEventListener("click", () => {
   state.logoRot = ((state.logoRot || 0) + 90) % 360; refresh();
@@ -97,4 +173,15 @@ document.querySelector("#reset").addEventListener("click", () => {
   state.logo = c.logo; state.text = c.text; refresh();
 });
 
+/* ========= Drag/Resize ========= */
 enableDragAndResize(state, () => { refresh(); positionBoxes(); });
+
+/* ========= Boot ========= */
+(async () => {
+  try { await carregarLinkCurto(); }
+  catch (e) {
+    console.error(e);
+    const err = document.querySelector("#err");
+    if (err) err.textContent = e.message || "Erro ao carregar link.";
+  }
+})();
