@@ -10,13 +10,13 @@ const WEBHOOK_PREVIEW   = CFG.WEBHOOK_PREVIEW;
 const WEBHOOK_APROVACAO = CFG.WEBHOOK_APROVACAO;
 
 /* ========= DOM ========= */
-const img       = document.querySelector("#canvas");
-const $orderNum = document.querySelector("#order-number");   // painel
-const $prodNome = document.querySelector("#produto-nome");
-const $prodSKU  = document.querySelector("#produto-sku");
-const $headline = document.querySelector("#headline-order"); // topbar "Pedido #—"
-const $overlay  = document.querySelector("#overlay");
-const $designProgress = document.querySelector("#design-progress");
+const img        = document.querySelector("#canvas");
+const $orderNum  = document.querySelector("#order-number");    // painel
+const $prodNome  = document.querySelector("#produto-nome");
+const $prodSKU   = document.querySelector("#produto-sku");
+const $headline  = document.querySelector("#headline-order");  // topbar "Pedido #—"
+const $designPg  = document.querySelector("#design-progress"); // (1/2) no título
+const $overlay   = document.querySelector("#overlay");
 const busy = (on) => { if ($overlay) $overlay.hidden = !on; };
 
 /* ========= Estado ========= */
@@ -38,6 +38,18 @@ let state = {
   textRot: 0,
 };
 
+// alvo selecionado (para os 4 botões)
+let active = "logo"; // "logo" | "texto"
+
+// debounce para não disparar centenas de requests ao mover/redimensionar
+const debounce = (fn, ms = 120) => {
+  let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); };
+};
+const refreshDebounced = debounce(() => {
+  const url = buildURL(state);
+  if (url) img.src = url;
+}, 120);
+
 /* ========= Helpers ========= */
 function getLinkId() {
   const u = new URL(location.href);
@@ -56,39 +68,39 @@ async function supaGET(pathAndQuery) {
   return r.json();
 }
 
+// extrai o public_id COMPLETO (com pastas) da preview_url
 function extractBaseId(url) {
   try {
     const u = new URL(url);
-    // Pega tudo após /image/upload/
     const after = u.pathname.split("/image/upload/")[1] || "";
     const seg = after.split("/").filter(Boolean);
-
-    // Remover o primeiro(s) segmento(s) que sejam transformação (tem vírgula)
-    // ou versão (ex.: v1697571027)
-    while (seg.length && (seg[0].includes(",") || /^v\d+$/.test(seg[0]))) {
-      seg.shift();
-    }
-
-    // O restante são as pastas + public_id (sem extensão)
+    while (seg.length && (seg[0].includes(",") || /^v\d+$/.test(seg[0]))) seg.shift();
     let pub = seg.join("/");
-    pub = pub.replace(/\.[a-z0-9]+$/i, ""); // tira .jpg/.png se houver
+    pub = pub.replace(/\.[a-z0-9]+$/i, "");
     return pub;
-  } catch {
-    return "";
-  }
+  } catch { return ""; }
 }
-
 function extractLogoId(url) {
   const m = (url || "").match(/\/l_([^,\/]+)/);
   return m ? m[1].replace(/:/g, "/") : "";
 }
 
-function progressLabel() {
-  return `(${atual + 1}/${Math.max(1, fila.length)})`;
+// cor preferencial: "variante" dos produtos em links_aprovacao
+function pickCor(prod) {
+  const v =
+    (prod?.variante ??
+     prod?.cor ??
+     prod?.color ??
+     prod?.cor_escolhida ??
+     prod?.variacao ??
+     "").toString().trim();
+  if (v) return v;
+  const qs = new URLSearchParams(location.search);
+  return (qs.get("cor") || "").trim();
 }
-function updateDesignProgress() {
-  if ($designProgress) $designProgress.textContent = ` ${progressLabel()}`;
-}
+
+function progressLabel() { return `(${atual + 1}/${Math.max(1, fila.length)})`; }
+function updateDesignProgress(){ if ($designPg) $designPg.textContent = ` ${progressLabel()}`; }
 
 /* ========= Desenho ========= */
 function positionBoxes() {
@@ -110,6 +122,20 @@ function positionBoxes() {
   if (state.textoVal.trim() !== "") setBox("#box-texto", state.text, "#38bdf8");
 }
 
+// escolher alvo tocando nas caixas
+function wireSelection(){
+  const $logo  = document.querySelector("#box-logo");
+  const $texto = document.querySelector("#box-texto");
+  const setActive = (who) => {
+    active = who;
+    $logo?.classList.toggle("active", who === "logo");
+    $texto?.classList.toggle("active", who === "texto");
+  };
+  $logo?.addEventListener("click",  () => setActive("logo"));
+  $texto?.addEventListener("click", () => setActive("texto"));
+  setActive("logo");
+}
+
 function refresh() {
   const url = buildURL(state);
   if (!url) return;
@@ -126,10 +152,8 @@ function preencherCabecalhoCom(prod) {
 }
 
 function mostrarProduto(i) {
-  updateDesignProgress();
   const prod = fila[i];
   if (!prod) {
-    // acabou a fila
     const $panel = document.querySelector(".panel");
     const $done  = document.querySelector("#done");
     if ($panel) $panel.style.display = "none";
@@ -150,6 +174,7 @@ function mostrarProduto(i) {
   state.logoRot = 0; state.textRot = 0;
 
   preencherCabecalhoCom(prod);
+  updateDesignProgress();
 }
 
 /* ========= Link curto → cabeçalho e fila ========= */
@@ -166,31 +191,11 @@ async function carregarLinkCurto() {
   if (!fila.length) throw new Error("Nenhum produto no link");
 
   atual = 0;
-  updateDesignProgress();
   preencherCabecalhoCom(fila[0]);
-
+  updateDesignProgress();
 }
 
 /* ========= Geração de prévia ========= */
-function pickCor(prod) {
-  // prioridade: campo "variante" que vem da tabela links_aprovacao
-  const v =
-    (prod?.variante ??           // <-- novo
-     prod?.cor ?? 
-     prod?.color ?? 
-     prod?.cor_escolhida ?? 
-     prod?.variacao ?? "")
-    .toString()
-    .trim();
-
-  if (v) return v;
-
-  // fallback de compatibilidade: ?cor= na URL
-  const qs = new URLSearchParams(location.search);
-  return (qs.get("cor") || "").trim();
-}
-
-
 async function gerarPrevia() {
   const file   = document.querySelector("#logo")?.files?.[0];
   const texto  = document.querySelector("#texto")?.value?.trim() || "";
@@ -214,10 +219,7 @@ async function gerarPrevia() {
     fd.append("cor", COR);
 
     const r = await fetch(WEBHOOK_PREVIEW, { method: "POST", body: fd });
-    if (!r.ok) {
-      const t = await r.text();
-      throw new Error(t || `HTTP ${r.status}`);
-    }
+    if (!r.ok) { const t = await r.text(); throw new Error(t || `HTTP ${r.status}`); }
     const data = await r.json();
     const preview = Array.isArray(data) ? data[0] : data;
 
@@ -272,15 +274,13 @@ async function aprovarProdutoAtual() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
     });
-    if (!r.ok) {
-      const t = await r.text();
-      throw new Error(t || `HTTP ${r.status}`);
-    }
+    if (!r.ok) { const t = await r.text(); throw new Error(t || `HTTP ${r.status}`); }
+
     // próximo produto
     atual += 1;
-    updateDesignProgress();
     if (atual < fila.length) {
       preencherCabecalhoCom(fila[atual]);
+      updateDesignProgress();
       mostrarProduto(atual);
     } else {
       mostrarProduto(atual); // encerra e mostra #done
@@ -295,26 +295,53 @@ async function aprovarProdutoAtual() {
 
 /* ========= Eventos ========= */
 document.querySelector("#btn-gerar")?.addEventListener("click", gerarPrevia);
-document.querySelector("#rot-logo")?.addEventListener("click", () => {
-  state.logoRot = ((state.logoRot || 0) + 90) % 360; refresh();
+
+// NOVOS 4 BOTÕES (agem no item selecionado: LOGO/TEXTO)
+function currentObj(){ return active === "logo" ? state.logo : state.text; }
+function clampBox(o){
+  o.w = Math.max(20, Math.min(state.natural.w, o.w));
+  o.x = Math.max(0, Math.min(state.natural.w - 40, o.x));
+  o.y = Math.max(0, Math.min(state.natural.h - 40, o.y));
+}
+
+document.querySelector("#btn-rot-cw")?.addEventListener("click", () => {
+  if (active === "logo") state.logoRot = (state.logoRot + 90) % 360;
+  else                   state.textRot = (state.textRot + 90) % 360;
+  refreshDebounced(); positionBoxes();
 });
-document.querySelector("#rot-texto")?.addEventListener("click", () => {
-  state.textRot = ((state.textRot || 0) + 90) % 360; refresh();
+document.querySelector("#btn-rot-ccw")?.addEventListener("click", () => {
+  if (active === "logo") state.logoRot = (state.logoRot + 270) % 360; // -90
+  else                   state.textRot = (state.textRot + 270) % 360;
+  refreshDebounced(); positionBoxes();
 });
+document.querySelector("#btn-inc")?.addEventListener("click", () => {
+  const step = Math.round(state.natural.w * 0.04); // +4%
+  const o = currentObj(); o.w += step; clampBox(o);
+  refreshDebounced(); positionBoxes();
+});
+document.querySelector("#btn-dec")?.addEventListener("click", () => {
+  const step = Math.round(state.natural.w * 0.04); // -4%
+  const o = currentObj(); o.w -= step; clampBox(o);
+  refreshDebounced(); positionBoxes();
+});
+
+// (se o HTML ainda tiver "reset", mantemos opcional)
 document.querySelector("#reset")?.addEventListener("click", () => {
   const c = centerDefaults(img, state.natural);
   state.logo = c.logo; state.text = c.text; refresh();
 });
+
 document.querySelector("#aprovar")?.addEventListener("click", aprovarProdutoAtual);
 
 /* ========= Drag/Resize ========= */
-enableDragAndResize(state, () => { refresh(); positionBoxes(); });
+enableDragAndResize(state, () => { refreshDebounced(); positionBoxes(); });
 
 /* ========= Boot ========= */
 (async () => {
   try {
     await carregarLinkCurto();
-    mostrarProduto(0); // exibe o 1º item e já pinta topbar/painel
+    mostrarProduto(0);
+    wireSelection();
   } catch (e) {
     console.error(e);
     const err = document.querySelector("#err");
