@@ -10,6 +10,16 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
+app.use((req, res, next) => {
+  res.locals.SUPABASE_URL      = process.env.SUPABASE_URL || "";
+  res.locals.SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || "";
+  res.locals.WEBHOOK_PREVIEW   = process.env.WEBHOOK_PREVIEW || "";
+  res.locals.WEBHOOK_APROVACAO = process.env.WEBHOOK_APROVACAO || "";
+  res.locals.CLOUDINARY_CLOUD  = process.env.CLOUDINARY_CLOUD || "dslzqtajk";
+  next();
+});
+
+
 // Pastas
 const publicDir = path.join(__dirname, "public");
 const srcDir = path.join(publicDir, "src");
