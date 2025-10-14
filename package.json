@@ -2,10 +2,15 @@
   "name": "aprovacao-design",
   "private": true,
   "version": "1.0.0",
+  "type": "module",
   "scripts": {
-    "start": "serve -s public -l 3000"
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
   },
   "dependencies": {
-    "serve": "^14.2.3"
+    "express": "^4.21.0",
+    "nunjucks": "^3.2.4"
   }
 }
