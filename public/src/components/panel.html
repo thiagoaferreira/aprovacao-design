@@ -56,13 +56,16 @@
         </div>
 
         <div class="tools">
-          <h4>Ajustes rápidos</h4>
-          <div class="group stack-8" style="margin-bottom:8px">
-            <button class="btn btn-outline" id="rot-logo">🔄 Rotacionar LOGO 90°</button>
-            <button class="btn btn-outline" id="rot-texto">🔄 Rotacionar TEXTO 90°</button>
-            <button class="btn btn-outline" id="reset">↺ Resetar posições</button>
+        <h4>Ajustes rápidos</h4>
+          <div class="edit-toolbar">
+            <button id="btn-rot-ccw" type="button" aria-label="Girar 90° anti-horário">⟲</button>
+            <button id="btn-rot-cw"  type="button" aria-label="Girar 90° horário">⟲⟲</button>
+            <button id="btn-dec"     type="button" aria-label="Diminuir">−</button>
+            <button id="btn-inc"     type="button" aria-label="Aumentar">＋</button>
           </div>
-          <div class="group stack-8">
+          <p class="edit-hint">Toque na etiqueta <b>LOGO</b> ou <b>TEXTO</b> para escolher o que editar.</p>
+        
+          <div class="group stack-8" style="margin-top:8px">
             <button class="btn btn-orange" id="aprovar">✅ Aprovar este produto</button>
           </div>
         </div>
