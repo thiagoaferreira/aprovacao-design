@@ -16,6 +16,7 @@ const $prodNome = document.querySelector("#produto-nome");
 const $prodSKU  = document.querySelector("#produto-sku");
 const $headline = document.querySelector("#headline-order"); // topbar "Pedido #—"
 const $overlay  = document.querySelector("#overlay");
+const $designProgress = document.querySelector("#design-progress");
 const busy = (on) => { if ($overlay) $overlay.hidden = !on; };
 
 /* ========= Estado ========= */
@@ -66,6 +67,9 @@ function extractLogoId(url) {
 function progressLabel() {
   return `(${atual + 1}/${Math.max(1, fila.length)})`;
 }
+function updateDesignProgress() {
+  if ($designProgress) $designProgress.textContent = ` ${progressLabel()}`;
+}
 
 /* ========= Desenho ========= */
 function positionBoxes() {
@@ -103,6 +107,7 @@ function preencherCabecalhoCom(prod) {
 }
 
 function mostrarProduto(i) {
+  updateDesignProgress();
   const prod = fila[i];
   if (!prod) {
     // acabou a fila
@@ -142,7 +147,9 @@ async function carregarLinkCurto() {
   if (!fila.length) throw new Error("Nenhum produto no link");
 
   atual = 0;
+  updateDesignProgress();
   preencherCabecalhoCom(fila[0]);
+
 }
 
 /* ========= Geração de prévia ========= */
@@ -243,6 +250,7 @@ async function aprovarProdutoAtual() {
     }
     // próximo produto
     atual += 1;
+    updateDesignProgress();
     if (atual < fila.length) {
       preencherCabecalhoCom(fila[atual]);
       mostrarProduto(atual);
