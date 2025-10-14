@@ -1,3 +1,4 @@
+// js/drag.js
 import { buildURL } from "./preview.js";
 
 export function enableDragAndResize(state, refresh) {
@@ -44,7 +45,7 @@ export function enableDragAndResize(state, refresh) {
 
     const obj = state[active];
     if (resizing) {
-      obj.w = Math.max(20, start.w + dx);
+      obj.w = Math.max(20, start.w + ix); // <-- corrigido
     } else {
       obj.x = Math.max(0, Math.min(state.natural.w - 40, start.X + ix));
       obj.y = Math.max(0, Math.min(state.natural.h - 40, start.Y + iy));
