@@ -102,7 +102,7 @@ function refresh() {
 function preencherCabecalhoCom(prod) {
   if ($headline) $headline.textContent = `Pedido #${linkData?.order_number ?? "—"}`;
   if ($orderNum) $orderNum.textContent = linkData?.order_number ?? "—";
-  if ($prodNome) $prodNome.textContent = prod?.nome ? `${prod.nome} ${progressLabel()}` : progressLabel();
+  if ($prodNome) $prodNome.textContent = prod?.nome ?? "—";
   if ($prodSKU)  $prodSKU.textContent  = prod?.sku  ?? "—";
 }
 
