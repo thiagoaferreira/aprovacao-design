@@ -57,8 +57,27 @@ async function supaGET(pathAndQuery) {
 }
 
 function extractBaseId(url) {
-  try { return new URL(url).pathname.split("/").pop() || ""; } catch { return ""; }
+  try {
+    const u = new URL(url);
+    // Pega tudo após /image/upload/
+    const after = u.pathname.split("/image/upload/")[1] || "";
+    const seg = after.split("/").filter(Boolean);
+
+    // Remover o primeiro(s) segmento(s) que sejam transformação (tem vírgula)
+    // ou versão (ex.: v1697571027)
+    while (seg.length && (seg[0].includes(",") || /^v\d+$/.test(seg[0]))) {
+      seg.shift();
+    }
+
+    // O restante são as pastas + public_id (sem extensão)
+    let pub = seg.join("/");
+    pub = pub.replace(/\.[a-z0-9]+$/i, ""); // tira .jpg/.png se houver
+    return pub;
+  } catch {
+    return "";
+  }
 }
+
 function extractLogoId(url) {
   const m = (url || "").match(/\/l_([^,\/]+)/);
   return m ? m[1].replace(/:/g, "/") : "";
