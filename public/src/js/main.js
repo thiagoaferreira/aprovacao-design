@@ -38,6 +38,8 @@ let state = {
   textRot: 0,
 };
 
+let centeredOnce = false; // centraliza só na 1ª imagem
+
 // alvo selecionado (para os 4 botões)
 let active = "logo"; // "logo" | "texto"
 
@@ -230,13 +232,19 @@ async function gerarPrevia() {
     state.hasText  = !!texto;
 
     img.onload = () => {
+    // centraliza apenas na primeira vez
+    if (!centeredOnce) {
       state.natural = { w: img.naturalWidth, h: img.naturalHeight };
       const c = centerDefaults(img, state.natural);
-      state.logo = c.logo; state.text = c.text;
-      const $prev = document.querySelector("#preview-block");
-      if ($prev) $prev.style.display = "block";
-      positionBoxes();
-    };
+      state.logo = c.logo;
+      state.text = c.text;
+      centeredOnce = true;
+    }
+    // nas próximas cargas: mantém posições e só redesenha as caixas
+    const $prev = document.querySelector("#preview-block");
+    if ($prev) $prev.style.display = "block";
+    positionBoxes();
+  };
 
     refresh();
   } catch (e) {
