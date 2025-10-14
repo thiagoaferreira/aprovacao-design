@@ -245,6 +245,8 @@ document.querySelector("#reset").addEventListener("click", () => {
   const c = centerDefaults(img, state.natural);
   state.logo = c.logo; state.text = c.text; refresh();
 });
+document.querySelector("#aprovar").addEventListener("click", aprovarProdutoAtual);
+
 
 /* ========= Drag/Resize ========= */
 enableDragAndResize(state, () => { refresh(); positionBoxes(); });
