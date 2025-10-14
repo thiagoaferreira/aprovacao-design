@@ -11,6 +11,15 @@
   <body>
     {% include "src/components/panel.html" %}
     {% include "src/components/modal.html" %}
+    <script>
+      window.CONFIG = {
+        SUPABASE_URL: "{{ SUPABASE_URL | default('') }}",
+        SUPABASE_ANON_KEY: "{{ SUPABASE_ANON_KEY | default('') }}",
+        WEBHOOK_PREVIEW: "{{ WEBHOOK_PREVIEW | default('https://gama-laser-n8n.gtyipj.easypanel.host/webhook-test/gerar-preview-mockup') }}",
+        WEBHOOK_APROVACAO: "{{ WEBHOOK_APROVACAO | default('https://gama-laser-n8n.gtyipj.easypanel.host/webhook/aprovar-mockup') }}",
+        CLOUDINARY_CLOUD: "{{ CLOUDINARY_CLOUD | default('dslzqtajk') }}"
+      };
+    </script>
     <script type="module" src="/js/main.js"></script>pt>
 
   </body>
