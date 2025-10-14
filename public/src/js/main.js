@@ -154,14 +154,23 @@ async function carregarLinkCurto() {
 
 /* ========= Geração de prévia ========= */
 function pickCor(prod) {
-  // tenta várias chaves comuns
-  const v = (prod?.cor ?? prod?.color ?? prod?.cor_escolhida ?? prod?.variacao ?? "").toString().trim();
+  // prioridade: campo "variante" que vem da tabela links_aprovacao
+  const v =
+    (prod?.variante ??           // <-- novo
+     prod?.cor ?? 
+     prod?.color ?? 
+     prod?.cor_escolhida ?? 
+     prod?.variacao ?? "")
+    .toString()
+    .trim();
+
   if (v) return v;
-  // fallback: se o link foi aberto com ?cor=... por compatibilidade
+
+  // fallback de compatibilidade: ?cor= na URL
   const qs = new URLSearchParams(location.search);
-  const compat = (qs.get("cor") || "").trim();
-  return compat;
+  return (qs.get("cor") || "").trim();
 }
+
 
 async function gerarPrevia() {
   const file   = document.querySelector("#logo")?.files?.[0];
