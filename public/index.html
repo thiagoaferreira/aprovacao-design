@@ -20,6 +20,13 @@
         CLOUDINARY_CLOUD: "{{ CLOUDINARY_CLOUD | default('dslzqtajk') }}"
       };
     </script>
+        <!-- Overlay de progresso -->
+    <div id="overlay" class="overlay" hidden>
+      <div class="overlay-modal">
+        <div class="spinner" aria-hidden="true"></div>
+        <p>Gerando prévia…</p>
+      </div>
+    </div>
     <script type="module" src="/js/main.js"></script>
 
   </body>
