@@ -62,6 +62,79 @@ function extractLogoId(url) {
   return m ? m[1].replace(/:/g, "/") : "";
 }
 
+/* ========= Aprovação / navegação entre produtos ========= */
+const $panel = document.querySelector(".panel");
+const $done  = document.querySelector("#done");
+
+function preencherCabecalhoCom(prod) {
+  $orderNum.textContent = linkData?.order_number ?? "—";
+  $prodNome.textContent = prod?.nome ?? "—";
+  $prodSKU.textContent  = prod?.sku  ?? "—";
+}
+
+function mostrarProduto(i) {
+  const prod = fila[i];
+  if (!prod) {
+    // acabou a fila
+    if ($panel) $panel.style.display = "none";
+    if ($done)  $done.style.display  = "block";
+    return;
+  }
+  // limpa formulário e preview
+  document.querySelector("#logo").value = "";
+  document.querySelector("#texto").value = "";
+  document.querySelector("#preview-block").style.display = "none";
+  state.baseId = ""; state.logoId = "";
+  state.textoVal = ""; state.hasText = false;
+  state.logoRot = 0; state.textRot = 0;
+
+  preencherCabecalhoCom(prod);
+}
+
+async function aprovarProdutoAtual() {
+  const prod = fila[atual];
+  if (!prod) return;
+
+  // monta payload pra sua automação
+  const payload = {
+    order_id:     linkData.order_id,
+    order_number: linkData.order_number,
+    sku:  prod.sku,
+    cor:  prod.cor,
+    fonte: state.fonte,
+    texto: state.textoVal,
+    base_public_id: state.baseId,
+    logo_public_id: state.logoId,
+    posicoes: {
+      logo:  { x: Math.round(state.logo.x),  y: Math.round(state.logo.y),  w: Math.round(state.logo.w),  rot: state.logoRot || 0 },
+      texto: { x: Math.round(state.text.x),  y: Math.round(state.text.y),  w: Math.round(state.text.w),  rot: state.textRot || 0 }
+    }
+  };
+
+  busy(true);
+  try {
+    const r = await fetch(WEBHOOK_APROVACAO, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    if (!r.ok) {
+      const t = await r.text();
+      throw new Error(t || `HTTP ${r.status}`);
+    }
+
+    // avançar na fila
+    atual += 1;
+    mostrarProduto(atual);
+  } catch (e) {
+    alert("Não foi possível concluir a aprovação agora.");
+    console.error(e);
+  } finally {
+    busy(false);
+  }
+}
+
+
 /* ========= Desenho ========= */
 function positionBoxes() {
   const rect = img.getBoundingClientRect();
@@ -178,10 +251,13 @@ enableDragAndResize(state, () => { refresh(); positionBoxes(); });
 
 /* ========= Boot ========= */
 (async () => {
-  try { await carregarLinkCurto(); }
-  catch (e) {
+  try {
+    await carregarLinkCurto();
+    mostrarProduto(0); // exibe o 1º produto da fila
+  } catch (e) {
     console.error(e);
     const err = document.querySelector("#err");
     if (err) err.textContent = e.message || "Erro ao carregar link.";
   }
 })();
+
