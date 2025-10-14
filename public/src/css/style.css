@@ -175,3 +175,9 @@ body {
 }
 .edit-toolbar button:active{ transform: scale(0.98); }
 .edit-hint{ font-size: 12px; opacity: .75; margin: 4px 0 0; }
+
+/* mantém LOGO/TEXTO dentro da área e reduz as etiquetas */
+#editorBoard, .editor-board, #previewBoard, #preview-area { position: relative; overflow: hidden; }
+.draggable { position: absolute; touch-action: none; }
+.draggable .label, .draggable .badge { font-size: 11px; padding: 2px 6px; }
+.is-selected { outline: 2px dashed #14a; outline-offset: 2px; }
