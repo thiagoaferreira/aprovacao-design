@@ -1,3 +1,4 @@
+// js/preview.js
 export function centerDefaults(img, natural) {
   const baseCenterX = natural.w / 2;
   const baseCenterY = natural.h / 2;
@@ -7,11 +8,16 @@ export function centerDefaults(img, natural) {
   };
 }
 
-export function buildURL({ cloud, baseId, logoId, logo, text, fonte, textoVal, hasText }) {
+export function buildURL({ cloud, baseId, logoId, logo, text, fonte, textoVal, hasText, logoRot = 0, textRot = 0 }) {
   if (!cloud || !baseId) return '';
 
-  const logoParts = [`l_${logoId}`, 'e_bgremoval', `w_${Math.max(10, Math.round(logo.w))}`, 
-                     'g_north_west', `x_${Math.round(logo.x)}`, `y_${Math.round(logo.y)}`, 'fl_layer_apply'];
+  const logoParts = [
+    `l_${logoId}`, 'e_bgremoval',
+    `w_${Math.max(10, Math.round(logo.w))}`,
+    `a_${Math.round(logoRot) || 0}`,
+    'g_north_west', `x_${Math.round(logo.x)}`, `y_${Math.round(logo.y)}`,
+    'fl_layer_apply'
+  ];
 
   let url = `https://res.cloudinary.com/${cloud}/image/upload/${logoParts.join(',')}`;
 
@@ -19,8 +25,10 @@ export function buildURL({ cloud, baseId, logoId, logo, text, fonte, textoVal, h
     const enc = encodeURIComponent(textoVal);
     const tParts = [
       `l_text:${fonte}_${Math.max(8, Math.round(text.w))}:${enc}`,
-      'co_rgb:000000', 'g_north_west',
-      `x_${Math.round(text.x)}`, `y_${Math.round(text.y)}`, 'fl_layer_apply'
+      'co_rgb:000000',
+      `a_${Math.round(textRot) || 0}`,
+      'g_north_west', `x_${Math.round(text.x)}`, `y_${Math.round(text.y)}`,
+      'fl_layer_apply'
     ];
     url += `/${tParts.join(',')}`;
   }
