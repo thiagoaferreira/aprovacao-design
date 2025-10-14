@@ -11,13 +11,20 @@ export function centerDefaults(img, natural) {
 export function buildURL({ cloud, baseId, logoId, logo, text, fonte, textoVal, hasText, logoRot = 0, textRot = 0 }) {
   if (!cloud || !baseId) return '';
 
-  const logoParts = [
-    `l_${logoId}`, 'e_bgremoval',
-    `w_${Math.max(10, Math.round(logo.w))}`,
-    `a_${Math.round(logoRot) || 0}`,
-    'g_north_west', `x_${Math.round(logo.x)}`, `y_${Math.round(logo.y)}`,
-    'fl_layer_apply'
-  ];
+// antes de montar logoParts:
+const logoLayerId = (logoId || "").replace(/\//g, ":"); // pasta -> ":" para Cloudinary
+
+const logoParts = [
+  `l_${logoLayerId}`,
+  "e_bgremoval",
+  `w_${Math.max(10, Math.round(logo.w))}`,
+  `a_${Math.round(logoRot) || 0}`,
+  "g_north_west",
+  `x_${Math.round(logo.x)}`,
+  `y_${Math.round(logo.y)}`,
+  "fl_layer_apply"
+];
+
 
   let url = `https://res.cloudinary.com/${cloud}/image/upload/${logoParts.join(',')}`;
 
