@@ -119,3 +119,18 @@ body {
 
 .done { display: none; padding: 48px 18px; text-align: center; }
 .done h2 { font-size: 26px; margin: 0 0 10px; }
+
+/* ----- Ajustes de espaçamento ----- */
+.panel-body { padding: 18px; }         /* respiro interno do painel */
+.preview-block { margin-top: 16px; }   /* espaço acima do bloco de prévia */
+.wrap { padding: 0 20px; }             /* respiro lateral na página */
+
+/* (Opcional) melhora o espaço de cabeçalho em telas grandes */
+@media (min-width: 1024px) {
+  .topbar-inner { padding-left: 24px; padding-right: 24px; }
+  .wrap { padding: 0 24px; }
+}
+
+/* (Opcional) mantém a área do mockup quadrada, evitando “pulos” de layout */
+.canvas-wrap { aspect-ratio: 1 / 1; }
+
