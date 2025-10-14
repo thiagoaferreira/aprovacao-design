@@ -42,6 +42,17 @@ app.use(express.static(publicDir, { index: false, extensions: ["html"] }));
 app.get("*", (_req, res) => res.render("index.html"));
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, "0.0.0.0", () => {
+// substitua a linha do app.listen por:
+const server = app.listen(PORT, "0.0.0.0", () => {
   console.log(`✅ Server listening on http://0.0.0.0:${PORT}`);
 });
+
+// encerramento limpo (ajuda no deploy rolling)
+process.on("SIGTERM", () => {
+  console.log("🛑 SIGTERM recebido, encerrando com graça…");
+  server.close(() => {
+    console.log("✅ HTTP server fechado"); process.exit(0);
+  });
+});
+process.on("SIGINT", () => process.emit("SIGTERM"));
+
