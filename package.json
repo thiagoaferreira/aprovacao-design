@@ -1,13 +1,11 @@
 {
-  "name": "aprovacao-mockup",
+  "name": "aprovacao-design",
+  "private": true,
   "version": "1.0.0",
-  "type": "module",
-  "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "serve -s public -l 3000"
   },
   "dependencies": {
-    "express": "^4.19.2",
-    "nunjucks": "^3.2.4"
+    "serve": "^14.2.3"
   }
 }
