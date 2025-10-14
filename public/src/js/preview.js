@@ -1,79 +1,67 @@
 // public/js/preview.js
-// Corrige: (1) posicionamento relativo ao board, (2) drag com limites,
-// (3) troca de seleção entre LOGO e TEXTO, (4) cálculo correto para Cloudinary.
+// Lazy-init: só inicializa quando o DOM do preview (board) existe.
+// Corrige: posicionamento relativo ao board, drag com limites, seleção LOGO/TEXTO,
+// e monta a URL Cloudinary usando coordenadas do board.
 
 (() => {
-  // Pequena ajudante para achar elementos com fallback (não quebra seu HTML atual)
-  const $ = (sels) => {
-    for (const s of sels) {
-      const el = document.querySelector(s);
-      if (el) return el;
-    }
-    return null;
+  // API "stub" para não quebrar nada antes da inicialização
+  if (!window.__previewAPI) {
+    window.__previewAPI = { updatePreview: () => {}, select: () => {}, ready: false };
+  }
+
+  const SELECTED_CLASS = 'is-selected';
+  let inited = false;
+  let cleanupObserver = null;
+
+  // Utilidades
+  const $first = (arr) => arr.find(Boolean) || null;
+  const Q = (sels) => $first(sels.map((s) => document.querySelector(s)));
+  const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
+  const num = (v, fb) => {
+    const n = Number(v);
+    return Number.isFinite(n) ? n : fb;
   };
 
-  // Seletores tolerantes a variações do seu HTML
-  const board = $([
-    '#editorBoard', '.editor-board', '#previewBoard', '#preview-area .board', '#preview-area'
-  ]);
-  const mockupImg = $([
-    '#mockupImg', '#mockup-image', '#preview-area img.mockup', '#preview-area img'
-  ]);
-  const ovLogo = $([
-    '#drag-logo', '.ov-logo', '.draggable[data-el="logo"]', '.draggable.logo'
-  ]);
-  const ovText = $([
-    '#drag-text', '.ov-text', '.draggable[data-el="text"]', '.draggable.text'
-  ]);
+  function resolveEls() {
+    const board = Q(['#editorBoard', '.editor-board', '#previewBoard', '#preview-area']);
+    const mockupImg =
+      Q(['#mockupImg', '#mockup-image', '#preview-area img.mockup', '#preview-area img']) || null;
+    const ovLogo = Q(['#drag-logo', '.ov-logo', '.draggable[data-el="logo"]', '.draggable.logo']);
+    const ovText = Q(['#drag-text', '.ov-text', '.draggable[data-el="text"]', '.draggable.text']);
 
-  if (!board || !mockupImg) return; // nada a fazer se a prévia ainda não foi montada
-
-  // Garante que os overlays são filhos do board e ficam dentro dele
-  board.style.position = board.style.position || 'relative';
-  board.style.overflow = board.style.overflow || 'hidden';
-
-  const overlays = [ovLogo, ovText].filter(Boolean);
-  overlays.forEach((el) => {
-    if (el.parentElement !== board) board.appendChild(el);
-    el.style.position = 'absolute';
-    el.style.touchAction = 'none';
-    // Se nunca recebeu posição, joga para perto do centro
-    if (!el.style.left) {
-      const left = (board.clientWidth - el.offsetWidth) / 2;
-      const top = (board.clientHeight - el.offsetHeight) / 2;
-      el.style.left = `${Math.max(0, left)}px`;
-      el.style.top  = `${Math.max(0, top)}px`;
-    }
-  });
-
-  // Estado de seleção (para os botões agirem no item certo)
-  let selected = ovLogo || ovText;
-  const SELECTED_CLASS = 'is-selected';
-  function select(el) {
-    if (!el) return;
-    selected?.classList?.remove(SELECTED_CLASS);
-    selected = el;
-    el.classList?.add(SELECTED_CLASS);
+    return { board, mockupImg, ovLogo, ovText };
   }
-  ovLogo?.addEventListener('pointerdown', () => select(ovLogo));
-  ovText?.addEventListener('pointerdown', () => select(ovText));
 
-  // Drag com limites do board
-  function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+  function ensureRelativeBoard(board) {
+    if (!board) return;
+    const style = board.style;
+    if (!style.position || style.position === 'static') style.position = 'relative';
+    if (!style.overflow) style.overflow = 'hidden';
+  }
 
-  function makeDraggable(el) {
+  function makeDraggable(board, el, onMove) {
     if (!el) return;
 
     let startX = 0, startY = 0, startLeft = 0, startTop = 0, dragging = false;
 
+    el.style.position = 'absolute';
+    el.style.touchAction = 'none';
+
+    // posição inicial se vazia
+    if (!el.style.left) {
+      const l = (board.clientWidth - el.offsetWidth) / 2;
+      const t = (board.clientHeight - el.offsetHeight) / 2;
+      el.style.left = `${Math.max(0, l)}px`;
+      el.style.top = `${Math.max(0, t)}px`;
+    }
+
     el.addEventListener('pointerdown', (e) => {
-      select(el);
       dragging = true;
       el.setPointerCapture?.(e.pointerId);
-      const rectEl = el.getBoundingClientRect();
-      const rectBd = board.getBoundingClientRect();
-      startLeft = rectEl.left - rectBd.left;
-      startTop  = rectEl.top  - rectBd.top;
+      const rEl = el.getBoundingClientRect();
+      const rBd = board.getBoundingClientRect();
+      startLeft = rEl.left - rBd.left;
+      startTop  = rEl.top  - rBd.top;
       startX = e.clientX;
       startY = e.clientY;
       e.preventDefault();
@@ -83,148 +71,183 @@
       if (!dragging) return;
       const dx = e.clientX - startX;
       const dy = e.clientY - startY;
-
       const newLeft = clamp(startLeft + dx, 0, board.clientWidth  - el.offsetWidth);
       const newTop  = clamp(startTop  + dy, 0, board.clientHeight - el.offsetHeight);
-
       el.style.left = `${newLeft}px`;
       el.style.top  = `${newTop}px`;
-
-      schedulePreview(); // atualiza a URL da composição (debounced)
+      onMove?.();
     });
 
     const finish = (e) => {
       if (!dragging) return;
       dragging = false;
       el.releasePointerCapture?.(e.pointerId);
-      schedulePreview();
+      onMove?.();
     };
     el.addEventListener('pointerup', finish);
     el.addEventListener('pointercancel', finish);
   }
 
-  makeDraggable(ovLogo);
-  makeDraggable(ovText);
+  function init() {
+    if (inited) return true;
 
-  // Botões rápidos (↺ ↻ − +) — agem no "selected"
-  const btnRotL  = document.querySelector('[data-act="rotL"]');
-  const btnRotR  = document.querySelector('[data-act="rotR"]');
-  const btnMinus = document.querySelector('[data-act="minus"]');
-  const btnPlus  = document.querySelector('[data-act="plus"]');
+    const { board, mockupImg, ovLogo, ovText } = resolveEls();
+    if (!board || !mockupImg || !ovLogo || !ovText) return false; // ainda não está no DOM
 
-  function ensureNumber(val, fallback) {
-    const n = Number(val);
-    return Number.isFinite(n) ? n : fallback;
+    inited = true;
+
+    // Garante hierarquia correta
+    ensureRelativeBoard(board);
+    for (const el of [ovLogo, ovText]) {
+      if (el && el.parentElement !== board) board.appendChild(el);
     }
 
-  function applyAction(act) {
-    if (!selected) return;
-    const isLogo = selected === ovLogo;
-    const isText = selected === ovText;
-    const KEY_SIZE = 'size';
-    const KEY_ROT  = 'rot';
+    // Seleção atual (para os botões agirem no item certo)
+    let selected = ovLogo;
+    const select = (el) => {
+      if (!el) return;
+      selected?.classList?.remove(SELECTED_CLASS);
+      selected = el;
+      el.classList?.add(SELECTED_CLASS);
+    };
+    select(selected);
+    ovLogo.addEventListener('pointerdown', () => select(ovLogo));
+    ovText.addEventListener('pointerdown', () => select(ovText));
 
-    // Tamanho “lógico”: para logo = largura em px; para texto = font-size em px
-    const baseSize = isLogo ? 100 : 60;
-    let size = ensureNumber(selected.dataset[KEY_SIZE], baseSize);
-    let rot  = ensureNumber(selected.dataset[KEY_ROT], 0);
+    // Drag com limites
+    let updateTimer;
+    const schedulePreview = () => {
+      clearTimeout(updateTimer);
+      updateTimer = setTimeout(updatePreview, 100);
+    };
+    makeDraggable(board, ovLogo, schedulePreview);
+    makeDraggable(board, ovText, schedulePreview);
 
-    if (act === 'rotL')  rot = (rot - 90 + 360) % 360;
-    if (act === 'rotR')  rot = (rot + 90) % 360;
-    if (act === 'minus') size = Math.max(10, size - 8);
-    if (act === 'plus')  size = Math.min(600, size + 8);
+    // Botões rápidos (↺ ↻ − +)
+    const btnRotL  = document.querySelector('[data-act="rotL"]');
+    const btnRotR  = document.querySelector('[data-act="rotR"]');
+    const btnMinus = document.querySelector('[data-act="minus"]');
+    const btnPlus  = document.querySelector('[data-act="plus"]');
 
-    selected.dataset[KEY_SIZE] = String(size);
-    selected.dataset[KEY_ROT]  = String(rot);
+    function applyAction(act) {
+      if (!selected) return;
+      const isLogo = selected === ovLogo;
+      const baseSize = isLogo ? 100 : 60;
+      let size = num(selected.dataset.size, baseSize);
+      let rot  = num(selected.dataset.rot, 0);
 
-    schedulePreview();
-  }
+      if (act === 'rotL')  rot = (rot - 90 + 360) % 360;
+      if (act === 'rotR')  rot = (rot + 90) % 360;
+      if (act === 'minus') size = Math.max(10, size - 8);
+      if (act === 'plus')  size = Math.min(600, size + 8);
 
-  btnRotL?.addEventListener('click',  () => applyAction('rotL'));
-  btnRotR?.addEventListener('click',  () => applyAction('rotR'));
-  btnMinus?.addEventListener('click', () => applyAction('minus'));
-  btnPlus?.addEventListener('click',  () => applyAction('plus'));
-
-  // Debounce da atualização da imagem Cloudinary
-  let t;
-  function schedulePreview() {
-    clearTimeout(t);
-    t = setTimeout(updatePreview, 120);
-  }
-
-  // Monta URL de composição do Cloudinary respeitando o board
-  function updatePreview() {
-    try {
-      const W = 1000; // largura “padrão” do canvas na Cloudinary
-      const k = W / board.clientWidth; // fator de escala px->Cloudinary
-
-      // Base (mockup) – ex: 'Mockup/3017d_azul'
-      const basePublicId =
-        window.MOCKUP_PUBLIC_ID ||
-        window.__mockupPublicId ||
-        document.querySelector('[data-mockup-id]')?.getAttribute('data-mockup-id');
-
-      if (!basePublicId || !window.CONFIG?.CLOUDINARY_CLOUD) return;
-
-      const parts = [`w_${W}`];
-
-      // LOGO
-      if (ovLogo) {
-        const x = Math.round(parseFloat(ovLogo.style.left || '0') * k);
-        const y = Math.round(parseFloat(ovLogo.style.top  || '0') * k);
-        const w = Math.round(ensureNumber(ovLogo.dataset.size, 100) * k);
-        const a = ensureNumber(ovLogo.dataset.rot, 0);
-
-        // ID da logo enviada (ex.: 3017D_1760...) – você já injeta isso no main.js
-        const logoId =
-          window.__lastLogoPublicId ||
-          window.lastUploadId ||
-          window.lastTempLogoId ||
-          window.__uploadedLogoId; // vários fallbacks
-
-        if (logoId) {
-          parts.push(
-            `l_Logo:logo_${logoId},e_bgremoval,w_${w},a_${a},g_north_west,x_${x},y_${y},fl_layer_apply`
-          );
-        }
-      }
-
-      // TEXTO
-      if (ovText) {
-        const x = Math.round(parseFloat(ovText.style.left || '0') * k);
-        const y = Math.round(parseFloat(ovText.style.top  || '0') * k);
-        const fs = Math.round(ensureNumber(ovText.dataset.size, 60) * k);
-        const a  = ensureNumber(ovText.dataset.rot, 0);
-
-        const txt =
-          window.__previewText ||
-          document.querySelector('#texto-gravacao, #textInput, [data-texto]')?.value ||
-          '';
-
-        if (txt) {
-          const enc = encodeURIComponent(txt.slice(0, 40));
-          // cor padrão vem de CONFIG.cor_gravacao se existir
-          const hex = (window.__corTextoHex || '000000').replace('#', '');
-          parts.push(
-            `l_text:Arial_${fs}:${enc},co_rgb:${hex},a_${a},g_north_west,x_${x},y_${y},fl_layer_apply`
-          );
-        }
-      }
-
-      const url = `https://res.cloudinary.com/${window.CONFIG.CLOUDINARY_CLOUD}/image/upload/${parts.join('/')}/${basePublicId}`;
-
-      // Troca o src da imagem de prévia (sem recriar overlays!)
-      const img = mockupImg || document.querySelector('#preview-img, #mockupPreview, .js-preview-img');
-      if (img && img.src !== url) img.src = url;
-    } catch (e) {
-      // Evita quebrar a UI em caso de algo inesperado
-      console.warn('Preview update skipped:', e);
+      selected.dataset.size = String(size);
+      selected.dataset.rot  = String(rot);
+      schedulePreview();
     }
+
+    btnRotL?.addEventListener('click',  () => applyAction('rotL'));
+    btnRotR?.addEventListener('click',  () => applyAction('rotR'));
+    btnMinus?.addEventListener('click', () => applyAction('minus'));
+    btnPlus?.addEventListener('click',  () => applyAction('plus'));
+
+    // Monta URL do Cloudinary a partir do board
+    function updatePreview() {
+      try {
+        const cloud = window.CONFIG?.CLOUDINARY_CLOUD;
+        const basePublicId =
+          window.MOCKUP_PUBLIC_ID ||
+          window.__mockupPublicId ||
+          document.querySelector('[data-mockup-id]')?.getAttribute('data-mockup-id');
+
+        if (!cloud || !basePublicId) return;
+
+        const W = 1000;
+        const k = W / board.clientWidth;
+        const parts = [`w_${W}`];
+
+        // LOGO
+        if (ovLogo) {
+          const x = Math.round(parseFloat(ovLogo.style.left || '0') * k);
+          const y = Math.round(parseFloat(ovLogo.style.top  || '0') * k);
+          const w = Math.round(num(ovLogo.dataset.size, 100) * k);
+          const a = num(ovLogo.dataset.rot, 0);
+
+          const logoId =
+            window.__lastLogoPublicId ||
+            window.lastUploadId ||
+            window.lastTempLogoId ||
+            window.__uploadedLogoId;
+
+          if (logoId) {
+            parts.push(
+              `l_Logo:logo_${logoId},e_bgremoval,w_${w},a_${a},g_north_west,x_${x},y_${y},fl_layer_apply`
+            );
+          }
+        }
+
+        // TEXTO
+        if (ovText) {
+          const x = Math.round(parseFloat(ovText.style.left || '0') * k);
+          const y = Math.round(parseFloat(ovText.style.top  || '0') * k);
+          const fs = Math.round(num(ovText.dataset.size, 60) * k);
+          const a  = num(ovText.dataset.rot, 0);
+
+          const txt =
+            window.__previewText ||
+            document.querySelector('#texto-gravacao, #textInput, [data-texto]')?.value ||
+            '';
+
+          if (txt) {
+            const enc = encodeURIComponent(txt.slice(0, 40));
+            const hex = (window.__corTextoHex || '000000').replace('#', '');
+            parts.push(
+              `l_text:Arial_${fs}:${enc},co_rgb:${hex},a_${a},g_north_west,x_${x},y_${y},fl_layer_apply`
+            );
+          }
+        }
+
+        const url = `https://res.cloudinary.com/${cloud}/image/upload/${parts.join('/')}/${basePublicId}`;
+        const img = mockupImg;
+        if (img && img.src !== url) img.src = url;
+      } catch (e) {
+        console.warn('Preview update skipped:', e);
+      }
+    }
+
+    // Expõe API real
+    window.__previewAPI.updatePreview = updatePreview;
+    window.__previewAPI.select = (which) => (which === 'text' ? ovText : ovLogo) && which === 'text'
+      ? ovText && ovText.classList.add(SELECTED_CLASS)
+      : ovLogo && ovLogo.classList.add(SELECTED_CLASS);
+    window.__previewAPI.ready = true;
+
+    // Primeira atualização
+    updatePreview();
+
+    return true;
   }
 
-  // Exponho só para o main.js chamar se precisar
-  window.__previewAPI = { updatePreview, select };
+  // Tenta inicializar agora (caso o preview já esteja no DOM)
+  init();
 
-  // Gera uma primeira prévia
-  updatePreview();
+  // Observa DOM para inicializar assim que a caixa do preview entrar no DOM
+  if (!inited) {
+    const obs = new MutationObserver(() => {
+      if (init()) {
+        obs.disconnect();
+        cleanupObserver = null;
+      }
+    });
+    obs.observe(document.body, { childList: true, subtree: true });
+    cleanupObserver = () => obs.disconnect();
+  }
+
+  // Opcional: permitir inicialização manual após montar o modal
+  window.__initPreview = () => init();
+
+  // Cleanup se sair da página SPA (defensivo)
+  window.addEventListener('beforeunload', () => {
+    if (cleanupObserver) cleanupObserver();
+  });
 })();
