@@ -198,34 +198,44 @@ function writeHeader() {
 }
 
 /* ====== Link curto → dados ====== */
+// SUBSTITUIR por completo no public/src/js/main.js
 async function loadShortLink() {
-  const p = getP(); if (!p) return;
-  const rows = await supaGET(`/rest/v1/links_aprovacao?id=eq.${encodeURIComponent(p)}&select=*`);
-  linkData = rows?.[0]; if (!linkData) throw new Error("Link não encontrado");
-  produtos = Array.isArray(linkData.produtos) ? linkData.produtos : [];
-  idx = 0; writeHeader();
+  const p = getP();
+  if (!p) return;
 
+  // 1) busca o link curto
+  const rows = await supaGET(`/rest/v1/links_aprovacao?id=eq.${encodeURIComponent(p)}&select=*`);
+  linkData = rows?.[0];
+  if (!linkData) throw new Error("Link não encontrado");
+
+  // 2) produtos do link + cabeçalho
+  produtos = Array.isArray(linkData.produtos) ? linkData.produtos : [];
+  idx = 0;
+  writeHeader();
+
+  // 3) base (mockup) inicial
   const prod = produtos[idx] || {};
   const base = `Mockup/${lower(prod.sku)}_${pickCor(prod).toLowerCase()}`;
   state.baseId = base;
-  
-  // 👇 NOVO: ler defaults do BD e aplicar
+
+  // 4) aplica defaults do BD (mesmos do webhook) e não “centraliza” depois
   try {
     const cfg = await fetchSkuConfig(prod.sku);
-    applyConfigDefaults(cfg);
+    applyConfigDefaults(cfg);           // preenche state.logo/text com x/y/w do BD
   } catch (e) {
     console.warn("Não foi possível ler configuracoes_produtos:", e);
   }
 
-// quando a imagem base carregar, só pinta as caixas (nada de centralizar)
-img.onload = () => {
-  state.natural = { w: img.naturalWidth, h: img.naturalHeight };
-  $block.style.display = "block";
-  positionBoxes();
-};
+  // 5) quando a imagem base carregar, só desenha as caixas
+  img.onload = () => {
+    state.natural = { w: img.naturalWidth, h: img.naturalHeight };
+    $block.style.display = "block";
+    positionBoxes();
+  };
 
-refresh(); // desenha base (sem overlays) e já mostra as caixas nos pontos do BD
-
+  // 6) desenha base no canvas
+  refresh();
+}
 
   // define a base inicial (sem logo) para já termos algo no canvas
   const prod = produtos[idx] || {};
