@@ -26,41 +26,42 @@ export function buildURL(state) {
 
   if (!cloud || !baseId) return "";
 
-  // 1) Trava a largura da BASE para casar com as caixas
+  // 1) trava a largura da base para casar com as caixas
   const baseW = Math.max(100, Math.round(natural.w || 1000));
-  const baseTransforms = [`w_${baseW}`];
+  const chunks = [`w_${baseW}`];
 
-  // 2) Overlay do LOGO — se tiver pasta no public_id, troca "/" por ":"
-  const logoLayerId = String(logoId || "").replace(/\//g, ":");
-  const logoParts = [
-    `l_${logoLayerId}`,
-    "e_bgremoval",
-    `w_${Math.max(10, Math.round(logo.w))}`,
-    `a_${Math.round(logoRot) || 0}`,
-    "g_north_west",
-    `x_${Math.round(logo.x)}`,
-    `y_${Math.round(logo.y)}`,
-    "fl_layer_apply",
-  ];
-
-  // 3) Monta a URL base
-  let url = `https://res.cloudinary.com/${cloud}/image/upload/${baseTransforms.join(",")}/${logoParts.join(",")}`;
-
-  // 4) Overlay do TEXTO (quando houver)
-  if (hasText && String(textoVal).trim() !== "") {
-    const enc = encodeURIComponent(textoVal);
-    const tParts = [
-      `l_text:${fonte}_${Math.max(8, Math.round(text.w))}:${enc}`,
-      "co_rgb:000000",
-      `a_${Math.round(textRot) || 0}`,
-      "g_north_west",
-      `x_${Math.round(text.x)}`,
-      `y_${Math.round(text.y)}`,
-      "fl_layer_apply",
-    ];
-    url += `/${tParts.join(",")}`;
+  // 2) overlay do LOGO (só se houver id)
+  if (logoId) {
+    const logoLayerId = String(logoId).replace(/\//g, ":");
+    chunks.push(
+      [
+        `l_${logoLayerId}`,
+        "e_bgremoval",
+        `w_${Math.max(10, Math.round(logo.w))}`,
+        `a_${Math.round(logoRot) || 0}`,
+        "g_north_west",
+        `x_${Math.round(logo.x)}`,
+        `y_${Math.round(logo.y)}`,
+        "fl_layer_apply",
+      ].join(",")
+    );
   }
 
-  // 5) Public ID da base (pode ter pasta; sem extensão)
-  return `${url}/${baseId}`;
+  // 3) overlay do TEXTO (opcional)
+  if (hasText && String(textoVal).trim() !== "") {
+    const enc = encodeURIComponent(textoVal);
+    chunks.push(
+      [
+        `l_text:${fonte}_${Math.max(8, Math.round(text.w))}:${enc}`,
+        "co_rgb:000000",
+        `a_${Math.round(textRot) || 0}`,
+        "g_north_west",
+        `x_${Math.round(text.x)}`,
+        `y_${Math.round(text.y)}`,
+        "fl_layer_apply",
+      ].join(",")
+    );
+  }
+
+  return `https://res.cloudinary.com/${cloud}/image/upload/${chunks.join("/")}/${baseId}`;
 }
