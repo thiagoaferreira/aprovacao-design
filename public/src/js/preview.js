@@ -11,6 +11,8 @@ export function centerDefaults(img, natural) {
 }
 
 export function buildURL(state) {
+  console.log("🔨 buildURL() chamado");
+  
   const {
     cloud, baseId, logoId,
     logo, text, fonte,
@@ -19,10 +21,20 @@ export function buildURL(state) {
     natural = { w: 1000, h: 1000 },
   } = state;
 
+  console.log("  🆔 baseId:", baseId);
+  console.log("  🆔 logoId:", logoId);
+  console.log("  📐 natural:", natural);
+  console.log("  📍 logo:", logo);
+  console.log("  📍 text:", text);
+  console.log("  📝 textoVal:", textoVal);
+  console.log("  📝 hasText:", hasText);
+
   if (!cloud || !baseId) return "";
 
-  // Garantir que baseW seja sempre a largura natural da imagem
+  // 1) trava a largura da base
   const baseW = Math.max(100, Math.round(natural.w || 1000));
+  console.log("  ⚙️ baseW calculado:", baseW);
+  
   const chunks = [`w_${baseW}`];
 
   // LOGO - usar coordenadas EXATAS do state.logo
@@ -68,5 +80,10 @@ export function buildURL(state) {
     );
   }
 
-  return `https://res.cloudinary.com/${cloud}/image/upload/${chunks.join("/")}/${baseId}`;
+  const finalUrl = `https://res.cloudinary.com/${cloud}/image/upload/${chunks.join("/")}/${baseId}`;
+  
+  console.log("🔗 URL final:", finalUrl);
+  console.log("  🧩 Chunks:", chunks);
+  
+  return finalUrl;
 }
