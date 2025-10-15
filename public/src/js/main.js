@@ -69,8 +69,13 @@ function extractBaseId(url) {
   } catch { return ""; }
 }
 function extractLogoId(url) {
-  const m = (url||"").match(/\/l_([^,\/]+)/);
-  return m ? m[1].replace(/:/g,"/") : "";
+  try {
+    const m = /\/l_([^,]+)/.exec(url || "");
+    if (!m) return "";
+    // se vier "Logo:logo_123", converte para "Logo/logo_123" (o buildURL troca "/"->":")
+    const raw = decodeURIComponent(m[1]);
+    return raw.includes(":") ? raw.replace(/:/g, "/") : raw;
+  } catch { return ""; }
 }
 
 /* ====== Desenho das “caixas” ====== */
@@ -179,7 +184,7 @@ async function gerarPrevia() {
 
     // Atualiza estado com ids (ou extrai da URL)
     state.baseId = data.mockup_public_id || state.baseId || (previewUrl ? extractBaseId(previewUrl) : state.baseId);
-    state.logoId = data.logo_public_id   || (previewUrl ? extractLogoId(previewUrl) : state.logoId);
+    state.logoId = data.logo_public_id   || state.logoId || (previewUrl ? extractLogoId(previewUrl) : state.logoId);
 
     state.textoVal = ($("#texto")?.value || "").trim();
     state.fonte    = $("#fonte")?.value || "Arial";
