@@ -22,12 +22,18 @@ const setText = (selectors, value) => {
 };
 
 const findBtnPreview = () =>
+  QS('#btn-gerar') ||           // <-- id real no panel.html
   QS('#btnGerarPrevia') ||
   QS('[data-btn="preview"]') ||
   QSA('button, a').find((b) => hasText(b, 'gerar prévia'));
 
-const findFileInput = () => QS('#logo-file') || QS('input[type="file"]');
+const findFileInput = () =>
+  QS('#logo') ||                // <-- id real no panel.html
+  QS('#logo-file') ||
+  QS('input[type="file"]');
+
 const findTextInput = () =>
+  QS('#texto') ||               // <-- id real no panel.html
   QS('#texto-gravacao') ||
   QS('#textInput') ||
   QSA('input[type="text"], textarea').find(Boolean);
@@ -74,6 +80,7 @@ async function loadShortLink() {
   }
   try {
     const rows = await supaGET(`/rest/v1/links_aprovacao?id=eq.${encodeURIComponent(p)}&select=*`);
+    console.log('[links_aprovacao row]', rows?.[0]);
     const row = rows?.[0];
     if (!row) {
       alert('Link não encontrado.');
@@ -96,9 +103,13 @@ function writeHeader() {
   const nome = prod.nome || '—';
   const sku = prod.sku || '—';
 
-  setText(['#pedido-number', '#pedido', '[data-pedido]'], String(pedido));
-  setText(['#produto-nome', '#produto', '[data-produto]'], nome);
-  setText(['#sku', '#sku-code', '.sku-value', '[data-sku]'], sku);
+  setText(['#order-number', '#pedido-number', '#pedido', '[data-pedido]'], String(pedido));  // Pedido
+  setText(['#produto-nome', '#produto', '[data-produto]'], nome);                            // Produto (já ok)
+  setText(['#produto-sku', '#sku', '#sku-code', '.sku-value', '[data-sku]'], sku);           // SKU
+  
+  // Atualizar também a linha da faixa preta (headline)
+  const head = document.querySelector('#headline-order');
+  if (head) head.textContent = `Pedido #${pedido}`;
 
   // "(1/2)" perto do título "Aprovação de Design"
   const total = Math.max(1, __produtos.length || 1);
@@ -136,7 +147,7 @@ function buildFormData() {
   const prod = __produtos[__idx] || {};
   const file = findFileInput()?.files?.[0] || null;
 
-  if (file) fd.append('file', file);
+  if (file) fd.append('logo', file);
   fd.append('sku', prod.sku || '');
   fd.append('cor', prod.variante || prod.cor || '');
   fd.append('order_id', __linkRow?.order_id ?? '');
@@ -156,6 +167,7 @@ async function onGerarPrevia(ev) {
     showOverlay(true);
 
     const fd = buildFormData();
+    console.log('[formData] sku=', fd.get('sku'), 'cor=', fd.get('cor'), 'order_number=', fd.get('order_number'), 'logo field =', fd.get('logo'));
     const r = await fetch(CFG.WEBHOOK_PREVIEW, { method: 'POST', body: fd });
     const data = await r.json().catch(() => ({}));
 
