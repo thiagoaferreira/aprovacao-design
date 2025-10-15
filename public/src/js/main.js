@@ -171,6 +171,18 @@ async function onGerarPrevia(ev) {
     const r = await fetch(CFG.WEBHOOK_PREVIEW, { method: 'POST', body: fd });
     const data = await r.json().catch(() => ({}));
 
+    // 1) Fallback: se o webhook mandou preview_url, mostra já
+    const previewUrl = (Array.isArray(data) ? data[0]?.preview_url : data?.preview_url) || null;
+    if (previewUrl) {
+      const img = document.getElementById('canvas');
+      const block = document.getElementById('preview-block');
+      if (img) {
+        img.onload = () => { if (block) block.style.display = 'block'; };
+        img.src = previewUrl;
+      }
+      // mantém os próximos passos (abaixo) para quando vierem os public_id's
+    }
+
     // Se o webhook devolver os public_ids, aplica para o preview local
     const logoId = data.logo_public_id || data.logoPublicId || data.logo || null;
     const mockupId = data.mockup_public_id || data.mockupPublicId || data.public_id || null;
