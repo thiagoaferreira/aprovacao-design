@@ -150,13 +150,33 @@ function positionBoxes() {
   }
 }
 
+// Atualiza os elementos visuais DENTRO das caixas
+function updatePreviews() {
+  const $logoImg = document.querySelector("#logo-preview");
+  const $textoDiv = document.querySelector("#texto-preview");
+  
+  // LOGO: mostrar a logo processada
+  if (state.logoId && $logoImg) {
+    const logoUrl = `https://res.cloudinary.com/${state.cloud}/image/upload/e_bgremoval,w_200/${state.logoId}`;
+    $logoImg.src = logoUrl;
+    $logoImg.style.transform = `rotate(${state.logoRot || 0}deg)`;
+  }
+  
+  // TEXTO: mostrar o texto
+  if ($textoDiv) {
+    $textoDiv.textContent = state.textoVal || "";
+    $textoDiv.style.fontFamily = state.fonte || "Arial";
+    $textoDiv.style.fontSize = "16px"; // tamanho fixo para preview
+    $textoDiv.style.transform = `rotate(${state.textRot || 0}deg)`;
+  }
+}
+
 function refresh() {
   const url = buildURL(state);
   if (!url) return;
-
+  
   const $aviso = document.querySelector("#aviso-logo");
   if ($aviso) {
-    // Mostrar aviso se não houver logoId e o preview estiver visível
     const semLogo = !state.logoId && $block.style.display !== "none";
     $aviso.style.display = semLogo ? "block" : "none";
   }
@@ -165,6 +185,7 @@ function refresh() {
   
   img.onload = () => {
     positionBoxes();
+    updatePreviews(); // ✅ ADICIONAR ESTA LINHA
   };
 }
 
@@ -301,7 +322,20 @@ async function gerarPrevia() {
     // ids vindos do webhook OU extraídos da preview_url
     state.baseId = data.mockup_public_id || state.baseId || (previewUrl ? extractBaseId(previewUrl) : state.baseId);
     state.logoId = data.logo_public_id   || state.logoId || (previewUrl ? extractLogoId(previewUrl) : state.logoId);
+    
+    console.log("🆔 IDs extraídos:", {
+      baseId: state.baseId,
+      logoId: state.logoId
+    });
 
+    // ✅ ADICIONAR: Atualizar preview da logo imediatamente
+    if (state.logoId) {
+      const $logoImg = document.querySelector("#logo-preview");
+      if ($logoImg) {
+        const logoUrl = `https://res.cloudinary.com/${state.cloud}/image/upload/e_bgremoval,w_200/${state.logoId}`;
+        $logoImg.src = logoUrl;
+      }
+    }
     state.textoVal = ($("#texto")?.value || "").trim();
     state.fonte    = $("#fonte")?.value || "Arial";
     state.hasText  = !!state.textoVal;
@@ -346,6 +380,31 @@ $("#btn-gerar")?.addEventListener("click", (e)=>{ e.preventDefault(); gerarPrevi
 $("#texto")?.addEventListener("input", (e) => {
   state.textoVal = e.target.value.trim();
   state.hasText = state.textoVal !== "";
+  
+  // Atualizar preview visual imediatamente
+  const $textoDiv = document.querySelector("#texto-preview");
+  if ($textoDiv) {
+    $textoDiv.textContent = state.textoVal;
+  }
+  
+  // Atualizar visibilidade da caixa
+  const $boxTexto = document.querySelector("#box-texto");
+  if ($boxTexto) {
+    $boxTexto.style.display = state.textoVal ? "block" : "none";
+  }
+  
+  refreshDebounced(); // URL só atualiza após parar de digitar
+});
+
+$("#fonte")?.addEventListener("change", (e) => {
+  state.fonte = e.target.value;
+  
+  // Atualizar preview visual
+  const $textoDiv = document.querySelector("#texto-preview");
+  if ($textoDiv) {
+    $textoDiv.style.fontFamily = state.fonte;
+  }
+  
   refresh();
 });
 
