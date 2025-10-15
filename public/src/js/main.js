@@ -195,6 +195,51 @@ function bindUI() {
     btn.__bound = true;
   }
 }
+function preencherCabecalhoCom(prod) {
+  // LOG rápido para conferirmos as chaves vindas do banco
+  console.log('[header] linkData:', linkData);
+  console.log('[header] produto:', prod);
+
+  // Pedido: aceita order_number ou order_id
+  const pedidoVal =
+    linkData?.order_number ?? linkData?.order_id ?? '—';
+
+  // SKU: aceita várias chaves comuns
+  const skuVal =
+    prod?.sku ??
+    prod?.codigo_amigavel ??
+    prod?.codigo ??
+    prod?.id_sku ??
+    '—';
+
+  // Nome do produto (fallback defensivo)
+  const nomeVal = prod?.nome ?? prod?.produto ?? '—';
+
+  if ($headline) $headline.textContent = `Pedido #${pedidoVal}`;
+  if ($orderNum) $orderNum.textContent = pedidoVal;
+  if ($prodNome) $prodNome.textContent = nomeVal;
+  if ($prodSKU)  $prodSKU.textContent  = skuVal;
+}
+
+async function carregarLinkCurto() {
+  const id = getLinkId();
+  if (!id) return; // página neutra (sem p=)
+
+  // Buscamos TUDO pra garantir que as chaves existam
+  const arr = await supaGET(
+    `links_aprovacao?id=eq.${encodeURIComponent(id)}&select=*`
+  );
+  linkData = arr[0];
+  if (!linkData) throw new Error("Link não encontrado");
+
+  // produtos deve ser um array
+  fila = Array.isArray(linkData.produtos) ? linkData.produtos : [];
+  if (!fila.length) throw new Error("Nenhum produto no link");
+
+  atual = 0;
+  preencherCabecalhoCom(fila[0]);
+  updateDesignProgress(); // (1/n)
+}
 
 // ---------- bootstrap ----------
 document.addEventListener('DOMContentLoaded', () => {
