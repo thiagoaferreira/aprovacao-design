@@ -38,7 +38,7 @@ export function createTextControl({ img, box, state, onChange, onSelect }) {
     dragging = false;
     el.releasePointerCapture?.(e.pointerId);
     document.removeEventListener("pointermove", move);
-    document.removeEventListener("pointerup",   up);
+    document.removeEventListener("pointerup", up);
   }
   el.addEventListener("pointerdown", down);
 
