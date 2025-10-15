@@ -53,7 +53,7 @@ const onChange = (who) => {
     logo: state.logo,
     text: state.text
   });
-  
+
   // Atualizar posição das caixas imediatamente (sem rebuild da URL)
   positionBoxes();
   updatePreviews();
@@ -250,15 +250,6 @@ function applyConfigDefaults(cfg) {
   centeredOnce = true;
   return true;
 }
-
-/* ========= Seleção & Change hooks (para módulos) ========= */
-const onChange = () => { refreshDebounced(); positionBoxes(); };
-const setActive = (who) => {
-  active = who;
-  document.querySelector("#box-logo") ?.classList.toggle("active", who === "logo");
-  document.querySelector("#box-texto")?.classList.toggle("active", who === "text");
-};
-const onSelect = (who) => setActive(who);
 
 /* ========= Link curto ========= */
 async function loadShortLink() {
