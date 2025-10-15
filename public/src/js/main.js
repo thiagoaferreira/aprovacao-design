@@ -1,275 +1,240 @@
-// public/src/js/main.js
-// Liga o link curto -> dados do pedido -> webhook -> preview.
-// Sem dependências externas; tudo defensivo para não quebrar o layout atual.
+// public/src/js/main.js  (ES Module)
+import { buildURL, centerDefaults } from "./preview.js";
+import { enableDragAndResize } from "./drag.js";
 
-console.log('[main] boot');
-
+/* ====== CONFIG / DOM ====== */
 const CFG = window.CONFIG || {};
-const QS = (s) => document.querySelector(s);
-const QSA = (s) => Array.from(document.querySelectorAll(s));
+const $ = (s) => document.querySelector(s);
 
-// ---------- utilidades -----------
-const hasText = (el, t) => el && (el.textContent || '').toLowerCase().includes(t.toLowerCase());
-const setText = (selectors, value) => {
-  for (const s of selectors) {
-    const el = QS(s);
-    if (el) {
-      el.textContent = value;
-      return el;
-    }
-  }
-  return null;
+const img       = $("#canvas");
+const $orderNum = $("#order-number");
+const $prodNome = $("#produto-nome");
+const $prodSKU  = $("#produto-sku");
+const $headline = $("#headline-order");
+const $block    = $("#preview-block");
+const $overlay  = $("#overlay");
+const busy = (on, msg="Gerando prévia…") => {
+  if (!$overlay) return;
+  $overlay.hidden = !on;
+  const p = $overlay.querySelector("p");
+  if (p) p.textContent = msg;
 };
 
-const findBtnPreview = () =>
-  QS('#btn-gerar') ||           // <-- id real no panel.html
-  QS('#btnGerarPrevia') ||
-  QS('[data-btn="preview"]') ||
-  QSA('button, a').find((b) => hasText(b, 'gerar prévia'));
+/* ====== Estado da composição (imagem) ====== */
+let linkData = null;     // registro de links_aprovacao
+let produtos = [];       // array de produtos do link
+let idx = 0;             // índice atual
 
-const findFileInput = () =>
-  QS('#logo') ||                // <-- id real no panel.html
-  QS('#logo-file') ||
-  QS('input[type="file"]');
+let state = {
+  cloud: CFG.CLOUDINARY_CLOUD || "dslzqtajk",
+  baseId: "",           // public_id do mockup (com pasta)
+  logoId: "",           // public_id do logo (pode ter pasta)
+  natural: { w: 1000, h: 1000 },
+  logo: { x: 0, y: 400, w: 100 },
+  text: { x: 0, y: 520, w: 60 },
+  fonte: "Arial",
+  textoVal: "",
+  hasText: false,
+  logoRot: 0,
+  textRot: 0,
+};
+let active = "logo";     // "logo" | "text"
+let centeredOnce = false;
 
-const findTextInput = () =>
-  QS('#texto') ||               // <-- id real no panel.html
-  QS('#texto-gravacao') ||
-  QS('#textInput') ||
-  QSA('input[type="text"], textarea').find(Boolean);
-const findFontSelect = () => QS('#fonte') || QSA('select').find(Boolean);
+/* ====== Utils ====== */
+const debounce = (fn, ms=120) => { let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), ms); }; };
+const refreshDebounced = debounce(()=>{ const url = buildURL(state); if (url) img.src = url; }, 120);
 
-const overlay = QS('#overlay');
-const showOverlay = (on) => overlay && (overlay.hidden = !on);
+const getP = () => new URL(location.href).searchParams.get("p") || "";
 
-const getParamP = () => new URL(location.href).searchParams.get('p') || '';
-
-const normColor = (c) =>
-  (c || '')
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .replace(/\s+/g, '_')
-    .replace(/[^\w]/g, '');
-
-const supaGET = async (pathWithQuery) => {
-  const base = (CFG.SUPABASE_URL || '').replace(/\/+$/, '');
-  if (!base || !CFG.SUPABASE_ANON_KEY) throw new Error('Supabase env ausente');
-  const url = `${base}${pathWithQuery}`;
-  const r = await fetch(url, {
-    headers: {
-      apikey: CFG.SUPABASE_ANON_KEY,
-      Authorization: `Bearer ${CFG.SUPABASE_ANON_KEY}`,
-    },
-  });
+async function supaGET(qs) {
+  const base = (CFG.SUPABASE_URL || "").replace(/\/+$/,"");
+  const key  = CFG.SUPABASE_ANON_KEY;
+  const r = await fetch(`${base}${qs}`, { headers: { apikey: key, Authorization: `Bearer ${key}` }});
   if (!r.ok) throw new Error(`Supabase ${r.status}`);
   return r.json();
-};
+}
 
-// ---------- estado -----------
-let __linkRow = null;
-let __produtos = [];
-let __idx = 0;
+const pickCor = (prod)=> (prod?.variante ?? prod?.cor ?? prod?.color ?? "").toString().trim();
+const lower   = (s)=> (s||"").toLowerCase();
 
-// ---------- carregamento do link curto -----------
-async function loadShortLink() {
-  const p = getParamP();
-  if (!p) {
-    console.warn('Sem parâmetro ?p= no link.');
-    return;
-  }
+/* Extrai ids da preview_url quando o webhook não devolver os campos */
+function extractBaseId(url) {
   try {
-    const rows = await supaGET(`/rest/v1/links_aprovacao?id=eq.${encodeURIComponent(p)}&select=*`);
-    console.log('[links_aprovacao row]', rows?.[0]);
-    const row = rows?.[0];
-    if (!row) {
-      alert('Link não encontrado.');
-      return;
-    }
-    __linkRow = row;
-    __produtos = Array.isArray(row.produtos) ? row.produtos : [];
-    __idx = 0;
+    const u = new URL(url);
+    const after = u.pathname.split("/image/upload/")[1] || "";
+    const seg = after.split("/").filter(Boolean);
+    while (seg.length && (seg[0].includes(",") || /^v\d+$/.test(seg[0]))) seg.shift();
+    return seg.join("/").replace(/\.[a-z0-9]+$/i,"");
+  } catch { return ""; }
+}
+function extractLogoId(url) {
+  const m = (url||"").match(/\/l_([^,\/]+)/);
+  return m ? m[1].replace(/:/g,"/") : "";
+}
 
-    writeHeader();
-    prepareMockupBase();
-  } catch (e) {
-    console.error('Falha ao carregar link curto:', e);
+/* ====== Desenho das “caixas” ====== */
+function positionBoxes() {
+  const rect = img.getBoundingClientRect();
+  const sx = rect.width  / state.natural.w;
+  const sy = rect.height / state.natural.h;
+
+  const paint = (id, obj, color) => {
+    const el = $(id);
+    el.style.left   = `${obj.x * sx}px`;
+    el.style.top    = `${obj.y * sy}px`;
+    el.style.width  = `${obj.w * sx}px`;
+    el.style.height = `${obj.w * 0.6 * sy}px`;  // razão para texto/logos padrão
+    el.style.borderColor = color;
+    el.style.display = "block";
+  };
+  paint("#box-logo",  state.logo, "#f68729");
+  if (state.textoVal.trim() !== "") paint("#box-texto", state.text, "#38bdf8");
+}
+
+function refresh() {
+  const url = buildURL(state);
+  if (url) {
+    img.src = url;
+    positionBoxes();
   }
 }
 
+/* ====== Seleção (para os botões agirem no alvo certo) ====== */
+function wireSelection() {
+  const $logo  = $("#box-logo");
+  const $texto = $("#box-texto");
+  const setActive = (who)=>{
+    active = who;
+    $logo?.classList.toggle("active", who==="logo");
+    $texto?.classList.toggle("active", who==="text");
+  };
+  $logo?.addEventListener("pointerdown", ()=>setActive("logo"));
+  $texto?.addEventListener("pointerdown", ()=>setActive("text"));
+  setActive("logo");
+}
+
+/* ====== Cabeçalho ====== */
 function writeHeader() {
-  const prod = __produtos[__idx] || {};
-  const pedido = __linkRow?.order_number ?? __linkRow?.order_id ?? '—';
-  const nome = prod.nome || '—';
-  const sku = prod.sku || '—';
+  const prod = produtos[idx] || {};
+  const pedido = linkData?.order_number ?? linkData?.order_id ?? "—";
+  const nome   = prod?.nome || "—";
+  const sku    = prod?.sku  || "—";
 
-  setText(['#order-number', '#pedido-number', '#pedido', '[data-pedido]'], String(pedido));  // Pedido
-  setText(['#produto-nome', '#produto', '[data-produto]'], nome);                            // Produto (já ok)
-  setText(['#produto-sku', '#sku', '#sku-code', '.sku-value', '[data-sku]'], sku);           // SKU
-  
-  // Atualizar também a linha da faixa preta (headline)
-  const head = document.querySelector('#headline-order');
-  if (head) head.textContent = `Pedido #${pedido}`;
+  if ($headline) $headline.textContent = `Pedido #${pedido}`;
+  if ($orderNum) $orderNum.textContent = pedido;
+  if ($prodNome) $prodNome.textContent = nome;
+  if ($prodSKU)  $prodSKU.textContent  = sku;
 
-  // "(1/2)" perto do título "Aprovação de Design"
-  const total = Math.max(1, __produtos.length || 1);
-  const label = `(${__idx + 1}/${total})`;
-  setText(
-    ['#aprovacao-count', '[data-approv-idx]', '.aprov-count'],
-    label
-  );
+  const total = Math.max(1, produtos.length || 1);
+  const pc = $("#design-progress"); if (pc) pc.textContent = ` (${idx+1}/${total})`;
 }
 
-function prepareMockupBase() {
-  const prod = __produtos[__idx] || {};
-  const sku = (prod.sku || '').toLowerCase();
-  const cor = normColor(prod.variante || prod.cor || prod.color);
-  if (!sku || !cor) return;
+/* ====== Link curto → dados ====== */
+async function loadShortLink() {
+  const p = getP(); if (!p) return;
+  const rows = await supaGET(`/rest/v1/links_aprovacao?id=eq.${encodeURIComponent(p)}&select=*`);
+  linkData = rows?.[0]; if (!linkData) throw new Error("Link não encontrado");
+  produtos = Array.isArray(linkData.produtos) ? linkData.produtos : [];
+  idx = 0; writeHeader();
 
-  // Convenção: pasta "Mockup/" no Cloudinary
-  const basePublicId = `Mockup/${sku}_${cor}`;
-  window.MOCKUP_PUBLIC_ID = basePublicId;
-  window.__mockupPublicId = basePublicId;
-
-  // Se houver um container com data-mockup-id no HTML, atualiza:
-  const container = document.querySelector('[data-mockup-id]');
-  if (container) container.setAttribute('data-mockup-id', basePublicId);
-
-  // Garante que o preview seja inicializado (script preview.js)
-  window.__initPreview?.();
-  // E já desenha uma primeira imagem base
-  window.__previewAPI?.updatePreview?.();
+  // define a base inicial (sem logo) para já termos algo no canvas
+  const prod = produtos[idx] || {};
+  const base = `Mockup/${lower(prod.sku)}_${pickCor(prod).toLowerCase()}`;
+  state.baseId = base;
+  img.onload = ()=>{
+    if (!centeredOnce) {
+      state.natural = { w: img.naturalWidth, h: img.naturalHeight };
+      const c = centerDefaults(img, state.natural);
+      state.logo = c.logo; state.text = c.text; centeredOnce = true;
+    }
+    $block.style.display = "block";
+    positionBoxes();
+  };
+  refresh(); // desenha a base sem overlays
 }
 
-// ---------- botão "Gerar prévia" -----------
+/* ====== Gerar prévia (chama webhook e liga a edição) ====== */
 function buildFormData() {
   const fd = new FormData();
-  const prod = __produtos[__idx] || {};
-  const file = findFileInput()?.files?.[0] || null;
-
-  if (file) fd.append('logo', file);
-  fd.append('sku', prod.sku || '');
-  fd.append('cor', prod.variante || prod.cor || '');
-  fd.append('order_id', __linkRow?.order_id ?? '');
-  fd.append('order_number', __linkRow?.order_number ?? '');
-  fd.append('p', getParamP() || '');
-  fd.append('texto', (findTextInput()?.value || '').trim());
-  fd.append('fonte', findFontSelect()?.value || 'Arial');
-
+  const prod = produtos[idx] || {};
+  const file = $("#logo")?.files?.[0] || null;
+  if (file) fd.append("logo", file);                        // n8n espera “logo”
+  fd.append("sku", prod.sku || "");
+  fd.append("cor", pickCor(prod) || "");
+  fd.append("order_id",     linkData?.order_id     ?? "");
+  fd.append("order_number", linkData?.order_number ?? "");
+  fd.append("p", getP() || "");
+  fd.append("texto", ($("#texto")?.value || "").trim());
+  fd.append("fonte", $("#fonte")?.value || "Arial");
   return fd;
 }
 
-async function onGerarPrevia(ev) {
-  ev?.preventDefault?.();
-  const btn = findBtnPreview();
+async function gerarPrevia() {
   try {
-    if (btn) btn.disabled = true;
-    showOverlay(true);
-
-    const fd = buildFormData();
-    console.log('[formData] sku=', fd.get('sku'), 'cor=', fd.get('cor'), 'order_number=', fd.get('order_number'), 'logo field =', fd.get('logo'));
-    const r = await fetch(CFG.WEBHOOK_PREVIEW, { method: 'POST', body: fd });
-    const data = await r.json().catch(() => ({}));
-
-    // 1) Fallback: se o webhook mandou preview_url, mostra já
+    busy(true);
+    const r = await fetch(CFG.WEBHOOK_PREVIEW, { method:"POST", body: buildFormData() });
+    const data = await r.json().catch(()=> ({}));
     const previewUrl = (Array.isArray(data) ? data[0]?.preview_url : data?.preview_url) || null;
-    if (previewUrl) {
-      const img = document.getElementById('canvas');
-      const block = document.getElementById('preview-block');
-      if (img) {
-        img.onload = () => { if (block) block.style.display = 'block'; };
-        img.src = previewUrl;
+
+    // Atualiza estado com ids (ou extrai da URL)
+    state.baseId = data.mockup_public_id || state.baseId || (previewUrl ? extractBaseId(previewUrl) : state.baseId);
+    state.logoId = data.logo_public_id   || (previewUrl ? extractLogoId(previewUrl) : state.logoId);
+
+    state.textoVal = ($("#texto")?.value || "").trim();
+    state.fonte    = $("#fonte")?.value || "Arial";
+    state.hasText  = !!state.textoVal;
+
+    // Quando a imagem carregar: mede e posiciona as caixas
+    img.onload = ()=>{
+      state.natural = { w: img.naturalWidth, h: img.naturalHeight };
+      if (!centeredOnce) {
+        const c = centerDefaults(img, state.natural);
+        state.logo = c.logo; state.text = c.text; centeredOnce = true;
       }
-      // mantém os próximos passos (abaixo) para quando vierem os public_id's
-    }
+      $block.style.display = "block";
+      positionBoxes();
+    };
 
-    // Se o webhook devolver os public_ids, aplica para o preview local
-    const logoId = data.logo_public_id || data.logoPublicId || data.logo || null;
-    const mockupId = data.mockup_public_id || data.mockupPublicId || data.public_id || null;
+    if (previewUrl) { img.src = previewUrl; } else { refresh(); }
 
-    if (logoId) {
-      // preview.js busca um desses nomes:
-      window.__lastLogoPublicId = logoId;
-      window.__uploadedLogoId = logoId;
-    }
-    if (mockupId) {
-      window.MOCKUP_PUBLIC_ID = mockupId;
-      window.__mockupPublicId = mockupId;
-      const el = document.querySelector('[data-mockup-id]');
-      if (el) el.setAttribute('data-mockup-id', mockupId);
-    }
+    // habilita drag/resize e seleção (apenas uma vez)
+    enableDragAndResize(state, ()=>{ refreshDebounced(); positionBoxes(); });
+    wireSelection();
 
-    // Garante inicialização e força redesenho
-    window.__initPreview?.();
-    window.__previewAPI?.updatePreview?.();
   } catch (e) {
-    console.error('Falha ao gerar prévia:', e);
-    alert('Falha ao gerar prévia. Tente novamente.');
+    console.error(e); alert("Falha ao gerar prévia. Tente novamente.");
   } finally {
-    showOverlay(false);
-    if (btn) btn.disabled = false;
+    busy(false);
   }
 }
 
-function bindUI() {
-  // Botão
-  const btn = findBtnPreview();
-  if (btn && !btn.__bound) {
-    btn.addEventListener('click', onGerarPrevia);
-    btn.__bound = true;
-  }
+/* ====== Botões rápidos (agem no item selecionado) ====== */
+function currentObj(){ return active==="logo" ? state.logo : state.text; }
+function clampBox(o){
+  o.w = Math.max(20, Math.min(state.natural.w, o.w));
+  o.x = Math.max(0, Math.min(state.natural.w-40, o.x));
+  o.y = Math.max(0, Math.min(state.natural.h-40, o.y));
 }
-function preencherCabecalhoCom(prod) {
-  // LOG rápido para conferirmos as chaves vindas do banco
-  console.log('[header] linkData:', linkData);
-  console.log('[header] produto:', prod);
-
-  // Pedido: aceita order_number ou order_id
-  const pedidoVal =
-    linkData?.order_number ?? linkData?.order_id ?? '—';
-
-  // SKU: aceita várias chaves comuns
-  const skuVal =
-    prod?.sku ??
-    prod?.codigo_amigavel ??
-    prod?.codigo ??
-    prod?.id_sku ??
-    '—';
-
-  // Nome do produto (fallback defensivo)
-  const nomeVal = prod?.nome ?? prod?.produto ?? '—';
-
-  if ($headline) $headline.textContent = `Pedido #${pedidoVal}`;
-  if ($orderNum) $orderNum.textContent = pedidoVal;
-  if ($prodNome) $prodNome.textContent = nomeVal;
-  if ($prodSKU)  $prodSKU.textContent  = skuVal;
-}
-
-async function carregarLinkCurto() {
-  const id = getLinkId();
-  if (!id) return; // página neutra (sem p=)
-
-  // Buscamos TUDO pra garantir que as chaves existam
-  const arr = await supaGET(
-    `links_aprovacao?id=eq.${encodeURIComponent(id)}&select=*`
-  );
-  linkData = arr[0];
-  if (!linkData) throw new Error("Link não encontrado");
-
-  // produtos deve ser um array
-  fila = Array.isArray(linkData.produtos) ? linkData.produtos : [];
-  if (!fila.length) throw new Error("Nenhum produto no link");
-
-  atual = 0;
-  preencherCabecalhoCom(fila[0]);
-  updateDesignProgress(); // (1/n)
-}
-
-// ---------- bootstrap ----------
-document.addEventListener('DOMContentLoaded', () => {
-  console.log('[main] DOM ready', CFG);
-  loadShortLink();   // puxa dados do pedido/itens
-  bindUI();          // liga o botão
-  // garante que o preview esteja pronto se o HTML já estiver montado
-  setTimeout(() => window.__initPreview?.(), 0);
+$("#btn-rot-ccw")?.addEventListener("click", ()=>{
+  if (active==="logo") state.logoRot = (state.logoRot+270)%360; else state.textRot = (state.textRot+270)%360;
+  refreshDebounced(); positionBoxes();
 });
+$("#btn-rot-cw")?.addEventListener("click", ()=>{
+  if (active==="logo") state.logoRot = (state.logoRot+90)%360; else state.textRot = (state.textRot+90)%360;
+  refreshDebounced(); positionBoxes();
+});
+$("#btn-inc")?.addEventListener("click", ()=>{
+  const o = currentObj(); o.w += Math.round(state.natural.w*0.04); clampBox(o);
+  refreshDebounced(); positionBoxes();
+});
+$("#btn-dec")?.addEventListener("click", ()=>{
+  const o = currentObj(); o.w -= Math.round(state.natural.w*0.04); clampBox(o);
+  refreshDebounced(); positionBoxes();
+});
+
+/* ====== Eventos principais ====== */
+$("#btn-gerar")?.addEventListener("click", (e)=>{ e.preventDefault(); gerarPrevia(); });
+
+/* ====== Boot ====== */
+document.addEventListener("DOMContentLoaded", ()=>{ loadShortLink(); });
