@@ -90,8 +90,7 @@ function extractLogoId(url) {
   try {
     const m = /\/l_([^,]+)/.exec(url || "");
     if (!m) return "";
-    // se vier "Logo:logo_123", converte para "Logo/logo_123" (o buildURL troca "/"->":")
-    const raw = decodeURIComponent(m[1]);
+    const raw = decodeURIComponent(m[1]);       // ex.: "Logo:logo_123" ou "Logo/logo_123"
     return raw.includes(":") ? raw.replace(/:/g, "/") : raw;
   } catch { return ""; }
 }
@@ -200,7 +199,7 @@ async function gerarPrevia() {
     const data = await r.json().catch(()=> ({}));
     const previewUrl = (Array.isArray(data) ? data[0]?.preview_url : data?.preview_url) || null;
 
-    // Atualiza estado com ids (ou extrai da URL)
+    // ids vindos do webhook OU extraídos da preview_url (fallback)
     state.baseId = data.mockup_public_id || state.baseId || (previewUrl ? extractBaseId(previewUrl) : state.baseId);
     state.logoId = data.logo_public_id   || state.logoId || (previewUrl ? extractLogoId(previewUrl) : state.logoId);
 
