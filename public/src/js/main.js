@@ -96,6 +96,12 @@ function writeHeader() {
 /* ========= Boxes (alinhadas ao contêiner) ========= */
 function positionBoxes() {
   const board = img.closest(".canvas-wrap") || img.parentElement;
+  
+  console.log("📦 positionBoxes() chamado");
+  console.log("  🖼️ Imagem natural:", state.natural);
+  console.log("  📍 Logo no state:", state.logo);
+  console.log("  📍 Text no state:", state.text);
+  
   if (!board) return;
 
   const imgRect = img.getBoundingClientRect();
