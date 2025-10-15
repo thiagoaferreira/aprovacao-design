@@ -185,3 +185,23 @@ body {
 /* Ancoragem das caixas ao quadro de edição */
 #preview-block .canvas-wrap { position: relative; overflow: hidden; }
 #box-logo, #box-texto { position: absolute; }
+
+/* Elementos de preview dentro das caixas */
+.elemento-preview {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  user-select: none;
+}
+
+#logo-preview {
+  opacity: 0.9;
+}
+
+#texto-preview {
+  opacity: 0.9;
+  text-align: center;
+  word-break: break-word;
+  padding: 4px;
+}
