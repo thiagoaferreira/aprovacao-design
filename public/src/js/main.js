@@ -97,28 +97,47 @@ function extractLogoId(url) {
 
 /* ====== Desenho das “caixas” ====== */
 function positionBoxes() {
-  const rect = img.getBoundingClientRect();
-  const sx = rect.width  / state.natural.w;
-  const sy = rect.height / state.natural.h;
+  // board = contêiner onde a imagem (#canvas) está
+  const board =
+    img.closest(".canvas-wrap") ||
+    img.parentElement;
 
-  const paint = (id, obj, color) => {
-    const el = $(id);
-    el.style.left   = `${obj.x * sx}px`;
-    el.style.top    = `${obj.y * sy}px`;
-    el.style.width  = `${obj.w * sx}px`;
-    el.style.height = `${obj.w * 0.6 * sy}px`;  // razão para texto/logos padrão
+  if (!board) return;
+
+  const imgRect   = img.getBoundingClientRect();
+  const boardRect = board.getBoundingClientRect();
+
+  const scaleX = imgRect.width  / state.natural.w;
+  const scaleY = imgRect.height / state.natural.h;
+
+  // deslocamento da imagem dentro do board (pode não ser (0,0))
+  const offX = imgRect.left - boardRect.left;
+  const offY = imgRect.top  - boardRect.top;
+
+  const paint = (sel, obj, color) => {
+    const el = document.querySelector(sel);
+    if (!el) return;
+    // garanta que as caixas sejam filhas do board (mesmo referencial)
+    if (el.parentElement !== board) board.appendChild(el);
+
+    // estilos do board (referência)
+    const st = board.style;
+    if (!st.position || st.position === "static") st.position = "relative";
+    if (!st.overflow) st.overflow = "hidden";
+
+    el.style.position   = "absolute";
+    el.style.left       = `${offX + obj.x * scaleX}px`;
+    el.style.top        = `${offY + obj.y * scaleY}px`;
+    el.style.width      = `${obj.w * scaleX}px`;
+    // altura “visual” da caixa — pode ajustar depois
+    el.style.height     = `${obj.w * 0.6 * scaleY}px`;
     el.style.borderColor = color;
-    el.style.display = "block";
+    el.style.display     = "block";
   };
-  paint("#box-logo",  state.logo, "#f68729");
-  if (state.textoVal.trim() !== "") paint("#box-texto", state.text, "#38bdf8");
-}
 
-function refresh() {
-  const url = buildURL(state);
-  if (url) {
-    img.src = url;
-    positionBoxes();
+  paint("#box-logo",  state.logo, "#f68729");
+  if (state.textoVal.trim() !== "") {
+    paint("#box-texto", state.text, "#38bdf8");
   }
 }
 
