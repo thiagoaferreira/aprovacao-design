@@ -1,5 +1,5 @@
 // public/src/js/main.js
-import { buildURL, centerDefaults } from "./preview.js";
+import { buildURL, buildFinalURL, centerDefaults } from "./preview.js";
 import { createLogoControl } from "./logo-control.js";
 import { createTextControl } from "./text-control.js";
 
