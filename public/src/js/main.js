@@ -171,17 +171,24 @@ async function fetchSkuConfig(sku) {
 }
 function applyConfigDefaults(cfg) {
   if (!cfg) return false;
+  
   state.logo = {
     x: +cfg.x_logo_media || 0,
-    y: +cfg.y_logo_media || 0,
+    y: +cfg.y_logo_media || 400,
     w: +cfg.tamanho_logo_media || 100
   };
   state.text = {
     x: +cfg.x_texto_media || 0,
-    y: +cfg.y_texto_media || 0,
+    y: +cfg.y_texto_media || 520,
     w: +cfg.tamanho_texto_media || 60
   };
-  centeredOnce = true; // não recentralizar
+  
+  console.log("✅ Configs do BD aplicadas:", {
+    logo: state.logo,
+    text: state.text
+  });
+  
+  centeredOnce = true;
   return true;
 }
 
@@ -213,17 +220,38 @@ async function loadShortLink() {
   const prod = produtos[idx] || {};
   state.baseId = `Mockup/${lower(prod.sku)}_${pickCor(prod).toLowerCase()}`;
 
-  // 4) aplicar defaults do BD (as mesmas coordenadas que o webhook usa)
+  // 4) aplicar defaults do BD (ANTES de carregar a imagem)
   try {
     const cfg = await fetchSkuConfig(prod.sku);
-    applyConfigDefaults(cfg);
+    if (cfg && applyConfigDefaults(cfg)) {
+      console.log("✅ Usando coordenadas do BD");
+    } else {
+      // Se não houver config, usa defaults centralizados
+      const defaults = centerDefaults(null, state.natural);
+      state.logo = defaults.logo;
+      state.text = defaults.text;
+      centeredOnce = true;
+      console.log("✅ Usando coordenadas padrão centralizadas");
+    }
   } catch (e) {
-    console.warn("Não foi possível ler configuracoes_produtos:", e);
+    console.warn("⚠️ Não foi possível ler configuracoes_produtos:", e);
+    // Fallback para defaults centralizados
+    const defaults = centerDefaults(null, state.natural);
+    state.logo = defaults.logo;
+    state.text = defaults.text;
+    centeredOnce = true;
   }
 
   // 5) quando a base carregar, desenhar caixas
   img.onload = () => {
     state.natural = { w: img.naturalWidth, h: img.naturalHeight };
+    
+    console.log("🖼️ Imagem base carregada:", state.natural);
+    console.log("📍 Posições finais:", {
+      logo: state.logo,
+      text: state.text
+    });
+    
     $block.style.display = "block";
     positionBoxes();
     
@@ -236,7 +264,7 @@ async function loadShortLink() {
     }
   };
 
-  // 6) desenha base
+  // 6) desenha base (SEM logo ainda, pois não há logoId)
   refresh();
 }
 
