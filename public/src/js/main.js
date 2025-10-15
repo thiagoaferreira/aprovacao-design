@@ -371,6 +371,15 @@ async function gerarPrevia() {
     state.fonte    = $("#fonte")?.value || "Arial";
     state.hasText  = !!state.textoVal;
 
+    // Mostrar caixas imediatamente (mesmo sem a imagem final)
+    $block.style.display = "block";
+    const $boxLogo = document.querySelector("#box-logo");
+    const $boxTexto = document.querySelector("#box-texto");
+    if ($boxLogo) $boxLogo.style.display = "block";
+    if ($boxTexto && state.hasText) $boxTexto.style.display = "block";
+
+    // IMPORTANTE: Aguardar imagem carregar para pegar dimensões corretas
+    
     img.onload = () => {
       state.natural = { w: img.naturalWidth, h: img.naturalHeight };
       $block.style.display = "block";
@@ -422,6 +431,11 @@ $("#texto")?.addEventListener("input", (e) => {
   const $boxTexto = document.querySelector("#box-texto");
   if ($boxTexto) {
     $boxTexto.style.display = state.textoVal ? "block" : "none";
+  }
+  
+  // Atualizar posição da caixa se ela já estiver visível
+  if (state.textoVal && $block.style.display !== "none") {
+    positionBoxes();
   }
   
   refreshDebounced(); // URL só atualiza após parar de digitar
