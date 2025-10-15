@@ -98,16 +98,16 @@ function positionBoxes() {
   const board = img.closest(".canvas-wrap") || img.parentElement;
   if (!board) return;
 
-  const imgRect   = img.getBoundingClientRect();
+  const imgRect = img.getBoundingClientRect();
   const boardRect = board.getBoundingClientRect();
 
-  const scaleX = imgRect.width  / state.natural.w;
+  const scaleX = imgRect.width / state.natural.w;
   const scaleY = imgRect.height / state.natural.h;
 
   const offX = imgRect.left - boardRect.left;
-  const offY = imgRect.top  - boardRect.top;
+  const offY = imgRect.top - boardRect.top;
 
-  const paint = (sel, obj, color) => {
+  const paint = (sel, obj, color, labelText) => {
     const el = document.querySelector(sel);
     if (!el) return;
     if (el.parentElement !== board) board.appendChild(el);
@@ -116,22 +116,43 @@ function positionBoxes() {
     if (!st.position || st.position === "static") st.position = "relative";
     if (!st.overflow) st.overflow = "hidden";
 
-    el.style.position   = "absolute";
-    el.style.left       = `${offX + obj.x * scaleX}px`;
-    el.style.top        = `${offY + obj.y * scaleY}px`;
-    el.style.width      = `${obj.w * scaleX}px`;
-    el.style.height     = `${obj.w * 0.6 * scaleY}px`;
+    const screenX = offX + obj.x * scaleX;
+    const screenY = offY + obj.y * scaleY;
+    const screenW = obj.w * scaleX;
+    const screenH = obj.w * 0.6 * scaleY;
+
+    el.style.position = "absolute";
+    el.style.left = `${screenX}px`;
+    el.style.top = `${screenY}px`;
+    el.style.width = `${screenW}px`;
+    el.style.height = `${screenH}px`;
     el.style.borderColor = color;
-    el.style.display     = "block";
+    el.style.display = "block";
+    el.style.pointerEvents = "auto";
+
+    const badge = el.querySelector(".badge");
+    if (badge) badge.textContent = labelText;
   };
 
-  paint("#box-logo",  state.logo, "#f68729");
-  if (state.textoVal.trim() !== "") paint("#box-texto", state.text, "#38bdf8");
+  paint("#box-logo", state.logo, "#f68729", "LOGO");
+  
+  if (state.textoVal.trim() !== "") {
+    paint("#box-texto", state.text, "#38bdf8", "TEXTO");
+  } else {
+    const textBox = document.querySelector("#box-texto");
+    if (textBox) textBox.style.display = "none";
+  }
 }
 
 function refresh() {
   const url = buildURL(state);
-  if (url) { img.src = url; positionBoxes(); }
+  if (!url) return;
+  
+  img.src = url;
+  
+  img.onload = () => {
+    positionBoxes();
+  };
 }
 
 /* ========= Defaults do SKU ========= */
@@ -199,6 +220,14 @@ async function loadShortLink() {
     state.natural = { w: img.naturalWidth, h: img.naturalHeight };
     $block.style.display = "block";
     positionBoxes();
+    
+    // Observar mudanças no tamanho da imagem
+    if (!window.__resizeObserver) {
+      window.__resizeObserver = new ResizeObserver(() => {
+        positionBoxes();
+      });
+      window.__resizeObserver.observe(img);
+    }
   };
 
   // 6) desenha base
@@ -272,4 +301,23 @@ $("#btn-dec")    ?.addEventListener("click", () => target()?.dec());
 $("#btn-gerar")?.addEventListener("click", (e)=>{ e.preventDefault(); gerarPrevia(); });
 
 /* ========= Boot ========= */
+// Atualizar quando texto mudar
+$("#texto")?.addEventListener("input", (e) => {
+  state.textoVal = e.target.value.trim();
+  state.hasText = state.textoVal !== "";
+  refresh();
+});
+
+// Atualizar quando fonte mudar
+$("#fonte")?.addEventListener("change", (e) => {
+  state.fonte = e.target.value;
+  refresh();
+});
+
+// Atualizar quando janela redimensionar
+window.addEventListener("resize", () => {
+  positionBoxes();
+});
+
+document.addEventListener("DOMContentLoaded", ()=>{ loadShortLink(); });
 document.addEventListener("DOMContentLoaded", ()=>{ loadShortLink(); });
