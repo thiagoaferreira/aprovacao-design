@@ -12,8 +12,8 @@ export function centerDefaults(img, natural) {
 
 /**
  * Monta a URL Cloudinary garantindo que a BASE tenha SEMPRE a mesma largura
- * da imagem carregada (state.natural.w). Assim as caixas (logo/texto) ficam
- * alinhadas 1:1 com a composição que você vê.
+ * da imagem visível (state.natural.w). Assim as caixas (logo/texto) ficam
+ * alinhadas e mover um não afeta visualmente o outro.
  */
 export function buildURL(state) {
   const {
@@ -26,11 +26,11 @@ export function buildURL(state) {
 
   if (!cloud || !baseId) return "";
 
-  // 1) Trava a largura da BASE para a mesma da imagem visível
+  // 1) Trava a largura da BASE para casar com as caixas
   const baseW = Math.max(100, Math.round(natural.w || 1000));
   const baseTransforms = [`w_${baseW}`];
 
-  // 2) Overlay do LOGO (pasta usa ":" em vez de "/")
+  // 2) Overlay do LOGO — se tiver pasta no public_id, troca "/" por ":"
   const logoLayerId = String(logoId || "").replace(/\//g, ":");
   const logoParts = [
     `l_${logoLayerId}`,
@@ -43,7 +43,7 @@ export function buildURL(state) {
     "fl_layer_apply",
   ];
 
-  // 3) Monta a URL
+  // 3) Monta a URL base
   let url = `https://res.cloudinary.com/${cloud}/image/upload/${baseTransforms.join(",")}/${logoParts.join(",")}`;
 
   // 4) Overlay do TEXTO (quando houver)
