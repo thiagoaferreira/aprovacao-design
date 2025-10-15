@@ -14,6 +14,29 @@ export function buildURL(state) {
   console.log("🔨 buildURL() chamado");
   
   const {
+    cloud, baseId,
+    natural = { w: 1000, h: 1000 },
+  } = state;
+
+  console.log("  🆔 baseId:", baseId);
+  console.log("  📐 natural:", natural);
+
+  if (!cloud || !baseId) return "";
+
+  // Apenas retorna a imagem base sem overlays (overlays ficam só nas caixas)
+  const baseW = Math.max(100, Math.round(natural.w || 1000));
+  console.log("  ⚙️ baseW calculado:", baseW);
+  
+  const finalUrl = `https://res.cloudinary.com/${cloud}/image/upload/w_${baseW}/${baseId}`;
+  
+  console.log("🔗 URL final:", finalUrl);
+  
+  return finalUrl;
+}
+ * Gera URL FINAL com todos os overlays aplicados (para aprovação/produção)
+ */
+export function buildFinalURL(state) {
+  const {
     cloud, baseId, logoId,
     logo, text, fonte,
     textoVal, hasText,
@@ -21,23 +44,12 @@ export function buildURL(state) {
     natural = { w: 1000, h: 1000 },
   } = state;
 
-  console.log("  🆔 baseId:", baseId);
-  console.log("  🆔 logoId:", logoId);
-  console.log("  📐 natural:", natural);
-  console.log("  📍 logo:", logo);
-  console.log("  📍 text:", text);
-  console.log("  📝 textoVal:", textoVal);
-  console.log("  📝 hasText:", hasText);
-
   if (!cloud || !baseId) return "";
 
-  // 1) trava a largura da base
   const baseW = Math.max(100, Math.round(natural.w || 1000));
-  console.log("  ⚙️ baseW calculado:", baseW);
-  
   const chunks = [`w_${baseW}`];
 
-  // LOGO - usar coordenadas EXATAS do state.logo
+  // LOGO
   if (logoId) {
     const logoLayerId = String(logoId).replace(/\//g, ":");
     const logoW = Math.max(10, Math.round(logo.w));
@@ -59,7 +71,7 @@ export function buildURL(state) {
     );
   }
 
-  // TEXTO - usar coordenadas EXATAS do state.text
+  // TEXTO
   if (hasText && String(textoVal).trim() !== "") {
     const enc = encodeURIComponent(textoVal);
     const textW = Math.max(8, Math.round(text.w));
@@ -80,10 +92,5 @@ export function buildURL(state) {
     );
   }
 
-  const finalUrl = `https://res.cloudinary.com/${cloud}/image/upload/${chunks.join("/")}/${baseId}`;
-  
-  console.log("🔗 URL final:", finalUrl);
-  console.log("  🧩 Chunks:", chunks);
-  
-  return finalUrl;
+  return `https://res.cloudinary.com/${cloud}/image/upload/${chunks.join("/")}/${baseId}`;
 }
