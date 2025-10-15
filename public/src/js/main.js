@@ -153,6 +153,13 @@ function positionBoxes() {
 function refresh() {
   const url = buildURL(state);
   if (!url) return;
+
+  const $aviso = document.querySelector("#aviso-logo");
+  if ($aviso) {
+    // Mostrar aviso se não houver logoId e o preview estiver visível
+    const semLogo = !state.logoId && $block.style.display !== "none";
+    $aviso.style.display = semLogo ? "block" : "none";
+  }
   
   img.src = url;
   
