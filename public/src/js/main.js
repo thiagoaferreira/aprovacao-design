@@ -43,6 +43,22 @@ let state = {
 let active = "logo";     // "logo" | "text"
 let centeredOnce = false;
 
+// ---- CONTROLES (novos) ----
+let logoCtl, textCtl; // instâncias dos módulos
+
+const onChange = () => {            // é chamado pelos módulos a cada movimento/resize/rotação
+  refreshDebounced();
+  positionBoxes();
+};
+
+const setActive = (who) => {        // atualiza seleção visual
+  active = who;
+  document.querySelector("#box-logo") ?.classList.toggle("active", who === "logo");
+  document.querySelector("#box-texto")?.classList.toggle("active", who === "text");
+};
+
+const onSelect = (who) => setActive(who);  // os módulos chamam isso quando você clica na etiqueta
+
 /* ====== Utils ====== */
 const debounce = (fn, ms=120) => { let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), ms); }; };
 const refreshDebounced = debounce(()=>{ const url = buildURL(state); if (url) img.src = url; }, 120);
@@ -205,9 +221,16 @@ async function gerarPrevia() {
 
     if (previewUrl) { img.src = previewUrl; } else { refresh(); }
 
-    // habilita drag/resize e seleção (apenas uma vez)
-    enableDragAndResize(state, ()=>{ refreshDebounced(); positionBoxes(); });
-    wireSelection();
+    // habilita drag/resize usando os MÓDULOS (apenas uma vez)
+    if (!window.__controlsReady) {
+      logoCtl = createLogoControl({ img, box: "#box-logo",  state, onChange, onSelect });
+      textCtl = createTextControl({ img, box: "#box-texto", state, onChange, onSelect });
+      window.__controlsReady = true;
+      setActive("logo"); // começa com logo selecionado
+    } else {
+      // já existem; só garante que a seleção visual bate com 'active'
+      setActive(active);
+    }
 
   } catch (e) {
     console.error(e); alert("Falha ao gerar prévia. Tente novamente.");
@@ -223,22 +246,14 @@ function clampBox(o){
   o.x = Math.max(0, Math.min(state.natural.w-40, o.x));
   o.y = Math.max(0, Math.min(state.natural.h-40, o.y));
 }
-$("#btn-rot-ccw")?.addEventListener("click", ()=>{
-  if (active==="logo") state.logoRot = (state.logoRot+270)%360; else state.textRot = (state.textRot+270)%360;
-  refreshDebounced(); positionBoxes();
-});
-$("#btn-rot-cw")?.addEventListener("click", ()=>{
-  if (active==="logo") state.logoRot = (state.logoRot+90)%360; else state.textRot = (state.textRot+90)%360;
-  refreshDebounced(); positionBoxes();
-});
-$("#btn-inc")?.addEventListener("click", ()=>{
-  const o = currentObj(); o.w += Math.round(state.natural.w*0.04); clampBox(o);
-  refreshDebounced(); positionBoxes();
-});
-$("#btn-dec")?.addEventListener("click", ()=>{
-  const o = currentObj(); o.w -= Math.round(state.natural.w*0.04); clampBox(o);
-  refreshDebounced(); positionBoxes();
-});
+// a toolbar chama os métodos do controle atualmente selecionado
+const target = () => (active === "logo" ? logoCtl : textCtl);
+
+$("#btn-rot-ccw")?.addEventListener("click", () => target()?.rotCCW());
+$("#btn-rot-cw") ?.addEventListener("click", () => target()?.rotCW());
+$("#btn-inc")    ?.addEventListener("click", () => target()?.inc());
+$("#btn-dec")    ?.addEventListener("click", () => target()?.dec());
+
 
 /* ====== Eventos principais ====== */
 $("#btn-gerar")?.addEventListener("click", (e)=>{ e.preventDefault(); gerarPrevia(); });
