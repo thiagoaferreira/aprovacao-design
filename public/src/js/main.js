@@ -76,6 +76,32 @@ async function supaGET(qs) {
 const pickCor = (prod)=> (prod?.variante ?? prod?.cor ?? prod?.color ?? "").toString().trim();
 const lower   = (s)=> (s||"").toLowerCase();
 
+// Busca os defaults de posicionamento para o SKU (os mesmos que o webhook usa)
+async function fetchSkuConfig(sku) {
+  const qs = `/rest/v1/configuracoes_produtos?sku=eq.${encodeURIComponent(sku)}&select=` +
+             `x_logo_media,y_logo_media,tamanho_logo_media,` +
+             `x_texto_media,y_texto_media,tamanho_texto_media`;
+  const rows = await supaGET(qs);
+  return rows?.[0] || null;
+}
+
+// Aplica os defaults (logo/texto) ao estado e marca que já centralizamos
+function applyConfigDefaults(cfg) {
+  if (!cfg) return false;
+  state.logo = {
+    x: +cfg.x_logo_media || 0,
+    y: +cfg.y_logo_media || 0,
+    w: +cfg.tamanho_logo_media || 100
+  };
+  state.text = {
+    x: +cfg.x_texto_media || 0,
+    y: +cfg.y_texto_media || 0,
+    w: +cfg.tamanho_texto_media || 60
+  };
+  centeredOnce = true;  // evita sobrescrever com centerDefaults
+  return true;
+}
+
 /* Extrai ids da preview_url quando o webhook não devolver os campos */
 function extractBaseId(url) {
   try {
@@ -179,6 +205,28 @@ async function loadShortLink() {
   produtos = Array.isArray(linkData.produtos) ? linkData.produtos : [];
   idx = 0; writeHeader();
 
+  const prod = produtos[idx] || {};
+  const base = `Mockup/${lower(prod.sku)}_${pickCor(prod).toLowerCase()}`;
+  state.baseId = base;
+  
+  // 👇 NOVO: ler defaults do BD e aplicar
+  try {
+    const cfg = await fetchSkuConfig(prod.sku);
+    applyConfigDefaults(cfg);
+  } catch (e) {
+    console.warn("Não foi possível ler configuracoes_produtos:", e);
+  }
+
+// quando a imagem base carregar, só pinta as caixas (nada de centralizar)
+img.onload = () => {
+  state.natural = { w: img.naturalWidth, h: img.naturalHeight };
+  $block.style.display = "block";
+  positionBoxes();
+};
+
+refresh(); // desenha base (sem overlays) e já mostra as caixas nos pontos do BD
+
+
   // define a base inicial (sem logo) para já termos algo no canvas
   const prod = produtos[idx] || {};
   const base = `Mockup/${lower(prod.sku)}_${pickCor(prod).toLowerCase()}`;
@@ -227,14 +275,10 @@ async function gerarPrevia() {
     state.hasText  = !!state.textoVal;
 
     // Quando a imagem carregar: mede e posiciona as caixas
-    img.onload = ()=>{
+    img.onload = () => {
       state.natural = { w: img.naturalWidth, h: img.naturalHeight };
-      if (!centeredOnce) {
-        const c = centerDefaults(img, state.natural);
-        state.logo = c.logo; state.text = c.text; centeredOnce = true;
-      }
       $block.style.display = "block";
-      positionBoxes();
+      positionBoxes();   // mantém as posições já vindas do BD
     };
 
     if (previewUrl) { img.src = previewUrl; } else { refresh(); }
