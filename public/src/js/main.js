@@ -1,6 +1,8 @@
 // public/src/js/main.js  (ES Module)
 import { buildURL, centerDefaults } from "./preview.js";
 import { enableDragAndResize } from "./drag.js";
+import { createLogoControl } from "./logo-control.js";
+import { createTextControl } from "./text-control.js";
 
 /* ====== CONFIG / DOM ====== */
 const CFG = window.CONFIG || {};
