@@ -48,6 +48,37 @@ let logoCtl, textCtl;
 const debounce = (fn, ms=120) => { let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), ms); }; };
 const refreshDebounced = debounce(()=>{ const url = buildURL(state); if (url) img.src = url; }, 120);
 
+const onChange = (who) => { 
+  console.log(`🔄 onChange chamado para: ${who}`, {
+    logo: state.logo,
+    text: state.text
+  });
+  
+  // Atualizar posição das caixas imediatamente (sem rebuild da URL)
+  positionBoxes();
+  updatePreviews();
+  
+  // Debounce para rebuild da URL final
+  refreshDebounced();
+};
+
+const setActive = (who) => {
+  active = who;
+  console.log(`🎯 Elemento ativo: ${who}`);
+  
+  const $logo = document.querySelector("#box-logo");
+  const $text = document.querySelector("#box-texto");
+  
+  if ($logo) $logo.classList.toggle("active", who === "logo");
+  if ($text) $text.classList.toggle("active", who === "text");
+  
+  // Atualizar classes nos controles também
+  logoCtl?.setActiveClass(who === "logo");
+  textCtl?.setActiveClass(who === "text");
+};
+
+const onSelect = (who) => setActive(who);
+
 const getP     = () => new URL(location.href).searchParams.get("p") || "";
 const pickCor  = (p) => (p?.variante ?? p?.cor ?? p?.color ?? "").toString().trim();
 const lower    = (s) => (s||"").toLowerCase();
