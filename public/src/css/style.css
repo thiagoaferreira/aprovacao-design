@@ -6,20 +6,26 @@
   --muted: #6b7280;
   --ring: #e5e7eb;
 }
-* { box-sizing: border-box; }
-body {
+
+* { 
+  box-sizing: border-box; 
+}
+
+body, html {
   margin: 0;
   font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
   background: var(--bg-dark);
   color: var(--text);
+  overscroll-behavior: contain; /* Melhora scroll no mobile */
 }
 
-/* Header */
+/* ========== HEADER ========== */
 .topbar {
   background: #000;
   color: #fff;
   border-bottom: 3px solid var(--gama-orange);
 }
+
 .topbar-inner {
   max-width: 1000px;
   margin: 0 auto;
@@ -28,117 +34,153 @@ body {
   align-items: center;
   gap: 16px;
 }
-.topbar img.logo { height: 44px; width: auto; }
-.brand .title { font-weight: 700; font-size: 16px; }
-.brand .subtitle { font-size: 12px; color: #e5e7eb; }
 
-/* Painel */
-.wrap { max-width: 1000px; margin: 24px auto; padding: 0 16px; }
+.topbar img.logo { 
+  height: 44px; 
+  width: auto; 
+}
+
+.brand .title { 
+  font-weight: 700; 
+  font-size: 16px; 
+}
+
+.brand .subtitle { 
+  font-size: 12px; 
+  color: #e5e7eb; 
+}
+
+/* ========== PAINEL ========== */
+.wrap { 
+  max-width: 1000px; 
+  margin: 24px auto; 
+  padding: 0 20px; 
+}
+
 .panel {
   background: var(--panel);
   border-radius: 18px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, .25);
   overflow: hidden;
 }
-.panel-head { padding: 18px; border-bottom: 1px solid var(--ring); }
+
+.panel-head { 
+  padding: 18px; 
+  border-bottom: 1px solid var(--ring); 
+}
+
+.panel-body { 
+  padding: 18px; 
+}
+
 .row {
-  display: flex; flex-wrap: wrap;
-  align-items: center; justify-content: space-between;
+  display: flex; 
+  flex-wrap: wrap;
+  align-items: center; 
+  justify-content: space-between;
 }
-.order-badge { color: var(--gama-orange); font-weight: 700; }
-.prod-info { display: flex; flex-wrap: wrap; gap: 10px 20px; color: #111; }
 
-/* Inputs */
-.grid { display: grid; gap: 12px; }
-.field label { display: block; font-weight: 600; margin-bottom: 6px; }
-.field input, .field select {
-  width: 100%; padding: 10px 12px;
+.order-badge { 
+  color: var(--gama-orange); 
+  font-weight: 700; 
+}
+
+.prod-info { 
+  display: flex; 
+  flex-wrap: wrap; 
+  gap: 10px 20px; 
+  color: #111; 
+}
+
+/* ========== INPUTS E BOTÕES ========== */
+.grid { 
+  display: grid; 
+  gap: 12px; 
+}
+
+.field label { 
+  display: block; 
+  font-weight: 600; 
+  margin-bottom: 6px; 
+}
+
+.field input, 
+.field select {
+  width: 100%; 
+  padding: 10px 12px;
   border: 2px solid var(--ring);
-  border-radius: 10px; font-size: 14px;
+  border-radius: 10px; 
+  font-size: 14px;
 }
+
 .btn {
-  display: inline-flex; align-items: center; justify-content: center;
-  border: 0; border-radius: 10px;
-  font-weight: 700; padding: 12px 16px; cursor: pointer;
-}
-.btn-black { background: #111; color: #fff; }
-.btn-black:hover { filter: brightness(1.05); }
-.btn-orange { background: var(--gama-orange); color: #fff; }
-.btn-orange:hover { filter: brightness(0.95); }
-.btn-outline { background: #fff; border: 2px solid var(--ring); }
-
-/* Canvas */
-.canvas-wrap {
-  position: relative; background: #f8fafc;
-  border: 2px dashed #e5e7eb; border-radius: 12px;
-  overflow: hidden;
-}
-.canvas { width: 100%; display: block; user-select: none; pointer-events: none; }
-
-.layer-box {
-  position: absolute;
-  border: 2px dashed var(--gama-orange);
-  background: rgba(246,135,41,.08);
-  border-radius: 8px;
-  touch-action: none;
-}
-.layer-box {
-  position: absolute;
-  border: 3px solid #f68729;
-  background: rgba(246, 135, 41, 0.15);
-  border-radius: 8px;
-  pointer-events: auto;
-  touch-action: none; /* Permite arrastar a caixa */
+  display: inline-flex; 
+  align-items: center; 
+  justify-content: center;
+  border: 0; 
+  border-radius: 10px;
+  font-weight: 700; 
+  padding: 12px 16px; 
+  cursor: pointer;
+  transition: filter 0.2s;
 }
 
-/* Permitir scroll no mobile fora das caixas */
-.canvas-wrap {
-  touch-action: pan-y; /* Permite scroll vertical */
+.btn-black { 
+  background: #111; 
+  color: #fff; 
 }
 
-/* Container principal - DEVE permitir scroll */
-.preview-block {
+.btn-black:hover { 
+  filter: brightness(1.1); 
+}
+
+.btn-orange { 
+  background: var(--gama-orange); 
+  color: #fff; 
+}
+
+.btn-orange:hover { 
+  filter: brightness(0.95); 
+}
+
+.btn-outline { 
+  background: #fff; 
+  border: 2px solid var(--ring); 
+}
+
+/* ========== CANVAS E PREVIEW ========== */
+.preview-block { 
+  margin-top: 16px;
   position: relative;
   width: 100%;
-  max-width: 600px;
-  margin: 0 auto;
-  /* NÃO bloquear touch aqui */
 }
 
-/* Canvas wrapper - área de trabalho */
 .canvas-wrap {
-  position: relative;
-  width: 100%;
-  padding: 20px;
-  background: #f8f9fa;
+  position: relative; 
+  background: #f8fafc;
+  border: 2px dashed #e5e7eb; 
   border-radius: 12px;
-  /* NÃO usar touch-action aqui */
+  overflow: hidden;
+  aspect-ratio: 1 / 1; /* Mantém área quadrada */
 }
 
-/* Imagem base - permite scroll */
-#preview-img {
-  display: block;
-  width: 100%;
-  height: auto;
+.canvas, 
+#preview-img { 
+  width: 100%; 
+  display: block; 
   user-select: none;
   -webkit-user-select: none;
-  /* Permite scroll passando por cima */
-  touch-action: auto;
+  pointer-events: none; /* Imagem não captura eventos */
 }
 
-/* Caixas de seleção - IMPEDEM scroll apenas quando tocadas */
+/* ========== CAIXAS DE SELEÇÃO (LOGO E TEXTO) ========== */
 .layer-box {
   position: absolute;
   border: 3px solid #f68729;
   background: rgba(246, 135, 41, 0.15);
   border-radius: 8px;
   cursor: move;
-  
-  /* ✅ CRÍTICO: apenas impedir scroll quando SEGURAR a caixa */
-  touch-action: none;
-  pointer-events: auto;
-  
-  /* Z-index para ficar acima da imagem */
+  pointer-events: auto; /* ✅ Caixa captura cliques */
   z-index: 10;
 }
 
@@ -154,21 +196,23 @@ body {
   z-index: 20;
 }
 
-/* Elementos de preview DENTRO das caixas */
+/* ========== ELEMENTOS DE PREVIEW (LOGO E TEXTO) ========== */
 .elemento-preview {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  pointer-events: none; /* NÃO captura eventos */
+  pointer-events: none; /* ❌ NÃO captura eventos */
   user-select: none;
-  z-index: 1;
+  z-index: 1; /* Fica ATRÁS das alças */
 }
 
 #logo-preview {
   opacity: 0.9;
   object-fit: contain;
+  width: 100%;
+  height: 100%;
 }
 
 #texto-preview {
@@ -181,9 +225,11 @@ body {
   justify-content: center;
   font-weight: bold;
   color: #000;
+  width: 100%;
+  height: 100%;
 }
 
-/* Badge - NÃO captura eventos */
+/* ========== BADGE (ETIQUETA) ========== */
 .badge {
   position: absolute;
   top: -32px;
@@ -196,7 +242,7 @@ body {
   font-size: 11px;
   font-weight: 600;
   white-space: nowrap;
-  pointer-events: none;
+  pointer-events: none; /* ❌ NÃO captura eventos */
   z-index: 3;
 }
 
@@ -205,7 +251,12 @@ body {
   animation: pulse 2s infinite;
 }
 
-/* Alças de redimensionamento - CAPTURAM eventos */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* ========== ALÇAS DE REDIMENSIONAMENTO ========== */
 .handle {
   position: absolute;
   width: 16px;
@@ -213,8 +264,7 @@ body {
   background: white;
   border: 2px solid currentColor;
   border-radius: 50%;
-  pointer-events: auto; /* ✅ IMPORTANTE */
-  touch-action: none; /* Impedir scroll ao tocar nas alças */
+  pointer-events: auto; /* ✅ Captura eventos */
   z-index: 2;
 }
 
@@ -223,8 +273,138 @@ body {
 .handle.bl { bottom: -8px; left: -8px; cursor: sw-resize; }
 .handle.br { bottom: -8px; right: -8px; cursor: se-resize; }
 
-/* Mobile: aumentar área de toque das alças */
+/* ========== TOOLBAR DE EDIÇÃO ========== */
+.edit-toolbar {
+  display: grid; 
+  grid-template-columns: repeat(4, minmax(44px, 1fr)); 
+  gap: 8px;
+  margin: 12px 0 8px;
+}
+
+.edit-toolbar button {
+  border: 1px solid var(--ring);
+  background: #fff; 
+  border-radius: 10px; 
+  padding: 10px 0;
+  font-size: 16px; 
+  line-height: 1; 
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.edit-toolbar button:active { 
+  transform: scale(0.96); 
+}
+
+.edit-hint { 
+  font-size: 12px; 
+  opacity: 0.75; 
+  margin: 4px 0 0; 
+}
+
+/* ========== MODAL ========== */
+.modal {
+  position: fixed; 
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: none; 
+  align-items: center; 
+  justify-content: center;
+  z-index: 50;
+}
+
+.modal-card {
+  width: min(92vw, 420px);
+  background: #fff; 
+  border-radius: 14px;
+  padding: 18px; 
+  text-align: center;
+}
+
+.meter { 
+  width: 100%; 
+  height: 18px; 
+  background: #eef2ff; 
+  border-radius: 999px; 
+  overflow: hidden; 
+  position: relative; 
+  margin-top: 10px; 
+}
+
+.meter > i { 
+  position: absolute; 
+  left: 0; 
+  top: 0; 
+  bottom: 0; 
+  width: 0%; 
+  background: linear-gradient(90deg, #f68729, #d67420); 
+  transition: width 0.3s; 
+}
+
+.meter span { 
+  position: absolute; 
+  inset: 0; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  font-weight: 700; 
+  font-size: 12px; 
+  color: #111; 
+}
+
+/* ========== OVERLAY DE PROGRESSO ========== */
+.overlay {
+  position: fixed; 
+  inset: 0; 
+  background: rgba(0, 0, 0, 0.65);
+  display: grid; 
+  place-items: center; 
+  z-index: 9999;
+}
+
+.overlay[hidden] { 
+  display: none; 
+}
+
+.overlay-modal {
+  background: #111; 
+  color: #fff; 
+  padding: 20px 24px; 
+  border-radius: 12px;
+  min-width: 220px; 
+  text-align: center; 
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.4);
+}
+
+.spinner {
+  width: 28px; 
+  height: 28px; 
+  border: 3px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff; 
+  border-radius: 50%;
+  margin: 8px auto 10px; 
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin { 
+  to { transform: rotate(360deg); } 
+}
+
+/* ========== TELA DE CONCLUSÃO ========== */
+.done { 
+  display: none; 
+  padding: 48px 18px; 
+  text-align: center; 
+}
+
+.done h2 { 
+  font-size: 26px; 
+  margin: 0 0 10px; 
+}
+
+/* ========== RESPONSIVO ========== */
 @media (max-width: 768px) {
+  /* Aumentar área de toque das alças no mobile */
   .handle {
     width: 24px;
     height: 24px;
@@ -236,168 +416,13 @@ body {
   .handle.br { bottom: -12px; right: -12px; }
 }
 
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
-}
-
-/* Área fora das caixas permite scroll */
-#canvas-wrap > img {
-  touch-action: pan-y; /* Permite scroll na imagem */
-}
-
-/* As alças sempre capturam o toque */
-.handle {
-  touch-action: none;
-}
-.layer-box.text {
-  border-color: #38bdf8;
-  background: rgba(56,189,248,.08);
-}
-.handle {
-  width: 12px; height: 12px; border-radius: 3px;
-  background: #111; position: absolute;
-}
-.tl { left: -6px; top: -6px } .tr { right: -6px; top: -6px }
-.bl { left: -6px; bottom: -6px } .br { right: -6px; bottom: -6px }
-.badge {
-  position: absolute; top: -26px; left: 50%;
-  transform: translateX(-50%);
-  background: #000; color: #fff; font-weight: 700;
-  font-size: 11px; padding: 4px 8px;
-  border-radius: 6px; pointer-events: none;
-  white-space: nowrap;
-}
-
-/* Modal */
-.modal {
-  position: fixed; inset: 0;
-  background: rgba(0,0,0,.6);
-  display: none; align-items: center; justify-content: center;
-  z-index: 50;
-}
-.modal-card {
-  width: min(92vw,420px);
-  background: #fff; border-radius: 14px;
-  padding: 18px; text-align: center;
-}
-.meter { width: 100%; height: 18px; background: #eef2ff; border-radius: 999px; overflow: hidden; position: relative; margin-top: 10px; }
-.meter > i { position: absolute; left: 0; top: 0; bottom: 0; width: 0%; background: linear-gradient(90deg,#f68729,#d67420); transition: width .3s; }
-.meter span { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; color: #111; }
-
-.done { display: none; padding: 48px 18px; text-align: center; }
-.done h2 { font-size: 26px; margin: 0 0 10px; }
-
-/* ----- Ajustes de espaçamento ----- */
-.panel-body { padding: 18px; }         /* respiro interno do painel */
-.preview-block { margin-top: 16px; }   /* espaço acima do bloco de prévia */
-.wrap { padding: 0 20px; }             /* respiro lateral na página */
-
-/* (Opcional) melhora o espaço de cabeçalho em telas grandes */
 @media (min-width: 1024px) {
-  .topbar-inner { padding-left: 24px; padding-right: 24px; }
-  .wrap { padding: 0 24px; }
-}
-
-/* (Opcional) mantém a área do mockup quadrada, evitando “pulos” de layout */
-.canvas-wrap { aspect-ratio: 1 / 1; }
-/* Overlay de progresso */
-.overlay {
-  position: fixed; inset: 0; background: rgba(0,0,0,.65);
-  display: grid; place-items: center; z-index: 9999;
-}
-.overlay[hidden] { display: none; }
-.overlay-modal {
-  background: #111; color: #fff; padding: 20px 24px; border-radius: 12px;
-  min-width: 220px; text-align: center; box-shadow: 0 10px 35px rgba(0,0,0,.4);
-}
-.spinner {
-  width: 28px; height: 28px; border: 3px solid rgba(255,255,255,.35);
-  border-top-color: #fff; border-radius: 50%;
-  margin: 8px auto 10px; animation: spin 1s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-
-/* ======== Edição: toolbar e etiquetas ======== */
-.canvas-wrap { overflow: hidden; } /* evita que LOGO/TEXTO “saiam” visualmente do quadro */
-
-.layer-box { position: absolute; border: 2px dashed rgba(0,0,0,.25); border-radius: 8px; }
-.layer-box .label{
-  position: absolute; top: -16px; left: -4px;
-  font-size: 11px; line-height: 1; font-weight: 700;
-  padding: 3px 6px; border-radius: 6px;
-  background: #111; color: #fff;
-  pointer-events: auto; user-select: none;
-}
-.layer-box .handle{ width: 10px; height: 10px; border-radius: 2px; }
-.layer-box.active{ outline: 2px solid #22c55e; outline-offset: 2px; }
-
-.edit-toolbar{
-  display: grid; grid-template-columns: repeat(4, minmax(44px, 1fr)); gap: 8px;
-  margin: 8px 0 4px;
-}
-.edit-toolbar button{
-  border: 1px solid var(--ring, #e5e7eb);
-  background: #fff; border-radius: 10px; padding: 8px 0;
-  font-size: 16px; line-height: 1; cursor: pointer;
-}
-.edit-toolbar button:active{ transform: scale(0.98); }
-.edit-hint{ font-size: 12px; opacity: .75; margin: 4px 0 0; }
-
-/* mantém LOGO/TEXTO dentro da área e reduz as etiquetas */
-#editorBoard, .editor-board, #previewBoard, #preview-area { position: relative; overflow: hidden; }
-.draggable { position: absolute; touch-action: none; }
-.draggable .label, .draggable .badge { font-size: 11px; padding: 2px 6px; }
-.is-selected { outline: 2px dashed #14a; outline-offset: 2px; }
-
-/* Ancoragem das caixas ao quadro de edição */
-#preview-block .canvas-wrap { position: relative; overflow: hidden; }
-#box-logo, #box-texto { position: absolute; }
-
-/* Elementos de preview dentro das caixas */
-.elemento-preview {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none; /* NÃO captura cliques */
-  user-select: none;
-  z-index: 1; /* Fica ATRÁS das alças */
-}
-
-/* Badge fica na frente */
-.badge {
-  position: relative;
-  z-index: 3;
-  pointer-events: none;
-}
-
-/* Alças ficam na frente */
-.handle {
-  position: absolute;
-  z-index: 2;
-  pointer-events: auto; /* Capturam cliques */
-}
-
-/* A caixa captura cliques */
-.layer-box {
-  position: absolute;
-  border: 3px solid #f68729;
-  background: rgba(246, 135, 41, 0.15);
-  border-radius: 8px;
-  pointer-events: auto; /* ✅ Captura cliques */
-  cursor: move;
-  touch-action: none;
-}
-
-#logo-preview {
-  opacity: 0.9;
-}
-
-#texto-preview {
-  opacity: 0.9;
-  text-align: center;
-  word-break: break-word;
-  padding: 4px;
+  .topbar-inner { 
+    padding-left: 24px; 
+    padding-right: 24px; 
+  }
+  
+  .wrap { 
+    padding: 0 24px; 
+  }
 }
