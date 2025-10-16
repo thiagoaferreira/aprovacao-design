@@ -17,6 +17,10 @@ export function createLogoControl({ img, box, state, onChange, onSelect }) {
   // drag/resize
   let dragging = false, resizing = false, start = {};
   function down(e) {
+    console.log("🖱️ LOGO: down event", {
+      target: e.target,
+      resizing: e.target.classList?.contains("handle")
+    });
     select();
     dragging  = true;
     resizing  = e.target.classList?.contains("handle");
