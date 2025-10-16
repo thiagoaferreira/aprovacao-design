@@ -90,6 +90,7 @@ async function supaGET(qs) {
   if (!r.ok) throw new Error(`Supabase ${r.status}`);
   return r.json();
 }
+
 function extractBaseId(url) {
   try {
     const u = new URL(url);
@@ -99,11 +100,12 @@ function extractBaseId(url) {
     return seg.join("/").replace(/\.[a-z0-9]+$/i,"");
   } catch { return ""; }
 }
+
 function extractLogoId(url) {
   try {
     const m = /\/l_([^,]+)/.exec(url || "");
     if (!m) return "";
-    const raw = decodeURIComponent(m[1]); // ex.: "Logo:logo_123" ou "Logo/logo_123"
+    const raw = decodeURIComponent(m[1]);
     return raw.includes(":") ? raw.replace(/:/g, "/") : raw;
   } catch { return ""; }
 }
@@ -183,10 +185,6 @@ function positionBoxes() {
     }
   };
 
-    const badge = el.querySelector(".badge");
-    if (badge) badge.textContent = labelText;
-  };
-
   // ✅ PASSAR ROTAÇÃO PARA A FUNÇÃO
   paint("#box-logo", state.logo, "#f68729", "LOGO", state.logoRot || 0);
   
@@ -243,7 +241,7 @@ function refresh() {
   
   img.onload = () => {
     positionBoxes();
-    updatePreviews(); // ✅ ADICIONAR ESTA LINHA
+    updatePreviews();
   };
 }
 
@@ -255,6 +253,7 @@ async function fetchSkuConfig(sku) {
   const rows = await supaGET(qs);
   return rows?.[0] || null;
 }
+
 function applyConfigDefaults(cfg) {
   if (!cfg) return false;
   
@@ -283,27 +282,22 @@ async function loadShortLink() {
   const p = getP();
   if (!p) return;
 
-  // 1) link do Supabase
   const rows = await supaGET(`/rest/v1/links_aprovacao?id=eq.${encodeURIComponent(p)}&select=*`);
   linkData = rows?.[0];
   if (!linkData) throw new Error("Link não encontrado");
 
-  // 2) produtos + cabeçalho
   produtos = Array.isArray(linkData.produtos) ? linkData.produtos : [];
   idx = 0;
   writeHeader();
 
-  // 3) base inicial (mockup)
   const prod = produtos[idx] || {};
   state.baseId = `Mockup/${lower(prod.sku)}_${pickCor(prod).toLowerCase()}`;
 
-  // 4) aplicar defaults do BD (ANTES de carregar a imagem)
   try {
     const cfg = await fetchSkuConfig(prod.sku);
     if (cfg && applyConfigDefaults(cfg)) {
       console.log("✅ Usando coordenadas do BD");
     } else {
-      // Se não houver config, usa defaults centralizados
       const defaults = centerDefaults(null, state.natural);
       state.logo = defaults.logo;
       state.text = defaults.text;
@@ -312,14 +306,12 @@ async function loadShortLink() {
     }
   } catch (e) {
     console.warn("⚠️ Não foi possível ler configuracoes_produtos:", e);
-    // Fallback para defaults centralizados
     const defaults = centerDefaults(null, state.natural);
     state.logo = defaults.logo;
     state.text = defaults.text;
     centeredOnce = true;
   }
 
-  // 5) quando a base carregar, desenhar caixas
   img.onload = () => {
     state.natural = { w: img.naturalWidth, h: img.naturalHeight };
     
@@ -332,7 +324,6 @@ async function loadShortLink() {
     $block.style.display = "block";
     positionBoxes();
     
-    // Observar mudanças no tamanho da imagem
     if (!window.__resizeObserver) {
       window.__resizeObserver = new ResizeObserver(() => {
         positionBoxes();
@@ -341,7 +332,6 @@ async function loadShortLink() {
     }
   };
 
-  // 6) desenha base (SEM logo ainda, pois não há logoId)
   refresh();
 }
 
@@ -350,7 +340,7 @@ function buildFormData() {
   const fd = new FormData();
   const prod = produtos[idx] || {};
   const file = $("#logo")?.files?.[0] || null;
-  if (file) fd.append("logo", file); // n8n espera "logo"
+  if (file) fd.append("logo", file);
   fd.append("sku", prod.sku || "");
   fd.append("cor", pickCor(prod) || "");
   fd.append("order_id",     linkData?.order_id     ?? "");
@@ -371,7 +361,6 @@ async function gerarPrevia() {
     
     const previewUrl = (Array.isArray(data) ? data[0]?.preview_url : data?.preview_url) || null;
 
-    // IDs vindos do webhook OU extraídos da preview_url
     state.baseId = data.mockup_public_id || state.baseId || (previewUrl ? extractBaseId(previewUrl) : state.baseId);
     state.logoId = data.logo_public_id   || state.logoId || (previewUrl ? extractLogoId(previewUrl) : state.logoId);
 
@@ -380,11 +369,10 @@ async function gerarPrevia() {
       logoId: state.logoId
     });
 
-    // Atualizar preview da logo imediatamente
     if (state.logoId) {
       const $logoImg = document.querySelector("#logo-preview");
       if ($logoImg) {
-        const logoUrl = `https://res.cloudinary.com/${state.cloud}/image/upload/e_bgremoval,w_200/${state.logoId}`;
+        const logoUrl = `https://res.cloudinary.com/${state.cloud}/image/upload/e_bgremoval,w_300,h_300,c_fit/${state.logoId}`;
         $logoImg.src = logoUrl;
       }
     }
@@ -398,14 +386,12 @@ async function gerarPrevia() {
       
       console.log("📐 Dimensões naturais da imagem:", state.natural);
       
-      // Mostrar caixas após ter dimensões
       $block.style.display = "block";
       const $boxLogo = document.querySelector("#box-logo");
       const $boxTexto = document.querySelector("#box-texto");
       if ($boxLogo) $boxLogo.style.display = "block";
       if ($boxTexto && state.hasText) $boxTexto.style.display = "block";
       
-      // Se for a primeira vez, aplicar defaults do BD ou centralizar
       if (!centeredOnce) {
         const prod = produtos[idx] || {};
         fetchSkuConfig(prod.sku).then(cfg => {
@@ -419,12 +405,14 @@ async function gerarPrevia() {
           }
           centeredOnce = true;
           positionBoxes();
+          updatePreviews();
         });
       } else {
         positionBoxes();
+        updatePreviews();
       }
       
-      // ✅ SEMPRE inicializar controles (fora do if)
+      // ✅ SEMPRE inicializar controles
       if (!window.__controlsReady) {
         console.log("🎮 Inicializando controles...");
         
@@ -449,12 +437,10 @@ async function gerarPrevia() {
         console.log("✅ Controles criados e ativos");
       } else {
         console.log("✅ Controles já existem, apenas atualizando");
-        // Reativar controles existentes
         setActive("logo");
       }
     };
 
-    // Usar previewUrl se existir, senão montar manualmente
     if (previewUrl) { 
       console.log("🖼️ Usando preview_url do webhook");
       img.src = previewUrl; 
@@ -473,44 +459,56 @@ async function gerarPrevia() {
 
 /* ========= Toolbar (aponta para o selecionado) ========= */
 const target = () => (active === "logo" ? logoCtl : textCtl);
-$("#btn-rot-ccw")?.addEventListener("click", () => target()?.rotCCW());
-$("#btn-rot-cw") ?.addEventListener("click", () => target()?.rotCW());
-$("#btn-inc")    ?.addEventListener("click", () => target()?.inc());
-$("#btn-dec")    ?.addEventListener("click", () => target()?.dec());
+
+// ✅ IMPORTANTE: NÃO chamar setActive aqui, apenas executar a ação
+$("#btn-rot-ccw")?.addEventListener("click", () => {
+  console.log(`🔄 Rotacionar CCW: ${active}`);
+  target()?.rotCCW();
+});
+
+$("#btn-rot-cw")?.addEventListener("click", () => {
+  console.log(`🔄 Rotacionar CW: ${active}`);
+  target()?.rotCW();
+});
+
+$("#btn-inc")?.addEventListener("click", () => {
+  console.log(`➕ Aumentar: ${active}`);
+  target()?.inc();
+});
+
+$("#btn-dec")?.addEventListener("click", () => {
+  console.log(`➖ Diminuir: ${active}`);
+  target()?.dec();
+});
 
 /* ========= Botão gerar ========= */
 $("#btn-gerar")?.addEventListener("click", (e)=>{ e.preventDefault(); gerarPrevia(); });
 
-/* ========= Boot ========= */
-// Atualizar quando texto mudar
+/* ========= Event listeners ========= */
 $("#texto")?.addEventListener("input", (e) => {
   state.textoVal = e.target.value.trim();
   state.hasText = state.textoVal !== "";
   
-  // Atualizar preview visual imediatamente
   const $textoDiv = document.querySelector("#texto-preview");
   if ($textoDiv) {
     $textoDiv.textContent = state.textoVal;
   }
   
-  // Atualizar visibilidade da caixa
   const $boxTexto = document.querySelector("#box-texto");
   if ($boxTexto) {
     $boxTexto.style.display = state.textoVal ? "block" : "none";
   }
   
-  // Atualizar posição da caixa se ela já estiver visível
   if (state.textoVal && $block.style.display !== "none") {
     positionBoxes();
   }
   
-  refreshDebounced(); // URL só atualiza após parar de digitar
+  refreshDebounced();
 });
 
 $("#fonte")?.addEventListener("change", (e) => {
   state.fonte = e.target.value;
   
-  // Atualizar preview visual
   const $textoDiv = document.querySelector("#texto-preview");
   if ($textoDiv) {
     $textoDiv.style.fontFamily = state.fonte;
@@ -519,16 +517,9 @@ $("#fonte")?.addEventListener("change", (e) => {
   refresh();
 });
 
-// Atualizar quando fonte mudar
-$("#fonte")?.addEventListener("change", (e) => {
-  state.fonte = e.target.value;
-  refresh();
-});
-
-// Atualizar quando janela redimensionar
 window.addEventListener("resize", () => {
   positionBoxes();
 });
 
-document.addEventListener("DOMContentLoaded", ()=>{ loadShortLink(); });
+/* ========= Boot ========= */
 document.addEventListener("DOMContentLoaded", ()=>{ loadShortLink(); });
