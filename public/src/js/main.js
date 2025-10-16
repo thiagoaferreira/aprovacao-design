@@ -157,16 +157,14 @@ function positionBoxes() {
     const screenY = offY + obj.y * scaleY;
     const screenW = obj.w * scaleX;
     
-    // ✅ ALTURA DINÂMICA: maior para texto, menor para logo
+    // ✅ ALTURA DINÂMICA
     let screenH;
     if (sel === "#box-texto") {
-      // Texto precisa de mais altura (proporção retangular)
-      screenH = obj.w * 0.4 * scaleY; // 40% da largura
+      screenH = obj.w * 0.4 * scaleY; // Texto mais retangular
     } else {
-      // Logo é mais quadrada
-      screenH = obj.w * 0.6 * scaleY; // 60% da largura
+      screenH = obj.w * 0.6 * scaleY; // Logo mais quadrada
     }
-    
+
     el.style.position = "absolute";
     el.style.left = `${screenX}px`;
     el.style.top = `${screenY}px`;
@@ -176,9 +174,14 @@ function positionBoxes() {
     el.style.display = "block";
     el.style.pointerEvents = "auto";
     
-    // ✅ APLICAR ROTAÇÃO NA CAIXA
-    el.style.transform = `rotate(${rotation}deg)`;
-    el.style.transformOrigin = "center center";
+    // ❌ NÃO aplicar rotação visual (confunde o usuário)
+    // A rotação será aplicada apenas na URL final do Cloudinary
+
+    const badge = el.querySelector(".badge");
+    if (badge) {
+      badge.textContent = `${labelText} ${rotation ? `(${rotation}°)` : ''}`.trim();
+    }
+  };
 
     const badge = el.querySelector(".badge");
     if (badge) badge.textContent = labelText;
@@ -200,24 +203,29 @@ function updatePreviews() {
   const $logoImg = document.querySelector("#logo-preview");
   const $textoDiv = document.querySelector("#texto-preview");
   
-  // LOGO: mostrar a logo processada
+  // LOGO: mostrar a logo processada SEM fundo
   if (state.logoId && $logoImg) {
-    const logoUrl = `https://res.cloudinary.com/${state.cloud}/image/upload/e_bgremoval,w_200/${state.logoId}`;
+    // ✅ SEMPRE aplicar bgremoval
+    const logoUrl = `https://res.cloudinary.com/${state.cloud}/image/upload/e_bgremoval,w_300,h_300,c_fit/${state.logoId}`;
     $logoImg.src = logoUrl;
-    $logoImg.style.transform = `rotate(${state.logoRot || 0}deg)`;
+    $logoImg.style.display = "block";
+  } else if ($logoImg) {
+    $logoImg.style.display = "none";
   }
   
   // TEXTO: mostrar o texto
-  if ($textoDiv) {
+  if ($textoDiv && state.textoVal) {
     $textoDiv.textContent = state.textoVal || "";
     $textoDiv.style.fontFamily = state.fonte || "Arial";
     
-    // ✅ ESCALAR O TEXTO baseado na largura da caixa
-    // A largura da caixa (state.text.w) define o tamanho da fonte
-    const fontSize = Math.max(12, Math.round(state.text.w * 0.6)); // 60% da largura
+    // ✅ CORRIGIR: Tamanho relativo à caixa (não tão grande)
+    const fontSize = Math.max(12, Math.min(48, Math.round(state.text.w * 0.3))); // 30% da largura
     $textoDiv.style.fontSize = `${fontSize}px`;
-    
-    $textoDiv.style.transform = `rotate(${state.textRot || 0}deg)`;
+    $textoDiv.style.lineHeight = "1.2";
+    $textoDiv.style.whiteSpace = "normal"; // ❌ REMOVER pre-wrap para não ficar vertical
+    $textoDiv.style.display = "flex";
+    $textoDiv.style.alignItems = "center";
+    $textoDiv.style.justifyContent = "center";
   }
 }
 
