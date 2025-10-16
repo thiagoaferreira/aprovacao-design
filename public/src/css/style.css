@@ -444,28 +444,80 @@ body, html {
   font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
   background: var(--bg-dark);
   color: var(--text);
-  /* ✅ Permitir scroll sempre */
-  overflow-y: auto !important;
+  /* ✅ CRÍTICO: Permitir scroll SEMPRE */
+  touch-action: pan-y pan-x !important;
+  overflow-y: scroll !important;
   -webkit-overflow-scrolling: touch;
-  height: auto !important;
-  min-height: 100vh;
 }
 
-/* Container principal permite scroll */
-.wrap {
-  max-width: 1000px; 
-  margin: 24px auto; 
-  padding: 0 20px;
+/* ========== CAIXAS DE SELEÇÃO (LOGO E TEXTO) ========== */
+.layer-box {
+  position: absolute;
+  border: 3px solid #f68729;
+  background: rgba(246, 135, 41, 0.15);
+  border-radius: 8px;
+  cursor: move;
+  pointer-events: auto;
+  z-index: 10;
+  /* ✅ Permitir scroll até arrastar */
+  touch-action: pan-y pan-x;
 }
 
-/* Canvas wrapper NÃO bloqueia scroll */
-.canvas-wrap {
-  position: relative; 
-  background: #f8fafc;
-  border: 2px dashed #e5e7eb; 
-  border-radius: 12px;
-  overflow: hidden;
-  aspect-ratio: 1 / 1;
+/* Quando arrastando, bloquear scroll */
+.layer-box.dragging {
+  touch-action: none !important;
+}
+
+/* ========== ELEMENTOS DE PREVIEW (ESCONDER ATÉ CARREGAR) ========== */
+.elemento-preview {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  user-select: none;
+  z-index: 1;
+  /* ✅ Esconder por padrão */
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s;
+}
+
+/* Só mostrar quando tiver src/conteúdo */
+#logo-preview[src]:not([src=""]) {
+  opacity: 1;
+  visibility: visible;
+}
+
+#texto-preview:not(:empty) {
+  opacity: 1;
+  visibility: visible;
+  display: flex !important;
+}
+
+#logo-preview {
+  object-fit: contain;
+  width: 100%;
+  height: 100%;
+  /* ✅ FORÇAR transparência */
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+#texto-preview {
+  text-align: center;
+  word-break: break-word;
+  padding: 4px;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  color: #000;
+  width: 100%;
+  height: 100%;
+  /* ✅ FORÇAR transparência */
+  background: transparent !important;
+  background-color: transparent !important;
 }
 
 /* ========== CAIXAS DE SELEÇÃO (LOGO E TEXTO) ========== */
