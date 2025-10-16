@@ -1,63 +1,126 @@
 // public/src/js/logo-control.js
 export function createLogoControl({ img, box, state, onChange, onSelect }) {
-  const el = typeof box === "string" ? document.querySelector(box) : box;
-  if (!el) throw new Error("[logo] #box-logo não encontrado");
-
-  // seleção
-  function select() { onSelect?.("logo"); }
-
-  // conversão px tela -> px imagem
-  function toImage(dx, dy) {
-    const r = img.getBoundingClientRect();
-    const sx = state.natural.w / r.width;
-    const sy = state.natural.h / r.height;
-    return { ix: dx * sx, iy: dy * sy };
+  const boxEl = typeof box === "string" ? document.querySelector(box) : box;
+  if (!boxEl) {
+    console.error("❌ Box de logo não encontrado:", box);
+    return null;
   }
 
-  // drag/resize
-  let dragging = false, resizing = false, start = {};
+  let dragging = false;
+  let resizing = false;
+  let startX = 0, startY = 0;
+  let startObjX = 0, startObjY = 0, startW = 0;
+  let currentHandle = null;
+
+  function select() {
+    onSelect?.("logo");
+  }
+
   function down(e) {
-    console.log("🖱️ LOGO: down event", {
+    console.log(`🖱️ LOGO: down event`, {
       target: e.target,
       resizing: e.target.classList?.contains("handle")
     });
-    select();
-    dragging  = true;
-    resizing  = e.target.classList?.contains("handle");
-    start = { x: e.clientX, y: e.clientY, X: state.logo.x, Y: state.logo.y, W: state.logo.w };
-    el.setPointerCapture?.(e.pointerId);
+    
     e.preventDefault();
-    document.addEventListener("pointermove", move);
-    document.addEventListener("pointerup",   up);
+    e.stopPropagation();
+    
+    select();
+    dragging = true;
+    
+    // ✅ ADICIONAR classe para bloquear scroll
+    boxEl.classList.add("dragging");
+    
+    resizing = e.target.classList?.contains("handle");
+    if (resizing) {
+      currentHandle = e.target.className.split(" ").find(c => ["tl","tr","bl","br"].includes(c));
+    }
+
+    const touch = e.touches?.[0] || e;
+    startX = touch.clientX;
+    startY = touch.clientY;
+    startObjX = state.logo.x;
+    startObjY = state.logo.y;
+    startW = state.logo.w;
   }
+
   function move(e) {
     if (!dragging) return;
-    const { ix, iy } = toImage(e.clientX - start.x, e.clientY - start.y);
+    e.preventDefault();
+
+    const touch = e.touches?.[0] || e;
+    const dx = touch.clientX - startX;
+    const dy = touch.clientY - startY;
+
+    const imgRect = img.getBoundingClientRect();
+    const scaleX = state.natural.w / imgRect.width;
+    const scaleY = state.natural.h / imgRect.height;
+
     if (resizing) {
-      state.logo.w = Math.max(20, Math.min(state.natural.w, start.W + ix));
+      const naturalDx = dx * scaleX;
+      const naturalDy = dy * scaleY;
+      
+      if (currentHandle === "br") {
+        const delta = Math.max(naturalDx, naturalDy);
+        state.logo.w = Math.max(20, startW + delta);
+      } else if (currentHandle === "bl") {
+        state.logo.w = Math.max(20, startW - naturalDx);
+      } else if (currentHandle === "tr") {
+        state.logo.w = Math.max(20, startW + naturalDx);
+      } else if (currentHandle === "tl") {
+        const delta = Math.max(-naturalDx, -naturalDy);
+        state.logo.w = Math.max(20, startW + delta);
+      }
     } else {
-      state.logo.x = Math.max(0, Math.min(state.natural.w - 40, start.X + ix));
-      state.logo.y = Math.max(0, Math.min(state.natural.h - 40, start.Y + iy));
+      state.logo.x = startObjX + dx * scaleX;
+      state.logo.y = startObjY + dy * scaleY;
     }
+
     onChange?.("logo");
   }
-  function up(e) {
-    dragging = false;
-    el.releasePointerCapture?.(e.pointerId);
-    document.removeEventListener("pointermove", move);
-    document.removeEventListener("pointerup",   up);
-  }
-  el.addEventListener("pointerdown", down);
 
-  // ações da toolbar
-  function inc() { state.logo.w = Math.min(state.natural.w, state.logo.w + Math.round(state.natural.w*0.04)); onChange?.("logo"); }
-  function dec() { state.logo.w = Math.max(20, state.logo.w - Math.round(state.natural.w*0.04));             onChange?.("logo"); }
-  function rotCW()  { state.logoRot = ((state.logoRot||0)+90)%360;  onChange?.("logo"); }
-  function rotCCW() { state.logoRot = ((state.logoRot||0)+270)%360; onChange?.("logo"); }
+  function up() {
+    dragging = false;
+    resizing = false;
+    currentHandle = null;
+    
+    // ✅ REMOVER classe para permitir scroll novamente
+    boxEl.classList.remove("dragging");
+  }
+
+  // Event listeners
+  boxEl.addEventListener("mousedown", down);
+  boxEl.addEventListener("touchstart", down, { passive: false });
+  
+  document.addEventListener("mousemove", move);
+  document.addEventListener("touchmove", move, { passive: false });
+  
+  document.addEventListener("mouseup", up);
+  document.addEventListener("touchend", up);
 
   return {
-    select,
-    setActiveClass(is){ el.classList.toggle("active", !!is); },
-    inc, dec, rotCW, rotCCW
+    rotCCW: () => { 
+      state.logoRot = (state.logoRot - 90) % 360; 
+      onChange?.("logo"); 
+    },
+    rotCW: () => { 
+      state.logoRot = (state.logoRot + 90) % 360; 
+      onChange?.("logo"); 
+    },
+    inc: () => { 
+      state.logo.w = Math.min(500, state.logo.w + 10); 
+      onChange?.("logo"); 
+    },
+    dec: () => { 
+      state.logo.w = Math.max(20, state.logo.w - 10); 
+      onChange?.("logo"); 
+    },
+    setActiveClass: (isActive) => {
+      if (isActive) {
+        boxEl.classList.add("active");
+      } else {
+        boxEl.classList.remove("active");
+      }
+    }
   };
 }
