@@ -96,6 +96,34 @@ body {
   touch-action: pan-y; /* Permite scroll vertical */
 }
 
+/* Container principal permite scroll */
+.preview-block {
+  touch-action: pan-y pan-x; /* Permite scroll em todas direções */
+  overflow: auto;
+}
+
+.canvas-wrap {
+  touch-action: pan-y; /* Permite scroll vertical */
+  position: relative;
+  overflow: visible;
+}
+
+/* Caixas só capturam toque quando SEGURAR */
+.layer-box {
+  position: absolute;
+  border: 3px solid #f68729;
+  background: rgba(246, 135, 41, 0.15);
+  border-radius: 8px;
+  pointer-events: auto;
+  cursor: move;
+  touch-action: none; /* Desabilita scroll APENAS quando tocar na caixa */
+}
+
+/* Área fora das caixas permite scroll */
+#canvas-wrap > img {
+  touch-action: pan-y; /* Permite scroll na imagem */
+}
+
 /* As alças sempre capturam o toque */
 .handle {
   touch-action: none;
