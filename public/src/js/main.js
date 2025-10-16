@@ -203,12 +203,19 @@ function updatePreviews() {
   
   // LOGO: mostrar a logo processada SEM fundo
   if (state.logoId && $logoImg) {
-    // ✅ SEMPRE aplicar bgremoval
-    const logoUrl = `https://res.cloudinary.com/${state.cloud}/image/upload/e_bgremoval,w_300,h_300,c_fit/${state.logoId}`;
+    // ✅ Forçar fundo transparente + formato PNG
+    const logoUrl = `https://res.cloudinary.com/${state.cloud}/image/upload/e_bgremoval,f_png,w_300,h_300,c_fit,b_rgb:00000000/${state.logoId}`;
     $logoImg.src = logoUrl;
     $logoImg.style.display = "block";
+    $logoImg.style.background = "transparent";
+    
+    // ✅ Adicionar classe quando carregar
+    $logoImg.onload = () => {
+      $logoImg.classList.add("loaded");
+    };
   } else if ($logoImg) {
     $logoImg.style.display = "none";
+    $logoImg.classList.remove("loaded");
   }
   
   // TEXTO: mostrar o texto
@@ -216,14 +223,20 @@ function updatePreviews() {
     $textoDiv.textContent = state.textoVal || "";
     $textoDiv.style.fontFamily = state.fonte || "Arial";
     
-    // ✅ CORRIGIR: Tamanho relativo à caixa (não tão grande)
-    const fontSize = Math.max(12, Math.min(48, Math.round(state.text.w * 0.3))); // 30% da largura
+    // ✅ Tamanho relativo à caixa
+    const fontSize = Math.max(12, Math.min(48, Math.round(state.text.w * 0.3)));
     $textoDiv.style.fontSize = `${fontSize}px`;
     $textoDiv.style.lineHeight = "1.2";
-    $textoDiv.style.whiteSpace = "normal"; // ❌ REMOVER pre-wrap para não ficar vertical
+    $textoDiv.style.whiteSpace = "normal";
     $textoDiv.style.display = "flex";
     $textoDiv.style.alignItems = "center";
     $textoDiv.style.justifyContent = "center";
+    $textoDiv.style.background = "transparent";
+    
+    // ✅ Adicionar classe loaded
+    $textoDiv.classList.add("loaded");
+  } else if ($textoDiv) {
+    $textoDiv.classList.remove("loaded");
   }
 }
 
