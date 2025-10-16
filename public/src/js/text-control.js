@@ -14,6 +14,10 @@ export function createTextControl({ img, box, state, onChange, onSelect }) {
 
   let dragging = false, resizing = false, start = {};
   function down(e) {
+    console.log("🖱️ TEXT: down event", {
+      target: e.target,
+      resizing: e.target.classList?.contains("handle")
+    });
     select();
     dragging  = true;
     resizing  = e.target.classList?.contains("handle");
