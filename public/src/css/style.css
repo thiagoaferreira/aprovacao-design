@@ -10,6 +10,13 @@
 * { 
   box-sizing: border-box; 
 }
+/* ========== BLOQUEAR SCROLL DURANTE EDIÇÃO ========== */
+body.editing {
+  overflow: hidden !important;
+  touch-action: none !important;
+  position: fixed !important;
+  width: 100% !important;
+}
 
 body, html {
   margin: 0;
