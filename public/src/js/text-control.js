@@ -20,6 +20,10 @@ export function createTextControl({ img, box, state, onChange, onSelect }) {
     });
     select();
     dragging  = true;
+
+     // ✅ ADICIONAR classe para bloquear scroll
+    box.classList.add("dragging");
+    
     resizing  = e.target.classList?.contains("handle");
     start = { x: e.clientX, y: e.clientY, X: state.text.x, Y: state.text.y, W: state.text.w };
     el.setPointerCapture?.(e.pointerId);
@@ -44,6 +48,10 @@ export function createTextControl({ img, box, state, onChange, onSelect }) {
     document.removeEventListener("pointermove", move);
     document.removeEventListener("pointerup", up);
   }
+
+  // ✅ REMOVER classe para permitir scroll novamente
+  box.classList.remove("dragging");
+  
   el.addEventListener("pointerdown", down);
 
   function inc() { state.text.w = Math.min(state.natural.w, state.text.w + Math.round(state.natural.w*0.04)); onChange?.("text"); }
