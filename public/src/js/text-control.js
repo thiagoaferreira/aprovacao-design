@@ -28,13 +28,15 @@ export function createTextControl({ img, box, state, onChange, onSelect }) {
     resizing  = e.target.classList?.contains("handle");
     start = { x: e.clientX, y: e.clientY, X: state.text.x, Y: state.text.y, W: state.text.w };
     el.setPointerCapture?.(e.pointerId);
-    e.preventDefault();
     document.addEventListener("pointermove", move);
     document.addEventListener("pointerup",   up);
   }
   
   function move(e) {
     if (!dragging) return;
+
+    e.preventDefault();
+    
     const { ix, iy } = toImage(e.clientX - start.x, e.clientY - start.y);
     if (resizing) {
       state.text.w = Math.max(20, Math.min(state.natural.w, start.W + ix));
