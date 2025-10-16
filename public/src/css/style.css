@@ -209,8 +209,36 @@ body {
   position: absolute;
   top: 0;
   left: 0;
-  pointer-events: none;
+  width: 100%;
+  height: 100%;
+  pointer-events: none; /* NÃO captura cliques */
   user-select: none;
+  z-index: 1; /* Fica ATRÁS das alças */
+}
+
+/* Badge fica na frente */
+.badge {
+  position: relative;
+  z-index: 3;
+  pointer-events: none;
+}
+
+/* Alças ficam na frente */
+.handle {
+  position: absolute;
+  z-index: 2;
+  pointer-events: auto; /* Capturam cliques */
+}
+
+/* A caixa captura cliques */
+.layer-box {
+  position: absolute;
+  border: 3px solid #f68729;
+  background: rgba(246, 135, 41, 0.15);
+  border-radius: 8px;
+  pointer-events: auto; /* ✅ Captura cliques */
+  cursor: move;
+  touch-action: none;
 }
 
 #logo-preview {
