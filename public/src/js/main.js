@@ -144,7 +144,7 @@ function positionBoxes() {
   const offX = imgRect.left - boardRect.left;
   const offY = imgRect.top - boardRect.top;
 
-  const paint = (sel, obj, color, labelText) => {
+  const paint = (sel, obj, color, labelText, rotation = 0) => {
     const el = document.querySelector(sel);
     if (!el) return;
     if (el.parentElement !== board) board.appendChild(el);
@@ -166,15 +166,20 @@ function positionBoxes() {
     el.style.borderColor = color;
     el.style.display = "block";
     el.style.pointerEvents = "auto";
+    
+    // ✅ APLICAR ROTAÇÃO NA CAIXA
+    el.style.transform = `rotate(${rotation}deg)`;
+    el.style.transformOrigin = "center center";
 
     const badge = el.querySelector(".badge");
     if (badge) badge.textContent = labelText;
   };
 
-  paint("#box-logo", state.logo, "#f68729", "LOGO");
+  // ✅ PASSAR ROTAÇÃO PARA A FUNÇÃO
+  paint("#box-logo", state.logo, "#f68729", "LOGO", state.logoRot || 0);
   
   if (state.textoVal.trim() !== "") {
-    paint("#box-texto", state.text, "#38bdf8", "TEXTO");
+    paint("#box-texto", state.text, "#38bdf8", "TEXTO", state.textRot || 0);
   } else {
     const textBox = document.querySelector("#box-texto");
     if (textBox) textBox.style.display = "none";
@@ -197,7 +202,12 @@ function updatePreviews() {
   if ($textoDiv) {
     $textoDiv.textContent = state.textoVal || "";
     $textoDiv.style.fontFamily = state.fonte || "Arial";
-    $textoDiv.style.fontSize = "16px"; // tamanho fixo para preview
+    
+    // ✅ ESCALAR O TEXTO baseado na largura da caixa
+    // A largura da caixa (state.text.w) define o tamanho da fonte
+    const fontSize = Math.max(12, Math.round(state.text.w * 0.6)); // 60% da largura
+    $textoDiv.style.fontSize = `${fontSize}px`;
+    
     $textoDiv.style.transform = `rotate(${state.textRot || 0}deg)`;
   }
 }
