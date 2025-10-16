@@ -10,31 +10,25 @@ export function centerDefaults(img, natural) {
   };
 }
 
+// ✅ URL PARA PREVIEW (SEM overlays - apenas mockup limpo)
 export function buildURL(state) {
-  console.log("🔨 buildURL() chamado");
-  
   const {
     cloud, baseId,
     natural = { w: 1000, h: 1000 },
   } = state;
 
-  console.log("  🆔 baseId:", baseId);
-  console.log("  📐 natural:", natural);
-
   if (!cloud || !baseId) return "";
 
-  // Apenas retorna a imagem base sem overlays (overlays ficam só nas caixas)
-  const baseW = Math.max(100, Math.round(natural.w || 1000));
-  console.log("  ⚙️ baseW calculado:", baseW);
-  
-  const finalUrl = `https://res.cloudinary.com/${cloud}/image/upload/w_${baseW}/${baseId}`;
-  
-  console.log("🔗 URL final:", finalUrl);
-  
-  return finalUrl;
-}
-// Gera URL FINAL com todos os overlays aplicados (para aprovação/produção)
+  console.log("🔨 buildURL() chamado - PREVIEW LIMPO");
+  console.log("  🆔 baseId:", baseId);
 
+  // ✅ APENAS retorna a imagem base SEM nenhum overlay
+  const baseW = Math.max(100, Math.round(natural.w || 1000));
+  
+  return `https://res.cloudinary.com/${cloud}/image/upload/w_${baseW}/${baseId}`;
+}
+
+// ✅ URL FINAL (COM overlays + rotação - para aprovação/produção)
 export function buildFinalURL(state) {
   const {
     cloud, baseId, logoId,
@@ -49,20 +43,20 @@ export function buildFinalURL(state) {
   const baseW = Math.max(100, Math.round(natural.w || 1000));
   const chunks = [`w_${baseW}`];
 
-  // LOGO
+  // LOGO com rotação
   if (logoId) {
     const logoLayerId = String(logoId).replace(/\//g, ":");
     const logoW = Math.max(10, Math.round(logo.w));
     const logoX = Math.round(logo.x);
     const logoY = Math.round(logo.y);
-    const logoA = Math.round(logoRot) || 0;
+    const logoA = Math.round(logoRot) || 0; // ✅ APLICAR ROTAÇÃO
 
     chunks.push(
       [
         `l_${logoLayerId}`,
         "e_bgremoval",
         `w_${logoW}`,
-        `a_${logoA}`,
+        `a_${logoA}`, // ✅ Ângulo de rotação
         "g_north_west",
         `x_${logoX}`,
         `y_${logoY}`,
@@ -71,19 +65,19 @@ export function buildFinalURL(state) {
     );
   }
 
-  // TEXTO
+  // TEXTO com rotação
   if (hasText && String(textoVal).trim() !== "") {
     const enc = encodeURIComponent(textoVal);
     const textW = Math.max(8, Math.round(text.w));
     const textX = Math.round(text.x);
     const textY = Math.round(text.y);
-    const textA = Math.round(textRot) || 0;
+    const textA = Math.round(textRot) || 0; // ✅ APLICAR ROTAÇÃO
 
     chunks.push(
       [
         `l_text:${fonte}_${textW}:${enc}`,
         "co_rgb:000000",
-        `a_${textA}`,
+        `a_${textA}`, // ✅ Ângulo de rotação
         "g_north_west",
         `x_${textX}`,
         `y_${textY}`,
