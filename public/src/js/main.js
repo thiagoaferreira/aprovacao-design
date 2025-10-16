@@ -472,23 +472,31 @@ async function gerarPrevia() {
 /* ========= Toolbar (aponta para o selecionado) ========= */
 const target = () => (active === "logo" ? logoCtl : textCtl);
 
-// ✅ IMPORTANTE: NÃO chamar setActive aqui, apenas executar a ação
-$("#btn-rot-ccw")?.addEventListener("click", () => {
+// ✅ IMPORTANTE: NÃO deixar o evento propagar para as caixas
+$("#btn-rot-ccw")?.addEventListener("click", (e) => {
+  e.preventDefault();
+  e.stopPropagation();
   console.log(`🔄 Rotacionar CCW: ${active}`);
   target()?.rotCCW();
 });
 
-$("#btn-rot-cw")?.addEventListener("click", () => {
+$("#btn-rot-cw")?.addEventListener("click", (e) => {
+  e.preventDefault();
+  e.stopPropagation();
   console.log(`🔄 Rotacionar CW: ${active}`);
   target()?.rotCW();
 });
 
-$("#btn-inc")?.addEventListener("click", () => {
+$("#btn-inc")?.addEventListener("click", (e) => {
+  e.preventDefault();
+  e.stopPropagation();
   console.log(`➕ Aumentar: ${active}`);
   target()?.inc();
 });
 
-$("#btn-dec")?.addEventListener("click", () => {
+$("#btn-dec")?.addEventListener("click", (e) => {
+  e.preventDefault();
+  e.stopPropagation();
   console.log(`➖ Diminuir: ${active}`);
   target()?.dec();
 });
