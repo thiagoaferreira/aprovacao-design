@@ -437,3 +437,66 @@ body, html {
     padding: 0 24px; 
   }
 }
+
+/* ========== SCROLL NO MOBILE ========== */
+body, html {
+  margin: 0;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+  background: var(--bg-dark);
+  color: var(--text);
+  overflow-x: hidden; /* Evitar scroll horizontal */
+  -webkit-overflow-scrolling: touch; /* Scroll suave no iOS */
+}
+
+/* Container principal permite scroll */
+.wrap {
+  max-width: 1000px; 
+  margin: 24px auto; 
+  padding: 0 20px;
+  /* ✅ CRÍTICO: Permitir scroll */
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Canvas wrapper NÃO bloqueia scroll */
+.canvas-wrap {
+  position: relative; 
+  background: #f8fafc;
+  border: 2px dashed #e5e7eb; 
+  border-radius: 12px;
+  overflow: hidden;
+  aspect-ratio: 1 / 1;
+  /* ✅ Não bloquear touch */
+  touch-action: auto;
+}
+
+/* Caixas só bloqueiam quando ARRASTANDO */
+.layer-box {
+  position: absolute;
+  border: 3px solid #f68729;
+  background: rgba(246, 135, 41, 0.15);
+  border-radius: 8px;
+  cursor: move;
+  pointer-events: auto;
+  z-index: 10;
+  /* ✅ Permitir scroll até começar a arrastar */
+  touch-action: pan-y pan-x;
+}
+
+/* Quando arrastar, bloquear scroll */
+.layer-box.dragging {
+  touch-action: none;
+}
+
+/* Alças sempre bloqueiam scroll (são pequenas) */
+.handle {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  background: white;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  pointer-events: auto;
+  z-index: 2;
+  touch-action: none; /* Sempre bloquear nas alças */
+}
