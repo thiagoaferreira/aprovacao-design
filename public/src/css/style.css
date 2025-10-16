@@ -96,27 +96,149 @@ body {
   touch-action: pan-y; /* Permite scroll vertical */
 }
 
-/* Container principal permite scroll */
+/* Container principal - DEVE permitir scroll */
 .preview-block {
-  touch-action: pan-y pan-x; /* Permite scroll em todas direções */
-  overflow: auto;
-}
-
-.canvas-wrap {
-  touch-action: pan-y; /* Permite scroll vertical */
   position: relative;
-  overflow: visible;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  /* NÃO bloquear touch aqui */
 }
 
-/* Caixas só capturam toque quando SEGURAR */
+/* Canvas wrapper - área de trabalho */
+.canvas-wrap {
+  position: relative;
+  width: 100%;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  /* NÃO usar touch-action aqui */
+}
+
+/* Imagem base - permite scroll */
+#preview-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  user-select: none;
+  -webkit-user-select: none;
+  /* Permite scroll passando por cima */
+  touch-action: auto;
+}
+
+/* Caixas de seleção - IMPEDEM scroll apenas quando tocadas */
 .layer-box {
   position: absolute;
   border: 3px solid #f68729;
   background: rgba(246, 135, 41, 0.15);
   border-radius: 8px;
-  pointer-events: auto;
   cursor: move;
-  touch-action: none; /* Desabilita scroll APENAS quando tocar na caixa */
+  
+  /* ✅ CRÍTICO: apenas impedir scroll quando SEGURAR a caixa */
+  touch-action: none;
+  pointer-events: auto;
+  
+  /* Z-index para ficar acima da imagem */
+  z-index: 10;
+}
+
+.layer-box.text {
+  border-color: #38bdf8;
+  background: rgba(56, 189, 248, 0.15);
+}
+
+.layer-box.active {
+  outline: 3px solid #22c55e;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 1px #22c55e;
+  z-index: 20;
+}
+
+/* Elementos de preview DENTRO das caixas */
+.elemento-preview {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none; /* NÃO captura eventos */
+  user-select: none;
+  z-index: 1;
+}
+
+#logo-preview {
+  opacity: 0.9;
+  object-fit: contain;
+}
+
+#texto-preview {
+  opacity: 0.9;
+  text-align: center;
+  word-break: break-word;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  color: #000;
+}
+
+/* Badge - NÃO captura eventos */
+.badge {
+  position: absolute;
+  top: -32px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1f2937;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.layer-box.active .badge {
+  background: #22c55e;
+  animation: pulse 2s infinite;
+}
+
+/* Alças de redimensionamento - CAPTURAM eventos */
+.handle {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  background: white;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  pointer-events: auto; /* ✅ IMPORTANTE */
+  touch-action: none; /* Impedir scroll ao tocar nas alças */
+  z-index: 2;
+}
+
+.handle.tl { top: -8px; left: -8px; cursor: nw-resize; }
+.handle.tr { top: -8px; right: -8px; cursor: ne-resize; }
+.handle.bl { bottom: -8px; left: -8px; cursor: sw-resize; }
+.handle.br { bottom: -8px; right: -8px; cursor: se-resize; }
+
+/* Mobile: aumentar área de toque das alças */
+@media (max-width: 768px) {
+  .handle {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .handle.tl { top: -12px; left: -12px; }
+  .handle.tr { top: -12px; right: -12px; }
+  .handle.bl { bottom: -12px; left: -12px; }
+  .handle.br { bottom: -12px; right: -12px; }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
 }
 
 /* Área fora das caixas permite scroll */
