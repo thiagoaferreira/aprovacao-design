@@ -438,14 +438,17 @@ body, html {
   }
 }
 
-/* ========== SCROLL NO MOBILE ========== */
+/* ========== SCROLL NO MOBILE - SOLUÇÃO DEFINITIVA ========== */
 body, html {
   margin: 0;
   font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
   background: var(--bg-dark);
   color: var(--text);
-  overflow-x: hidden; /* Evitar scroll horizontal */
-  -webkit-overflow-scrolling: touch; /* Scroll suave no iOS */
+  /* ✅ Permitir scroll sempre */
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch;
+  height: auto !important;
+  min-height: 100vh;
 }
 
 /* Container principal permite scroll */
@@ -453,9 +456,6 @@ body, html {
   max-width: 1000px; 
   margin: 24px auto; 
   padding: 0 20px;
-  /* ✅ CRÍTICO: Permitir scroll */
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
 }
 
 /* Canvas wrapper NÃO bloqueia scroll */
@@ -466,11 +466,9 @@ body, html {
   border-radius: 12px;
   overflow: hidden;
   aspect-ratio: 1 / 1;
-  /* ✅ Não bloquear touch */
-  touch-action: auto;
 }
 
-/* Caixas só bloqueiam quando ARRASTANDO */
+/* ========== CAIXAS DE SELEÇÃO (LOGO E TEXTO) ========== */
 .layer-box {
   position: absolute;
   border: 3px solid #f68729;
@@ -479,16 +477,67 @@ body, html {
   cursor: move;
   pointer-events: auto;
   z-index: 10;
-  /* ✅ Permitir scroll até começar a arrastar */
-  touch-action: pan-y pan-x;
+  /* ❌ NÃO bloquear scroll por padrão */
 }
 
-/* Quando arrastar, bloquear scroll */
+/* Só bloquear scroll quando ARRASTANDO */
 .layer-box.dragging {
-  touch-action: none;
+  touch-action: none !important;
 }
 
-/* Alças sempre bloqueiam scroll (são pequenas) */
+.layer-box.text {
+  border-color: #38bdf8;
+  background: rgba(56, 189, 248, 0.15);
+}
+
+.layer-box.active {
+  outline: 3px solid #22c55e;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 1px #22c55e;
+  z-index: 20;
+}
+
+/* ========== ELEMENTOS DE PREVIEW (LOGO E TEXTO) ========== */
+.elemento-preview {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  user-select: none;
+  z-index: 1;
+  /* ✅ Esconder até ter conteúdo */
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.elemento-preview.loaded {
+  opacity: 1;
+}
+
+#logo-preview {
+  object-fit: contain;
+  width: 100%;
+  height: 100%;
+  background: transparent !important; /* ✅ SEM fundo amarelo */
+}
+
+#texto-preview {
+  text-align: center;
+  word-break: break-word;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  color: #000;
+  width: 100%;
+  height: 100%;
+  background: transparent !important; /* ✅ SEM fundo */
+}
+
+/* ========== ALÇAS DE REDIMENSIONAMENTO ========== */
 .handle {
   position: absolute;
   width: 16px;
@@ -498,5 +547,6 @@ body, html {
   border-radius: 50%;
   pointer-events: auto;
   z-index: 2;
-  touch-action: none; /* Sempre bloquear nas alças */
+  /* Alças sempre bloqueiam scroll */
+  touch-action: none;
 }
