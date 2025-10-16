@@ -385,7 +385,6 @@ async function gerarPrevia() {
     state.fonte    = $("#fonte")?.value || "Arial";
     state.hasText  = !!state.textoVal;
 
-    // IMPORTANTE: Aguardar imagem carregar para pegar dimensões corretas
     img.onload = () => {
       state.natural = { w: img.naturalWidth, h: img.naturalHeight };
       
@@ -411,22 +410,41 @@ async function gerarPrevia() {
             console.log("✅ Defaults centralizados aplicados");
           }
           centeredOnce = true;
-          
           positionBoxes();
-          
-          // Instanciar controles
-          if (!window.__controlsReady) {
-            logoCtl = createLogoControl({ img, box: "#box-logo",  state, onChange, onSelect });
-            textCtl = createTextControl({ img, box: "#box-texto", state, onChange, onSelect });
-            window.__controlsReady = true;
-            setActive("logo");
-            console.log("🎮 Controles criados");
-          }
         });
       } else {
         positionBoxes();
       }
-    }; // ✅ IMPORTANTE: Fechar o img.onload aqui
+      
+      // ✅ SEMPRE inicializar controles (fora do if)
+      if (!window.__controlsReady) {
+        console.log("🎮 Inicializando controles...");
+        
+        logoCtl = createLogoControl({ 
+          img, 
+          box: "#box-logo", 
+          state, 
+          onChange, 
+          onSelect 
+        });
+        
+        textCtl = createTextControl({ 
+          img, 
+          box: "#box-texto", 
+          state, 
+          onChange, 
+          onSelect 
+        });
+        
+        window.__controlsReady = true;
+        setActive("logo");
+        console.log("✅ Controles criados e ativos");
+      } else {
+        console.log("✅ Controles já existem, apenas atualizando");
+        // Reativar controles existentes
+        setActive("logo");
+      }
+    };
 
     // Usar previewUrl se existir, senão montar manualmente
     if (previewUrl) { 
