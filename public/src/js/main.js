@@ -362,12 +362,21 @@ async function gerarPrevia() {
     state.fonte    = $("#fonte")?.value || "Arial";
     state.hasText  = !!state.textoVal;
 
-    // Mostrar caixas imediatamente (mesmo sem a imagem final)
-    $block.style.display = "block";
-    const $boxLogo = document.querySelector("#box-logo");
-    const $boxTexto = document.querySelector("#box-texto");
-    if ($boxLogo) $boxLogo.style.display = "block";
-    if ($boxTexto && state.hasText) $boxTexto.style.display = "block";
+    // IMPORTANTE: Aguardar imagem carregar para pegar dimensões corretas
+    img.onload = () => {
+      state.natural = { w: img.naturalWidth, h: img.naturalHeight };
+      
+      console.log("📐 Dimensões naturais da imagem:", state.natural);
+      
+      // ✅ AGORA SIM mostrar caixas (após ter dimensões)
+      $block.style.display = "block";
+      const $boxLogo = document.querySelector("#box-logo");
+      const $boxTexto = document.querySelector("#box-texto");
+      if ($boxLogo) $boxLogo.style.display = "block";
+      if ($boxTexto && state.hasText) $boxTexto.style.display = "block";
+      
+      // Se for a primeira vez, aplicar defaults do BD ou centralizar
+      if (!centeredOnce) {
 
     // IMPORTANTE: Aguardar imagem carregar para pegar dimensões corretas
     
