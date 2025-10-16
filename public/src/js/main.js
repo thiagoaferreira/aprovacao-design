@@ -349,18 +349,21 @@ async function gerarPrevia() {
     busy(true);
     const r = await fetch(CFG.WEBHOOK_PREVIEW, { method:"POST", body: buildFormData() });
     const data = await r.json().catch(()=> ({}));
+    
+    console.log("📦 Resposta do webhook:", data);
+    
     const previewUrl = (Array.isArray(data) ? data[0]?.preview_url : data?.preview_url) || null;
 
-    // ids vindos do webhook OU extraídos da preview_url
+    // IDs vindos do webhook OU extraídos da preview_url
     state.baseId = data.mockup_public_id || state.baseId || (previewUrl ? extractBaseId(previewUrl) : state.baseId);
     state.logoId = data.logo_public_id   || state.logoId || (previewUrl ? extractLogoId(previewUrl) : state.logoId);
-    
+
     console.log("🆔 IDs extraídos:", {
       baseId: state.baseId,
       logoId: state.logoId
     });
 
-    // ✅ ADICIONAR: Atualizar preview da logo imediatamente
+    // Atualizar preview da logo imediatamente
     if (state.logoId) {
       const $logoImg = document.querySelector("#logo-preview");
       if ($logoImg) {
@@ -368,6 +371,7 @@ async function gerarPrevia() {
         $logoImg.src = logoUrl;
       }
     }
+    
     state.textoVal = ($("#texto")?.value || "").trim();
     state.fonte    = $("#fonte")?.value || "Arial";
     state.hasText  = !!state.textoVal;
@@ -378,7 +382,7 @@ async function gerarPrevia() {
       
       console.log("📐 Dimensões naturais da imagem:", state.natural);
       
-      // ✅ AGORA SIM mostrar caixas (após ter dimensões)
+      // Mostrar caixas após ter dimensões
       $block.style.display = "block";
       const $boxLogo = document.querySelector("#box-logo");
       const $boxTexto = document.querySelector("#box-texto");
@@ -387,28 +391,45 @@ async function gerarPrevia() {
       
       // Se for a primeira vez, aplicar defaults do BD ou centralizar
       if (!centeredOnce) {
+        const prod = produtos[idx] || {};
+        fetchSkuConfig(prod.sku).then(cfg => {
+          if (cfg && applyConfigDefaults(cfg)) {
+            console.log("✅ Configs do BD aplicadas");
+          } else {
+            const defaults = centerDefaults(img, state.natural);
+            state.logo = defaults.logo;
+            state.text = defaults.text;
+            console.log("✅ Defaults centralizados aplicados");
+          }
+          centeredOnce = true;
+          
+          positionBoxes();
+          
+          // Instanciar controles
+          if (!window.__controlsReady) {
+            logoCtl = createLogoControl({ img, box: "#box-logo",  state, onChange, onSelect });
+            textCtl = createTextControl({ img, box: "#box-texto", state, onChange, onSelect });
+            window.__controlsReady = true;
+            setActive("logo");
+            console.log("🎮 Controles criados");
+          }
+        });
+      } else {
+        positionBoxes();
+      }
+    }; // ✅ IMPORTANTE: Fechar o img.onload aqui
 
-    // IMPORTANTE: Aguardar imagem carregar para pegar dimensões corretas
-    
-    img.onload = () => {
-      state.natural = { w: img.naturalWidth, h: img.naturalHeight };
-      $block.style.display = "block";
-      positionBoxes();
-    };
-
-    if (previewUrl) { img.src = previewUrl; } else { refresh(); }
-
-    // Instanciar controles uma vez
-    if (!window.__controlsReady) {
-      logoCtl = createLogoControl({ img, box: "#box-logo",  state, onChange, onSelect });
-      textCtl = createTextControl({ img, box: "#box-texto", state, onChange, onSelect });
-      window.__controlsReady = true;
-      setActive("logo");
-    } else {
-      setActive(active);
+    // Usar previewUrl se existir, senão montar manualmente
+    if (previewUrl) { 
+      console.log("🖼️ Usando preview_url do webhook");
+      img.src = previewUrl; 
+    } else { 
+      console.log("🔨 Montando URL manualmente");
+      refresh(); 
     }
+
   } catch (e) {
-    console.error(e);
+    console.error("❌ Erro ao gerar prévia:", e);
     alert("Falha ao gerar prévia. Tente novamente.");
   } finally {
     busy(false);
