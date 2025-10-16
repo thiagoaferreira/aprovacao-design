@@ -28,13 +28,15 @@ export function createLogoControl({ img, box, state, onChange, onSelect }) {
     resizing  = e.target.classList?.contains("handle");
     start = { x: e.clientX, y: e.clientY, X: state.logo.x, Y: state.logo.y, W: state.logo.w };
     el.setPointerCapture?.(e.pointerId);
-    e.preventDefault();
     document.addEventListener("pointermove", move);
     document.addEventListener("pointerup",   up);
   }
   
   function move(e) {
     if (!dragging) return;
+
+     e.preventDefault();
+    
     const { ix, iy } = toImage(e.clientX - start.x, e.clientY - start.y);
     if (resizing) {
       state.logo.w = Math.max(20, Math.min(state.natural.w, start.W + ix));
