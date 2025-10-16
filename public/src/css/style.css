@@ -173,27 +173,22 @@ body, html {
   pointer-events: none; /* Imagem não captura eventos */
 }
 
-/* ========== CAIXAS DE SELEÇÃO (LOGO E TEXTO) ========== */
+/* ========== CAIXAS DE SELEÇÃO ========== */
 .layer-box {
   position: absolute;
   border: 3px solid #f68729;
   background: rgba(246, 135, 41, 0.15);
   border-radius: 8px;
   cursor: move;
-  pointer-events: auto; /* ✅ Caixa captura cliques */
+  pointer-events: auto;
   z-index: 10;
+  /* ✅ NÃO bloquear touch por padrão */
+  touch-action: auto;
 }
 
-.layer-box.text {
-  border-color: #38bdf8;
-  background: rgba(56, 189, 248, 0.15);
-}
-
-.layer-box.active {
-  outline: 3px solid #22c55e;
-  outline-offset: 2px;
-  box-shadow: 0 0 0 1px #22c55e;
-  z-index: 20;
+/* Só bloquear quando arrastando */
+.layer-box.dragging {
+  touch-action: none;
 }
 
 /* ========== ELEMENTOS DE PREVIEW (LOGO E TEXTO) ========== */
