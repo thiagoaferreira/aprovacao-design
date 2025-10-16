@@ -49,17 +49,16 @@ const debounce = (fn, ms=120) => { let t; return (...a)=>{ clearTimeout(t); t=se
 const refreshDebounced = debounce(()=>{ const url = buildURL(state); if (url) img.src = url; }, 120);
 
 const onChange = (who) => { 
-  console.log(`🔄 onChange chamado para: ${who}`, {
-    logo: state.logo,
-    text: state.text
-  });
+  console.log(`🔄 onChange chamado para: ${who}`);
 
-  // Atualizar posição das caixas imediatamente (sem rebuild da URL)
-  positionBoxes();
+  // ✅ SEMPRE atualizar previews (logo e texto visuais)
   updatePreviews();
   
-  // Debounce para rebuild da URL final
-  refreshDebounced();
+  // Atualizar posição das caixas
+  positionBoxes();
+  
+  // Debounce para rebuild da URL final (só se necessário)
+  // refreshDebounced(); // ❌ NÃO chamar aqui, senão recarrega a imagem toda hora
 };
 
 const setActive = (who) => {
@@ -201,21 +200,21 @@ function updatePreviews() {
   const $logoImg = document.querySelector("#logo-preview");
   const $textoDiv = document.querySelector("#texto-preview");
   
+  console.log("🔄 updatePreviews() chamado");
+  
   // LOGO: mostrar a logo processada SEM fundo
   if (state.logoId && $logoImg) {
     // ✅ Forçar fundo transparente + formato PNG
     const logoUrl = `https://res.cloudinary.com/${state.cloud}/image/upload/e_bgremoval,f_png,w_300,h_300,c_fit,b_rgb:00000000/${state.logoId}`;
+    
+    console.log("  🖼️ Atualizando logo:", logoUrl);
+    
     $logoImg.src = logoUrl;
     $logoImg.style.display = "block";
     $logoImg.style.background = "transparent";
-    
-    // ✅ Adicionar classe quando carregar
-    $logoImg.onload = () => {
-      $logoImg.classList.add("loaded");
-    };
+    $logoImg.style.backgroundColor = "transparent";
   } else if ($logoImg) {
     $logoImg.style.display = "none";
-    $logoImg.classList.remove("loaded");
   }
   
   // TEXTO: mostrar o texto
@@ -223,7 +222,7 @@ function updatePreviews() {
     $textoDiv.textContent = state.textoVal || "";
     $textoDiv.style.fontFamily = state.fonte || "Arial";
     
-    // ✅ Tamanho relativo à caixa
+    // ✅ CRÍTICO: Tamanho baseado na largura da caixa
     const fontSize = Math.max(12, Math.min(48, Math.round(state.text.w * 0.3)));
     $textoDiv.style.fontSize = `${fontSize}px`;
     $textoDiv.style.lineHeight = "1.2";
@@ -232,11 +231,11 @@ function updatePreviews() {
     $textoDiv.style.alignItems = "center";
     $textoDiv.style.justifyContent = "center";
     $textoDiv.style.background = "transparent";
+    $textoDiv.style.backgroundColor = "transparent";
     
-    // ✅ Adicionar classe loaded
-    $textoDiv.classList.add("loaded");
+    console.log(`  📝 Texto atualizado: "${state.textoVal}" - fontSize: ${fontSize}px`);
   } else if ($textoDiv) {
-    $textoDiv.classList.remove("loaded");
+    $textoDiv.textContent = "";
   }
 }
 
