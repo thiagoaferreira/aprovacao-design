@@ -156,8 +156,17 @@ function positionBoxes() {
     const screenX = offX + obj.x * scaleX;
     const screenY = offY + obj.y * scaleY;
     const screenW = obj.w * scaleX;
-    const screenH = obj.w * 0.6 * scaleY;
-
+    
+    // ✅ ALTURA DINÂMICA: maior para texto, menor para logo
+    let screenH;
+    if (sel === "#box-texto") {
+      // Texto precisa de mais altura (proporção retangular)
+      screenH = obj.w * 0.4 * scaleY; // 40% da largura
+    } else {
+      // Logo é mais quadrada
+      screenH = obj.w * 0.6 * scaleY; // 60% da largura
+    }
+    
     el.style.position = "absolute";
     el.style.left = `${screenX}px`;
     el.style.top = `${screenY}px`;
