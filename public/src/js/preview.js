@@ -33,8 +33,8 @@ export function buildURL(state) {
   
   return finalUrl;
 }
- * Gera URL FINAL com todos os overlays aplicados (para aprovação/produção)
- */
+// Gera URL FINAL com todos os overlays aplicados (para aprovação/produção)
+
 export function buildFinalURL(state) {
   const {
     cloud, baseId, logoId,
