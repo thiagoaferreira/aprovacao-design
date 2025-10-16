@@ -550,3 +550,61 @@ body, html {
   /* Alças sempre bloqueiam scroll */
   touch-action: none;
 }
+/* ========== TOOLBAR DE EDIÇÃO ========== */
+.edit-toolbar {
+  display: grid; 
+  grid-template-columns: repeat(4, minmax(44px, 1fr)); 
+  gap: 8px;
+  margin: 12px 0 8px;
+}
+
+.edit-toolbar button {
+  border: 1px solid var(--ring);
+  background: #fff; 
+  border-radius: 10px; 
+  padding: 10px 8px;
+  font-size: 18px; 
+  line-height: 1; 
+  cursor: pointer;
+  transition: all 0.2s;
+  /* ✅ ADICIONAR flex para layout vertical */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.edit-toolbar button:hover {
+  background: #f9fafb;
+  border-color: var(--gama-orange);
+}
+
+.edit-toolbar button:active { 
+  transform: scale(0.96); 
+}
+
+/* Ícones sempre visíveis */
+.btn-icon {
+  font-size: 20px;
+}
+
+/* Texto escondido no mobile */
+.btn-text {
+  display: none;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text);
+}
+
+/* Desktop: mostrar texto */
+@media (min-width: 640px) {
+  .btn-text {
+    display: block;
+  }
+  
+  .edit-toolbar button {
+    padding: 12px 8px;
+  }
+}
