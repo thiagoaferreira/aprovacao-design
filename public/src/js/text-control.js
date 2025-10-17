@@ -24,8 +24,6 @@ export function createTextControl({ img, box, state, onChange, onSelect }) {
     
     // ✅ CORRIGIDO: usar `el` em vez de `box`
     el.classList.add("dragging");
-    // ✅ LIBERAR SCROLL DA PÁGINA
-    document.body.classList.remove("editing");
     
     resizing  = e.target.classList?.contains("handle");
     start = { x: e.clientX, y: e.clientY, X: state.text.x, Y: state.text.y, W: state.text.w };
