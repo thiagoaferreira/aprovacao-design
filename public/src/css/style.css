@@ -168,18 +168,24 @@ body, html {
   border: 2px dashed #e5e7eb; 
   border-radius: 12px;
   overflow: hidden;
-  aspect-ratio: 1 / 1; /* Mantém área quadrada */
+  aspect-ratio: 1 / 1;
+  /* ✅ CRÍTICO: Bloquear QUALQUER touch dentro da área de edição */
+  touch-action: none !important;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
+/* Imagem base não captura eventos */
 .canvas, 
 #preview-img { 
   width: 100%; 
   display: block; 
   user-select: none;
   -webkit-user-select: none;
-  pointer-events: none; /* Imagem não captura eventos */
-}
-
+  pointer-events: none;
+  /* ✅ Garantir que não permite scroll */
+  touch-action: none !important;
+  
 /* ========== CAIXAS DE SELEÇÃO ========== */
 .layer-box {
   position: absolute;
@@ -189,13 +195,20 @@ body, html {
   cursor: move;
   pointer-events: auto;
   z-index: 10;
-  /* ✅ NÃO bloquear touch por padrão */
-  touch-action: auto;
+  /* ✅ Bloquear scroll sempre */
+  touch-action: none !important;
 }
 
-/* Só bloquear quando arrastando */
-.layer-box.dragging {
-  touch-action: none;
+.layer-box.text {
+  border-color: #38bdf8;
+  background: rgba(56, 189, 248, 0.15);
+}
+
+.layer-box.active {
+  outline: 3px solid #22c55e;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 1px #22c55e;
+  z-index: 20;
 }
 
 /* ========== ELEMENTOS DE PREVIEW (LOGO E TEXTO) ========== */
@@ -208,8 +221,10 @@ body, html {
   pointer-events: none;
   user-select: none;
   z-index: 1;
-  display: none; /* ✅ ESCONDER até carregar */
+  /* ✅ Nunca permitir scroll */
+  touch-action: none !important;
 }
+
 
 /* Só mostrar quando tiver conteúdo */
 #logo-preview[src]:not([src=""]) {
@@ -277,10 +292,11 @@ body, html {
   background: white;
   border: 2px solid currentColor;
   border-radius: 50%;
-  pointer-events: auto; /* ✅ Captura eventos */
+  pointer-events: auto;
   z-index: 2;
+  /* ✅ Bloquear scroll nas alças */
+  touch-action: none !important;
 }
-
 .handle.tl { top: -8px; left: -8px; cursor: nw-resize; }
 .handle.tr { top: -8px; right: -8px; cursor: ne-resize; }
 .handle.bl { bottom: -8px; left: -8px; cursor: sw-resize; }
