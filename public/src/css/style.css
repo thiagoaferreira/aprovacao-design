@@ -163,10 +163,6 @@ body, html {
   border-radius: 12px;
   overflow: hidden;
   aspect-ratio: 1 / 1;
-  /* ✅ CRÍTICO: Bloquear QUALQUER touch dentro da área de edição */
-  touch-action: none !important;
-  -webkit-user-select: none;
-  user-select: none;
 }
 
 /* Imagem base não captura eventos */
@@ -177,8 +173,6 @@ body, html {
   user-select: none;
   -webkit-user-select: none;
   pointer-events: none;
-  /* ✅ Garantir que não permite scroll */
-  touch-action: none !important;
   
 /* ========== CAIXAS DE SELEÇÃO ========== */
 .layer-box {
@@ -190,7 +184,7 @@ body, html {
   pointer-events: auto;
   z-index: 10;
   /* ✅ Bloquear scroll sempre */
-  touch-action: none !important;
+  touch-action: auto;
 }
 
 .layer-box.text {
@@ -212,44 +206,48 @@ body, html {
   left: 0;
   width: 100%;
   height: 100%;
-  pointer-events: none;
+  pointer-events: none; /* ❌ NÃO captura eventos */
   user-select: none;
   z-index: 1;
-  /* ✅ Nunca permitir scroll */
-  touch-action: none !important;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s;
 }
 
 
-/* Só mostrar quando tiver conteúdo */
+/* Mostrar quando carregar */
 #logo-preview[src]:not([src=""]) {
-  display: block;
+  opacity: 1;
+  visibility: visible;
 }
 
 #texto-preview:not(:empty) {
-  display: flex;
+  opacity: 1;
+  visibility: visible;
+  display: flex !important;
 }
 
 #logo-preview {
-  opacity: 0.9;
   object-fit: contain;
   width: 100%;
   height: 100%;
-  background: transparent; /* ✅ SEM fundo amarelo */
+  background: transparent !important;
+  background-color: transparent !important;
 }
 
 #texto-preview {
-  opacity: 0.9;
   text-align: center;
   word-break: break-word;
   padding: 4px;
+  display: flex;
   align-items: center;
   justify-content: center;
   font-weight: bold;
   color: #000;
   width: 100%;
   height: 100%;
-  background: transparent; /* ✅ SEM fundo */
-}
+  background: transparent !important;
+  background-color: transparent !important;
 
 /* ========== BADGE (ETIQUETA) ========== */
 .badge {
@@ -286,11 +284,11 @@ body, html {
   background: white;
   border: 2px solid currentColor;
   border-radius: 50%;
-  pointer-events: auto;
+  pointer-events: auto; /* ✅ Capturam eventos */
   z-index: 2;
-  /* ✅ Bloquear scroll nas alças */
-  touch-action: none !important;
+  touch-action: none; /* ✅ Apenas alças bloqueiam scroll */
 }
+  
 .handle.tl { top: -8px; left: -8px; cursor: nw-resize; }
 .handle.tr { top: -8px; right: -8px; cursor: ne-resize; }
 .handle.bl { bottom: -8px; left: -8px; cursor: sw-resize; }
@@ -671,4 +669,16 @@ body, html {
   .edit-toolbar button {
     padding: 12px 8px;
   }
+}
+
+  /* ========== TELA DE CONCLUSÃO ========== */
+.done { 
+  display: none !important; /* ✅ Escondido por padrão */
+  padding: 48px 18px; 
+  text-align: center; 
+}
+
+.done h2 { 
+  font-size: 26px; 
+  margin: 0 0 10px; 
 }
