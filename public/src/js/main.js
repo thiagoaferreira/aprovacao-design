@@ -541,5 +541,30 @@ window.addEventListener("resize", () => {
   positionBoxes();
 });
 
+/* ========= Prevenir scroll durante edição no mobile ========= */
+let preventScrollHandler = null;
+
+// Criar handler que previne scroll quando body.editing está ativo
+preventScrollHandler = (e) => {
+  if (document.body.classList.contains('editing')) {
+    e.preventDefault();
+    e.stopPropagation();
+    return false;
+  }
+};
+
+// Adicionar listeners globais para touch
+document.addEventListener('touchmove', preventScrollHandler, { passive: false });
+document.addEventListener('touchstart', (e) => {
+  // Se tocar em uma caixa, preparar para bloquear scroll
+  const box = e.target.closest('.layer-box');
+  if (box) {
+    document.body.classList.add('editing');
+  }
+}, { passive: false });
+
+/* ========= Boot ========= */
+document.addEventListener("DOMContentLoaded", ()=>{ loadShortLink(); });
+
 /* ========= Boot ========= */
 document.addEventListener("DOMContentLoaded", ()=>{ loadShortLink(); });
