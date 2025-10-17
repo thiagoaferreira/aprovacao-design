@@ -541,28 +541,5 @@ window.addEventListener("resize", () => {
   positionBoxes();
 });
 
-/* ========= Prevenir scroll durante edição no mobile ========= */
-let preventScrollHandler = (e) => {
-  if (document.body.classList.contains('editing')) {
-    e.preventDefault();
-    e.stopPropagation();
-    return false;
-  }
-};
-
-// Listeners globais para touch
-document.addEventListener('touchmove', preventScrollHandler, { passive: false });
-
-// Garantir limpeza ao soltar
-document.addEventListener('touchend', () => {
-  setTimeout(() => {
-    document.body.classList.remove('editing');
-  }, 50);
-}, { passive: true });
-
-document.addEventListener('touchcancel', () => {
-  document.body.classList.remove('editing');
-}, { passive: true });
-
 /* ========= Boot ========= */
 document.addEventListener("DOMContentLoaded", ()=>{ loadShortLink(); });
