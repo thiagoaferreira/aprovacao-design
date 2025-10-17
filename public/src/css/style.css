@@ -7,17 +7,14 @@
   --ring: #e5e7eb;
 }
 
-* { 
-  box-sizing: border-box; 
-}
-/* ========== BLOQUEAR SCROLL DURANTE EDIÇÃO ========== */
+* { box-sizing: border-box; }
 
 body, html {
   margin: 0;
   font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
   background: var(--bg-dark);
   color: var(--text);
-  overscroll-behavior: contain; /* Melhora scroll no mobile */
+  overscroll-behavior: contain;
 }
 
 /* ========== HEADER ========== */
@@ -36,27 +33,12 @@ body, html {
   gap: 16px;
 }
 
-.topbar img.logo { 
-  height: 44px; 
-  width: auto; 
-}
-
-.brand .title { 
-  font-weight: 700; 
-  font-size: 16px; 
-}
-
-.brand .subtitle { 
-  font-size: 12px; 
-  color: #e5e7eb; 
-}
+.topbar img.logo { height: 44px; width: auto; }
+.brand .title { font-weight: 700; font-size: 16px; }
+.brand .subtitle { font-size: 12px; color: #e5e7eb; }
 
 /* ========== PAINEL ========== */
-.wrap { 
-  max-width: 1000px; 
-  margin: 24px auto; 
-  padding: 0 20px; 
-}
+.wrap { max-width: 1000px; margin: 24px auto; padding: 0 20px; }
 
 .panel {
   background: var(--panel);
@@ -65,14 +47,8 @@ body, html {
   overflow: hidden;
 }
 
-.panel-head { 
-  padding: 18px; 
-  border-bottom: 1px solid var(--ring); 
-}
-
-.panel-body { 
-  padding: 18px; 
-}
+.panel-head { padding: 18px; border-bottom: 1px solid var(--ring); }
+.panel-body { padding: 18px; }
 
 .row {
   display: flex; 
@@ -81,32 +57,14 @@ body, html {
   justify-content: space-between;
 }
 
-.order-badge { 
-  color: var(--gama-orange); 
-  font-weight: 700; 
-}
-
-.prod-info { 
-  display: flex; 
-  flex-wrap: wrap; 
-  gap: 10px 20px; 
-  color: #111; 
-}
+.order-badge { color: var(--gama-orange); font-weight: 700; }
+.prod-info { display: flex; flex-wrap: wrap; gap: 10px 20px; color: #111; }
 
 /* ========== INPUTS E BOTÕES ========== */
-.grid { 
-  display: grid; 
-  gap: 12px; 
-}
+.grid { display: grid; gap: 12px; }
+.field label { display: block; font-weight: 600; margin-bottom: 6px; }
 
-.field label { 
-  display: block; 
-  font-weight: 600; 
-  margin-bottom: 6px; 
-}
-
-.field input, 
-.field select {
+.field input, .field select {
   width: 100%; 
   padding: 10px 12px;
   border: 2px solid var(--ring);
@@ -126,35 +84,14 @@ body, html {
   transition: filter 0.2s;
 }
 
-.btn-black { 
-  background: #111; 
-  color: #fff; 
-}
-
-.btn-black:hover { 
-  filter: brightness(1.1); 
-}
-
-.btn-orange { 
-  background: var(--gama-orange); 
-  color: #fff; 
-}
-
-.btn-orange:hover { 
-  filter: brightness(0.95); 
-}
-
-.btn-outline { 
-  background: #fff; 
-  border: 2px solid var(--ring); 
-}
+.btn-black { background: #111; color: #fff; }
+.btn-black:hover { filter: brightness(1.1); }
+.btn-orange { background: var(--gama-orange); color: #fff; }
+.btn-orange:hover { filter: brightness(0.95); }
+.btn-outline { background: #fff; border: 2px solid var(--ring); }
 
 /* ========== CANVAS E PREVIEW ========== */
-.preview-block { 
-  margin-top: 16px;
-  position: relative;
-  width: 100%;
-}
+.preview-block { margin-top: 16px; position: relative; width: 100%; }
 
 .canvas-wrap {
   position: relative; 
@@ -165,15 +102,14 @@ body, html {
   aspect-ratio: 1 / 1;
 }
 
-/* Imagem base não captura eventos */
-.canvas, 
-#preview-img { 
+.canvas, #preview-img { 
   width: 100%; 
   display: block; 
   user-select: none;
   -webkit-user-select: none;
   pointer-events: none;
-  
+}
+
 /* ========== CAIXAS DE SELEÇÃO ========== */
 .layer-box {
   position: absolute;
@@ -183,8 +119,6 @@ body, html {
   cursor: move;
   pointer-events: auto;
   z-index: 10;
-  /* ✅ Bloquear scroll sempre */
-  touch-action: auto;
 }
 
 .layer-box.text {
@@ -199,27 +133,28 @@ body, html {
   z-index: 20;
 }
 
-/* ========== ELEMENTOS DE PREVIEW (LOGO E TEXTO) ========== */
+/* ========== ELEMENTOS DE PREVIEW ========== */
 .elemento-preview {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  pointer-events: none; /* ❌ NÃO captura eventos */
+  pointer-events: none;
   user-select: none;
   z-index: 1;
 }
 
 #logo-preview {
+  opacity: 0.9;
   object-fit: contain;
   width: 100%;
   height: 100%;
-  background: transparent !important;
-  background-color: transparent !important;
+  background: transparent;
 }
 
 #texto-preview {
+  opacity: 0.9;
   text-align: center;
   word-break: break-word;
   padding: 4px;
@@ -230,10 +165,10 @@ body, html {
   color: #000;
   width: 100%;
   height: 100%;
-  background: transparent !important;
-  background-color: transparent !important;
+  background: transparent;
+}
 
-/* ========== BADGE (ETIQUETA) ========== */
+/* ========== BADGE ========== */
 .badge {
   position: absolute;
   top: -32px;
@@ -246,7 +181,7 @@ body, html {
   font-size: 11px;
   font-weight: 600;
   white-space: nowrap;
-  pointer-events: none; /* ❌ NÃO captura eventos */
+  pointer-events: none;
   z-index: 3;
 }
 
@@ -260,7 +195,7 @@ body, html {
   50% { opacity: 0.7; }
 }
 
-/* ========== ALÇAS DE REDIMENSIONAMENTO ========== */
+/* ========== ALÇAS ========== */
 .handle {
   position: absolute;
   width: 16px;
@@ -268,17 +203,16 @@ body, html {
   background: white;
   border: 2px solid currentColor;
   border-radius: 50%;
-  pointer-events: auto; /* ✅ Capturam eventos */
+  pointer-events: auto;
   z-index: 2;
-  touch-action: none; /* ✅ Apenas alças bloqueiam scroll */
 }
-  
+
 .handle.tl { top: -8px; left: -8px; cursor: nw-resize; }
 .handle.tr { top: -8px; right: -8px; cursor: ne-resize; }
 .handle.bl { bottom: -8px; left: -8px; cursor: sw-resize; }
 .handle.br { bottom: -8px; right: -8px; cursor: se-resize; }
 
-/* ========== TOOLBAR DE EDIÇÃO ========== */
+/* ========== TOOLBAR ========== */
 .edit-toolbar {
   display: grid; 
   grid-template-columns: repeat(4, minmax(44px, 1fr)); 
@@ -290,74 +224,42 @@ body, html {
   border: 1px solid var(--ring);
   background: #fff; 
   border-radius: 10px; 
-  padding: 10px 0;
-  font-size: 16px; 
+  padding: 10px 8px;
+  font-size: 18px; 
   line-height: 1; 
   cursor: pointer;
-  transition: transform 0.1s;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
 }
 
-.edit-toolbar button:active { 
-  transform: scale(0.96); 
+.edit-toolbar button:hover {
+  background: #f9fafb;
+  border-color: var(--gama-orange);
 }
 
-.edit-hint { 
-  font-size: 12px; 
-  opacity: 0.75; 
-  margin: 4px 0 0; 
+.edit-toolbar button:active { transform: scale(0.96); }
+
+.btn-icon { font-size: 20px; }
+
+.btn-text {
+  display: none;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-/* ========== MODAL ========== */
-.modal {
-  position: fixed; 
-  inset: 0;
-  background: rgba(0, 0, 0, 0.6);
-  display: none; 
-  align-items: center; 
-  justify-content: center;
-  z-index: 50;
+@media (min-width: 640px) {
+  .btn-text { display: block; }
+  .edit-toolbar button { padding: 12px 8px; }
 }
 
-.modal-card {
-  width: min(92vw, 420px);
-  background: #fff; 
-  border-radius: 14px;
-  padding: 18px; 
-  text-align: center;
-}
+.edit-hint { font-size: 12px; opacity: 0.75; margin: 4px 0 0; }
 
-.meter { 
-  width: 100%; 
-  height: 18px; 
-  background: #eef2ff; 
-  border-radius: 999px; 
-  overflow: hidden; 
-  position: relative; 
-  margin-top: 10px; 
-}
-
-.meter > i { 
-  position: absolute; 
-  left: 0; 
-  top: 0; 
-  bottom: 0; 
-  width: 0%; 
-  background: linear-gradient(90deg, #f68729, #d67420); 
-  transition: width 0.3s; 
-}
-
-.meter span { 
-  position: absolute; 
-  inset: 0; 
-  display: flex; 
-  align-items: center; 
-  justify-content: center; 
-  font-weight: 700; 
-  font-size: 12px; 
-  color: #111; 
-}
-
-/* ========== OVERLAY DE PROGRESSO ========== */
+/* ========== OVERLAY ========== */
 .overlay {
   position: fixed; 
   inset: 0; 
@@ -367,9 +269,7 @@ body, html {
   z-index: 9999;
 }
 
-.overlay[hidden] { 
-  display: none; 
-}
+.overlay[hidden] { display: none; }
 
 .overlay-modal {
   background: #111; 
@@ -391,9 +291,7 @@ body, html {
   animation: spin 1s linear infinite;
 }
 
-@keyframes spin { 
-  to { transform: rotate(360deg); } 
-}
+@keyframes spin { to { transform: rotate(360deg); } }
 
 /* ========== TELA DE CONCLUSÃO ========== */
 .done { 
@@ -402,14 +300,10 @@ body, html {
   text-align: center; 
 }
 
-.done h2 { 
-  font-size: 26px; 
-  margin: 0 0 10px; 
-}
+.done h2 { font-size: 26px; margin: 0 0 10px; }
 
 /* ========== RESPONSIVO ========== */
 @media (max-width: 768px) {
-  /* Aumentar área de toque das alças no mobile */
   .handle {
     width: 24px;
     height: 24px;
@@ -422,247 +316,6 @@ body, html {
 }
 
 @media (min-width: 1024px) {
-  .topbar-inner { 
-    padding-left: 24px; 
-    padding-right: 24px; 
-  }
-  
-  .wrap { 
-    padding: 0 24px; 
-  }
-}
-
-/* ========== SCROLL NO MOBILE - SOLUÇÃO DEFINITIVA ========== */
-body, html {
-  margin: 0;
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-  background: var(--bg-dark);
-  color: var(--text);
-  /* ✅ CRÍTICO: Permitir scroll SEMPRE */
-  touch-action: pan-y pan-x !important;
-  overflow-y: scroll !important;
-  -webkit-overflow-scrolling: touch;
-}
-
-/* ========== CAIXAS DE SELEÇÃO (LOGO E TEXTO) ========== */
-.layer-box {
-  position: absolute;
-  border: 3px solid #f68729;
-  background: rgba(246, 135, 41, 0.15);
-  border-radius: 8px;
-  cursor: move;
-  pointer-events: auto;
-  z-index: 10;
-  /* ✅ Permitir scroll até arrastar */
-  touch-action: pan-y pan-x;
-}
-
-/* Quando arrastando, bloquear scroll */
-.layer-box.dragging {
-  touch-action: none !important;
-}
-
-/* ========== ELEMENTOS DE PREVIEW (ESCONDER ATÉ CARREGAR) ========== */
-.elemento-preview {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  user-select: none;
-  z-index: 1;
-  /* ✅ Esconder por padrão */
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.3s;
-}
-
-/* Só mostrar quando tiver src/conteúdo */
-#logo-preview[src]:not([src=""]) {
-  opacity: 1;
-  visibility: visible;
-}
-
-#texto-preview:not(:empty) {
-  opacity: 1;
-  visibility: visible;
-  display: flex !important;
-}
-
-#logo-preview {
-  object-fit: contain;
-  width: 100%;
-  height: 100%;
-  /* ✅ FORÇAR transparência */
-  background: transparent !important;
-  background-color: transparent !important;
-}
-
-#texto-preview {
-  text-align: center;
-  word-break: break-word;
-  padding: 4px;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-  color: #000;
-  width: 100%;
-  height: 100%;
-  /* ✅ FORÇAR transparência */
-  background: transparent !important;
-  background-color: transparent !important;
-}
-
-/* ========== CAIXAS DE SELEÇÃO (LOGO E TEXTO) ========== */
-.layer-box {
-  position: absolute;
-  border: 3px solid #f68729;
-  background: rgba(246, 135, 41, 0.15);
-  border-radius: 8px;
-  cursor: move;
-  pointer-events: auto;
-  z-index: 10;
-  /* ❌ NÃO bloquear scroll por padrão */
-}
-
-/* Só bloquear scroll quando ARRASTANDO */
-.layer-box.dragging {
-  touch-action: none !important;
-}
-
-.layer-box.text {
-  border-color: #38bdf8;
-  background: rgba(56, 189, 248, 0.15);
-}
-
-.layer-box.active {
-  outline: 3px solid #22c55e;
-  outline-offset: 2px;
-  box-shadow: 0 0 0 1px #22c55e;
-  z-index: 20;
-}
-
-/* ========== ELEMENTOS DE PREVIEW (LOGO E TEXTO) ========== */
-.elemento-preview {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  user-select: none;
-  z-index: 1;
-  /* ✅ Esconder até ter conteúdo */
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-
-.elemento-preview.loaded {
-  opacity: 1;
-}
-
-#logo-preview {
-  object-fit: contain;
-  width: 100%;
-  height: 100%;
-  background: transparent !important; /* ✅ SEM fundo amarelo */
-}
-
-#texto-preview {
-  text-align: center;
-  word-break: break-word;
-  padding: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-  color: #000;
-  width: 100%;
-  height: 100%;
-  background: transparent !important; /* ✅ SEM fundo */
-}
-
-/* ========== ALÇAS DE REDIMENSIONAMENTO ========== */
-.handle {
-  position: absolute;
-  width: 16px;
-  height: 16px;
-  background: white;
-  border: 2px solid currentColor;
-  border-radius: 50%;
-  pointer-events: auto;
-  z-index: 2;
-  /* Alças sempre bloqueiam scroll */
-  touch-action: none;
-}
-/* ========== TOOLBAR DE EDIÇÃO ========== */
-.edit-toolbar {
-  display: grid; 
-  grid-template-columns: repeat(4, minmax(44px, 1fr)); 
-  gap: 8px;
-  margin: 12px 0 8px;
-}
-
-.edit-toolbar button {
-  border: 1px solid var(--ring);
-  background: #fff; 
-  border-radius: 10px; 
-  padding: 10px 8px;
-  font-size: 18px; 
-  line-height: 1; 
-  cursor: pointer;
-  transition: all 0.2s;
-  /* ✅ ADICIONAR flex para layout vertical */
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-}
-
-.edit-toolbar button:hover {
-  background: #f9fafb;
-  border-color: var(--gama-orange);
-}
-
-.edit-toolbar button:active { 
-  transform: scale(0.96); 
-}
-
-/* Ícones sempre visíveis */
-.btn-icon {
-  font-size: 20px;
-}
-
-/* Texto escondido no mobile */
-.btn-text {
-  display: none;
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--text);
-}
-
-/* Desktop: mostrar texto */
-@media (min-width: 640px) {
-  .btn-text {
-    display: block;
-  }
-  
-  .edit-toolbar button {
-    padding: 12px 8px;
-  }
-}
-
-  /* ========== TELA DE CONCLUSÃO ========== */
-.done { 
-  display: none !important; /* ✅ Escondido por padrão */
-  padding: 48px 18px; 
-  text-align: center; 
-}
-
-.done h2 { 
-  font-size: 26px; 
-  margin: 0 0 10px; 
+  .topbar-inner { padding-left: 24px; padding-right: 24px; }
+  .wrap { padding: 0 24px; }
 }
