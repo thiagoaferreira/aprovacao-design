@@ -541,23 +541,37 @@ window.addEventListener("resize", () => {
   positionBoxes();
 });
 
-/* ========= Bloquear scroll APENAS quando arrastando ========= */
-let isEditing = false;
+/* ========= Solução para scroll no mobile ========= */
+const canvasWrap = document.querySelector('.canvas-wrap');
 
-function preventScroll(e) {
-  if (isEditing) {
-    e.preventDefault();
-    return false;
-  }
+if (canvasWrap) {
+  let isDragging = false;
+  
+  // Quando tocar em uma caixa, preparar para bloquear
+  canvasWrap.addEventListener('touchstart', (e) => {
+    const isBox = e.target.closest('.layer-box');
+    if (isBox) {
+      isDragging = true;
+    }
+  }, { passive: true });
+  
+  // Bloquear scroll apenas quando arrastando
+  canvasWrap.addEventListener('touchmove', (e) => {
+    if (isDragging) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  }, { passive: false });
+  
+  // Liberar ao soltar
+  canvasWrap.addEventListener('touchend', () => {
+    isDragging = false;
+  }, { passive: true });
+  
+  canvasWrap.addEventListener('touchcancel', () => {
+    isDragging = false;
+  }, { passive: true });
 }
-
-// Adicionar listener global para touchmove
-document.addEventListener('touchmove', preventScroll, { passive: false });
-
-// Exportar para os controles usarem
-window.__setEditing = (val) => {
-  isEditing = val;
-};
 
 /* ========= Boot ========= */
 document.addEventListener("DOMContentLoaded", ()=>{ loadShortLink(); });
