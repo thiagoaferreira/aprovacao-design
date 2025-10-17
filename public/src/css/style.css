@@ -319,3 +319,18 @@ body, html {
   .topbar-inner { padding-left: 24px; padding-right: 24px; }
   .wrap { padding: 0 24px; }
 }
+
+/* ========== MODAL (ESCONDER POR PADRÃO) ========== */
+.modal {
+  position: fixed; 
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: none !important; /* ✅ CRÍTICO */
+  align-items: center; 
+  justify-content: center;
+  z-index: 50;
+}
+
+.modal.show {
+  display: flex !important; /* Mostrar quando tiver classe .show */
+}
