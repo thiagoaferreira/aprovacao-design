@@ -542,10 +542,7 @@ window.addEventListener("resize", () => {
 });
 
 /* ========= Prevenir scroll durante edição no mobile ========= */
-let preventScrollHandler = null;
-
-// Criar handler que previne scroll quando body.editing está ativo
-preventScrollHandler = (e) => {
+let preventScrollHandler = (e) => {
   if (document.body.classList.contains('editing')) {
     e.preventDefault();
     e.stopPropagation();
@@ -553,18 +550,19 @@ preventScrollHandler = (e) => {
   }
 };
 
-// Adicionar listeners globais para touch
+// Listeners globais para touch
 document.addEventListener('touchmove', preventScrollHandler, { passive: false });
-document.addEventListener('touchstart', (e) => {
-  // Se tocar em uma caixa, preparar para bloquear scroll
-  const box = e.target.closest('.layer-box');
-  if (box) {
-    document.body.classList.add('editing');
-  }
-}, { passive: false });
 
-/* ========= Boot ========= */
-document.addEventListener("DOMContentLoaded", ()=>{ loadShortLink(); });
+// Garantir limpeza ao soltar
+document.addEventListener('touchend', () => {
+  setTimeout(() => {
+    document.body.classList.remove('editing');
+  }, 50);
+}, { passive: true });
+
+document.addEventListener('touchcancel', () => {
+  document.body.classList.remove('editing');
+}, { passive: true });
 
 /* ========= Boot ========= */
 document.addEventListener("DOMContentLoaded", ()=>{ loadShortLink(); });
