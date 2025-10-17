@@ -21,6 +21,9 @@ export function createTextControl({ img, box, state, onChange, onSelect }) {
     });
     select();
     dragging  = true;
+
+      // ✅ Avisar que começou a editar
+  if (window.__setEditing) window.__setEditing(true);
     
     // ✅ CORRIGIDO: usar `el` em vez de `box`
     el.classList.add("dragging");
@@ -49,6 +52,9 @@ export function createTextControl({ img, box, state, onChange, onSelect }) {
   
   function up(e) {
     dragging = false;
+
+      // ✅ Avisar que começou a editar
+  if (window.__setEditing) window.__setEditing(true);
     
     // ✅ CORRIGIDO: usar `el` em vez de `box` e DENTRO da função up
     el.classList.remove("dragging");
