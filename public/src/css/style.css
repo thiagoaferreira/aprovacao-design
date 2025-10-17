@@ -209,22 +209,6 @@ body, html {
   pointer-events: none; /* ❌ NÃO captura eventos */
   user-select: none;
   z-index: 1;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.3s;
-}
-
-
-/* Mostrar quando carregar */
-#logo-preview[src]:not([src=""]) {
-  opacity: 1;
-  visibility: visible;
-}
-
-#texto-preview:not(:empty) {
-  opacity: 1;
-  visibility: visible;
-  display: flex !important;
 }
 
 #logo-preview {
