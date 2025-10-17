@@ -541,5 +541,23 @@ window.addEventListener("resize", () => {
   positionBoxes();
 });
 
+/* ========= Bloquear scroll APENAS quando arrastando ========= */
+let isEditing = false;
+
+function preventScroll(e) {
+  if (isEditing) {
+    e.preventDefault();
+    return false;
+  }
+}
+
+// Adicionar listener global para touchmove
+document.addEventListener('touchmove', preventScroll, { passive: false });
+
+// Exportar para os controles usarem
+window.__setEditing = (val) => {
+  isEditing = val;
+};
+
 /* ========= Boot ========= */
 document.addEventListener("DOMContentLoaded", ()=>{ loadShortLink(); });
