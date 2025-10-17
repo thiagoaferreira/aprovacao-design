@@ -24,8 +24,6 @@ export function createLogoControl({ img, box, state, onChange, onSelect }) {
     
     // ✅ ADICIONAR classe para bloquear scroll
     el.classList.add("dragging");
-    // ✅ LIBERAR SCROLL DA PÁGINA
-    document.body.classList.remove("editing");
     
     resizing  = e.target.classList?.contains("handle");
     start = { x: e.clientX, y: e.clientY, X: state.logo.x, Y: state.logo.y, W: state.logo.w };
