@@ -21,6 +21,9 @@ export function createLogoControl({ img, box, state, onChange, onSelect }) {
     });
     select();
     dragging  = true;
+
+      // ✅ Avisar que começou a editar
+  if (window.__setEditing) window.__setEditing(true);
     
     // ✅ ADICIONAR classe para bloquear scroll
     el.classList.add("dragging");
@@ -49,6 +52,9 @@ export function createLogoControl({ img, box, state, onChange, onSelect }) {
   
   function up(e) {
     dragging = false;
+
+      // ✅ Avisar que começou a editar
+  if (window.__setEditing) window.__setEditing(true);
     
     // ✅ REMOVER classe para permitir scroll
     el.classList.remove("dragging");
