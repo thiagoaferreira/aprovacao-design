@@ -222,18 +222,25 @@ function updatePreviews() {
     $textoDiv.textContent = state.textoVal || "";
     $textoDiv.style.fontFamily = state.fonte || "Arial";
     
-    // ✅ CRÍTICO: Tamanho baseado na largura da caixa
-    const fontSize = Math.max(12, Math.min(48, Math.round(state.text.w * 0.3)));
-    $textoDiv.style.fontSize = `${fontSize}px`;
-    $textoDiv.style.lineHeight = "1.2";
-    $textoDiv.style.whiteSpace = "normal";
-    $textoDiv.style.display = "flex";
-    $textoDiv.style.alignItems = "center";
-    $textoDiv.style.justifyContent = "center";
-    $textoDiv.style.background = "transparent";
-    $textoDiv.style.backgroundColor = "transparent";
-    
-    console.log(`  📝 Texto atualizado: "${state.textoVal}" - fontSize: ${fontSize}px`);
+    // ✅ CRÍTICO: Calcular fontSize baseado na largura REAL da caixa na tela
+    const $boxTexto = document.querySelector("#box-texto");
+    if ($boxTexto) {
+      const boxWidth = $boxTexto.offsetWidth; // Largura real em pixels CSS
+      const fontSize = Math.max(10, Math.min(48, Math.round(boxWidth * 0.25))); // 25% da largura
+      
+      $textoDiv.style.fontSize = `${fontSize}px`;
+      $textoDiv.style.lineHeight = "1.2";
+      $textoDiv.style.whiteSpace = "normal";
+      $textoDiv.style.wordBreak = "break-word"; // ✅ Quebrar palavras longas
+      $textoDiv.style.display = "flex";
+      $textoDiv.style.alignItems = "center";
+      $textoDiv.style.justifyContent = "center";
+      $textoDiv.style.padding = "4px"; // ✅ Espaço interno
+      $textoDiv.style.background = "transparent";
+      $textoDiv.style.backgroundColor = "transparent";
+      
+      console.log(`  📝 Texto atualizado: "${state.textoVal}" - boxWidth: ${boxWidth}px, fontSize: ${fontSize}px`);
+    }
   } else if ($textoDiv) {
     $textoDiv.textContent = "";
   }
