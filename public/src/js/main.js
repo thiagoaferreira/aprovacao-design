@@ -203,19 +203,19 @@ function updatePreviews() {
   console.log("🔄 updatePreviews() chamado");
   
   // LOGO: mostrar a logo processada SEM fundo
-  if (state.logoId && $logoImg) {
-    // ✅ Forçar fundo transparente + formato PNG
-    const logoUrl = `https://res.cloudinary.com/${state.cloud}/image/upload/e_bgremoval,f_png,w_300,h_300,c_fit,b_rgb:00000000/${state.logoId}`;
-    
-    console.log("  🖼️ Atualizando logo:", logoUrl);
-    
-    $logoImg.src = logoUrl;
-    $logoImg.style.display = "block";
-    $logoImg.style.background = "transparent";
-    $logoImg.style.backgroundColor = "transparent";
-  } else if ($logoImg) {
-    $logoImg.style.display = "none";
-  }
+if (state.logoId && $logoImg) {
+  // ✅ URL ORIGINAL - apenas remoção de fundo, SEM forçar formato PNG
+  const logoUrl = `https://res.cloudinary.com/${state.cloud}/image/upload/e_bgremoval,w_300,h_300,c_fit/${state.logoId}`;
+  
+  console.log("  🖼️ Atualizando logo:", logoUrl);
+  
+  $logoImg.src = logoUrl;
+  $logoImg.style.display = "block";
+  $logoImg.style.background = "transparent";
+  $logoImg.style.backgroundColor = "transparent";
+} else if ($logoImg) {
+  $logoImg.style.display = "none";
+}
   
   // TEXTO: mostrar o texto
   if ($textoDiv && state.textoVal) {
