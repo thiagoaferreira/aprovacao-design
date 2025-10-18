@@ -195,7 +195,7 @@ body, html {
   50% { opacity: 0.7; }
 }
 
-/* ========== ALÇAS ========== */
+/* ========== ALÇAS DE REDIMENSIONAMENTO ========== */
 .handle {
   position: absolute;
   width: 16px;
@@ -205,12 +205,23 @@ body, html {
   border-radius: 50%;
   pointer-events: auto;
   z-index: 2;
+  /* ✅ Esconder alças por padrão */
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s, visibility 0.2s;
 }
 
-.handle.tl { top: -8px; left: -8px; cursor: nw-resize; }
-.handle.tr { top: -8px; right: -8px; cursor: ne-resize; }
-.handle.bl { bottom: -8px; left: -8px; cursor: sw-resize; }
-.handle.br { bottom: -8px; right: -8px; cursor: se-resize; }
+/* ✅ Mostrar alças APENAS quando a caixa está ativa */
+.layer-box.active .handle {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* ✅ Posicionar TOTALMENTE FORA da caixa */
+.handle.tl { top: -18px; left: -18px; cursor: nw-resize; }
+.handle.tr { top: -18px; right: -18px; cursor: ne-resize; }
+.handle.bl { bottom: -18px; left: -18px; cursor: sw-resize; }
+.handle.br { bottom: -18px; right: -18px; cursor: se-resize; }
 
 /* ========== TOOLBAR ========== */
 .edit-toolbar {
@@ -303,16 +314,18 @@ body, html {
 .done h2 { font-size: 26px; margin: 0 0 10px; }
 
 /* ========== RESPONSIVO ========== */
+/* ========== MOBILE: Alças maiores para facilitar toque ========== */
 @media (max-width: 768px) {
   .handle {
-    width: 24px;
-    height: 24px;
+    width: 20px;
+    height: 20px;
   }
   
-  .handle.tl { top: -12px; left: -12px; }
-  .handle.tr { top: -12px; right: -12px; }
-  .handle.bl { bottom: -12px; left: -12px; }
-  .handle.br { bottom: -12px; right: -12px; }
+  /* Mais afastadas ainda no mobile */
+  .handle.tl { top: -22px; left: -22px; }
+  .handle.tr { top: -22px; right: -22px; }
+  .handle.bl { bottom: -22px; left: -22px; }
+  .handle.br { bottom: -22px; right: -22px; }
 }
 
 @media (min-width: 1024px) {
