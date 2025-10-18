@@ -372,25 +372,26 @@ async function gerarPrevia() {
     console.log("📦 Resposta do webhook:", data);
     
     const previewUrl = (Array.isArray(data) ? data[0]?.preview_url : data?.preview_url) || null;
-
     state.baseId = data.mockup_public_id || state.baseId || (previewUrl ? extractBaseId(previewUrl) : state.baseId);
     state.logoId = data.logo_public_id   || state.logoId || (previewUrl ? extractLogoId(previewUrl) : state.logoId);
-
+    
     console.log("🆔 IDs extraídos:", {
       baseId: state.baseId,
       logoId: state.logoId
     });
-
-        // ✅ CARREGAR IMAGEM LIMPA (sem overlays)
+    
+    // ✅ CARREGAR IMAGEM LIMPA (sem overlays)
     const cleanUrl = buildURL(state);
     if (cleanUrl) {
+      console.log("🖼️ Carregando imagem LIMPA:", cleanUrl);
       img.src = cleanUrl; // ✅ Imagem base SEM logo/texto
     }
-
+    
     if (state.logoId) {
       const $logoImg = document.querySelector("#logo-preview");
       if ($logoImg) {
-        const logoUrl = `https://res.cloudinary.com/${state.cloud}/image/upload/e_bgremoval,w_300,h_300,c_fit/${state.logoId}`;
+        const logoUrl = `https://res.cloudinary.com/${state.cloud}/image/upload/e_bgremoval,f_png,w_300,h_300,c_fit,b_rgb:00000000/${state.logoId}`;
+        console.log("🎨 Logo URL:", logoUrl);
         $logoImg.src = logoUrl;
       }
     }
@@ -398,7 +399,7 @@ async function gerarPrevia() {
     state.textoVal = ($("#texto")?.value || "").trim();
     state.fonte    = $("#fonte")?.value || "Arial";
     state.hasText  = !!state.textoVal;
-
+    
     img.onload = () => {
       state.natural = { w: img.naturalWidth, h: img.naturalHeight };
       
@@ -458,15 +459,9 @@ async function gerarPrevia() {
         setActive("logo");
       }
     };
-
-    if (previewUrl) { 
-      console.log("🖼️ Usando preview_url do webhook");
-      img.src = previewUrl; 
-    } else { 
-      console.log("🔨 Montando URL manualmente");
-      refresh(); 
-    }
-
+    
+    // ✅ FIM - não precisa de mais nada aqui
+    
   } catch (e) {
     console.error("❌ Erro ao gerar prévia:", e);
     alert("Falha ao gerar prévia. Tente novamente.");
