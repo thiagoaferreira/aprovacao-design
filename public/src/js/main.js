@@ -174,10 +174,17 @@ function positionBoxes() {
     el.style.borderColor = color;
     el.style.display = "block";
     el.style.pointerEvents = "auto";
+
+     // ✅ APLICAR ROTAÇÃO NA CAIXA TAMBÉM
+    if (rotation && rotation !== 0) {
+      el.style.transform = `rotate(${rotation}deg)`;
+      el.style.transformOrigin = "center center"; // Girar do centro
+    } else {
+      el.style.transform = "none";
+    }
     
     // ❌ NÃO aplicar rotação visual (confunde o usuário)
     // A rotação será aplicada apenas na URL final do Cloudinary
-
     const badge = el.querySelector(".badge");
     if (badge) {
       badge.textContent = `${labelText} ${rotation ? `(${rotation}°)` : ''}`.trim();
