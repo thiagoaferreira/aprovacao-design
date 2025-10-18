@@ -381,6 +381,12 @@ async function gerarPrevia() {
       logoId: state.logoId
     });
 
+        // ✅ CARREGAR IMAGEM LIMPA (sem overlays)
+    const cleanUrl = buildURL(state);
+    if (cleanUrl) {
+      img.src = cleanUrl; // ✅ Imagem base SEM logo/texto
+    }
+
     if (state.logoId) {
       const $logoImg = document.querySelector("#logo-preview");
       if ($logoImg) {
