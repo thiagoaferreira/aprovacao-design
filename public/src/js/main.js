@@ -223,7 +223,7 @@ function updatePreviews() {
     
     // ✅ APLICAR ROTAÇÃO VISUAL
     const logoRotation = state.logoRot || 0;
-    $logoImg.style.transform = `rotate(${logoRotation}deg)`;
+    $logoImg.style.transform = "none";
     console.log(`  🔄 Logo rotação: ${logoRotation}°`);
   } else if ($logoImg) {
     $logoImg.style.display = "none";
@@ -253,7 +253,7 @@ function updatePreviews() {
       
       // ✅ APLICAR ROTAÇÃO VISUAL
       const textRotation = state.textRot || 0;
-      $textoDiv.style.transform = `rotate(${textRotation}deg)`;
+      $textoDiv.style.transform = "none";
       
       console.log(`  📝 Texto atualizado: "${state.textoVal}" - boxWidth: ${boxWidth}px, fontSize: ${fontSize}px, rotação: ${textRotation}°`);
     }
