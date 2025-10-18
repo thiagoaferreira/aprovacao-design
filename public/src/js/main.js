@@ -203,19 +203,24 @@ function updatePreviews() {
   console.log("🔄 updatePreviews() chamado");
   
   // LOGO: mostrar a logo processada SEM fundo
-if (state.logoId && $logoImg) {
-  // ✅ URL ORIGINAL - apenas remoção de fundo, SEM forçar formato PNG
-  const logoUrl = `https://res.cloudinary.com/${state.cloud}/image/upload/e_bgremoval,w_300,h_300,c_fit/${state.logoId}`;
-  
-  console.log("  🖼️ Atualizando logo:", logoUrl);
-  
-  $logoImg.src = logoUrl;
-  $logoImg.style.display = "block";
-  $logoImg.style.background = "transparent";
-  $logoImg.style.backgroundColor = "transparent";
-} else if ($logoImg) {
-  $logoImg.style.display = "none";
-}
+  if (state.logoId && $logoImg) {
+    // ✅ URL ORIGINAL - apenas remoção de fundo
+    const logoUrl = `https://res.cloudinary.com/${state.cloud}/image/upload/e_bgremoval,w_300,h_300,c_fit/${state.logoId}`;
+    
+    console.log("  🖼️ Atualizando logo:", logoUrl);
+    
+    $logoImg.src = logoUrl;
+    $logoImg.style.display = "block";
+    $logoImg.style.background = "transparent";
+    $logoImg.style.backgroundColor = "transparent";
+    
+    // ✅ APLICAR ROTAÇÃO VISUAL
+    const logoRotation = state.logoRot || 0;
+    $logoImg.style.transform = `rotate(${logoRotation}deg)`;
+    console.log(`  🔄 Logo rotação: ${logoRotation}°`);
+  } else if ($logoImg) {
+    $logoImg.style.display = "none";
+  }
   
   // TEXTO: mostrar o texto
   if ($textoDiv && state.textoVal) {
@@ -231,15 +236,19 @@ if (state.logoId && $logoImg) {
       $textoDiv.style.fontSize = `${fontSize}px`;
       $textoDiv.style.lineHeight = "1.2";
       $textoDiv.style.whiteSpace = "normal";
-      $textoDiv.style.wordBreak = "break-word"; // ✅ Quebrar palavras longas
+      $textoDiv.style.wordBreak = "break-word";
       $textoDiv.style.display = "flex";
       $textoDiv.style.alignItems = "center";
       $textoDiv.style.justifyContent = "center";
-      $textoDiv.style.padding = "4px"; // ✅ Espaço interno
+      $textoDiv.style.padding = "4px";
       $textoDiv.style.background = "transparent";
       $textoDiv.style.backgroundColor = "transparent";
       
-      console.log(`  📝 Texto atualizado: "${state.textoVal}" - boxWidth: ${boxWidth}px, fontSize: ${fontSize}px`);
+      // ✅ APLICAR ROTAÇÃO VISUAL
+      const textRotation = state.textRot || 0;
+      $textoDiv.style.transform = `rotate(${textRotation}deg)`;
+      
+      console.log(`  📝 Texto atualizado: "${state.textoVal}" - boxWidth: ${boxWidth}px, fontSize: ${fontSize}px, rotação: ${textRotation}°`);
     }
   } else if ($textoDiv) {
     $textoDiv.textContent = "";
