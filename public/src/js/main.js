@@ -234,36 +234,48 @@ function updatePreviews() {
   }
   
   // TEXTO: mostrar o texto
-  if ($textoDiv && state.textoVal) {
-    $textoDiv.textContent = state.textoVal || "";
-    $textoDiv.style.fontFamily = state.fonte || "Arial";
+if ($textoDiv && state.textoVal) {
+  $textoDiv.textContent = state.textoVal || "";
+  $textoDiv.style.fontFamily = state.fonte || "Arial";
+  
+  const $boxTexto = document.querySelector("#box-texto");
+  if ($boxTexto) {
+    const boxWidth = $boxTexto.offsetWidth;
     
-    // ✅ CRÍTICO: Calcular fontSize baseado na largura REAL da caixa na tela
-    const $boxTexto = document.querySelector("#box-texto");
-    if ($boxTexto) {
-      const boxWidth = $boxTexto.offsetWidth; // Largura real em pixels CSS
-      const fontSize = Math.max(10, Math.min(48, Math.round(boxWidth * 0.25))); // 25% da largura
-      
-      $textoDiv.style.fontSize = `${fontSize}px`;
-      $textoDiv.style.lineHeight = "1.2";
-      $textoDiv.style.whiteSpace = "normal";
-      $textoDiv.style.wordBreak = "break-word";
-      $textoDiv.style.display = "flex";
-      $textoDiv.style.alignItems = "center";
-      $textoDiv.style.justifyContent = "center";
-      $textoDiv.style.padding = "4px";
-      $textoDiv.style.background = "transparent";
-      $textoDiv.style.backgroundColor = "transparent";
-      
-      // ✅ APLICAR ROTAÇÃO VISUAL
-      const textRotation = state.textRot || 0;
-      $textoDiv.style.transform = "none";
-      
-      console.log(`  📝 Texto atualizado: "${state.textoVal}" - boxWidth: ${boxWidth}px, fontSize: ${fontSize}px, rotação: ${textRotation}°`);
+    // ✅ Calcular fontSize para caber em UMA linha
+    // Usar um multiplicador menor para garantir que cabe
+    const fontSize = Math.max(8, Math.min(48, Math.round(boxWidth * 0.20))); // 20% ao invés de 25%
+    
+    $textoDiv.style.fontSize = `${fontSize}px`;
+    $textoDiv.style.lineHeight = "1.2";
+    
+    // ✅ CRÍTICO: Verificar se tem quebra de linha manual (\n)
+    const hasManualBreak = state.textoVal.includes('\n');
+    
+    if (hasManualBreak) {
+      // Se usuário deu ENTER, respeitar quebras
+      $textoDiv.style.whiteSpace = "pre-wrap";
+    } else {
+      // Se NÃO deu ENTER, NUNCA quebrar linha
+      $textoDiv.style.whiteSpace = "nowrap";
     }
-  } else if ($textoDiv) {
-    $textoDiv.textContent = "";
+    
+    $textoDiv.style.overflow = "hidden"; // ✅ Esconder se passar
+    $textoDiv.style.textOverflow = "ellipsis"; // ✅ Mostrar ... se não couber
+    $textoDiv.style.display = "flex";
+    $textoDiv.style.alignItems = "center";
+    $textoDiv.style.justifyContent = "center";
+    $textoDiv.style.padding = "4px";
+    $textoDiv.style.background = "transparent";
+    $textoDiv.style.backgroundColor = "transparent";
+    
+    // ❌ Sem rotação própria (gira com a caixa)
+    $textoDiv.style.transform = "none";
+    
+    console.log(`  📝 Texto: "${state.textoVal}" - fontSize: ${fontSize}px, whiteSpace: ${hasManualBreak ? 'pre-wrap' : 'nowrap'}`);
   }
+} else if ($textoDiv) {
+  $textoDiv.textContent = "";
 }
 
 function refresh() {
