@@ -220,6 +220,10 @@ function updatePreviews() {
     $logoImg.style.display = "block";
     $logoImg.style.background = "transparent";
     $logoImg.style.backgroundColor = "transparent";
+
+    // ✅ GARANTIR cores originais
+    $logoImg.style.opacity = "1";
+    $logoImg.style.filter = "none";
     
     // ✅ APLICAR ROTAÇÃO VISUAL
     const logoRotation = state.logoRot || 0;
