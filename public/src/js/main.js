@@ -211,7 +211,6 @@ function updatePreviews() {
   
   // LOGO: mostrar a logo processada SEM fundo
   if (state.logoId && $logoImg) {
-    // ✅ URL ORIGINAL - apenas remoção de fundo
     const logoUrl = `https://res.cloudinary.com/${state.cloud}/image/upload/e_bgremoval,w_300,h_300,c_fit/${state.logoId}`;
     
     console.log("  🖼️ Atualizando logo:", logoUrl);
@@ -220,63 +219,63 @@ function updatePreviews() {
     $logoImg.style.display = "block";
     $logoImg.style.background = "transparent";
     $logoImg.style.backgroundColor = "transparent";
-
+    
     // ✅ GARANTIR cores originais
     $logoImg.style.opacity = "1";
     $logoImg.style.filter = "none";
     
-    // ✅ APLICAR ROTAÇÃO VISUAL
-    const logoRotation = state.logoRot || 0;
+    // ❌ Sem rotação própria (gira com a caixa)
     $logoImg.style.transform = "none";
-    console.log(`  🔄 Logo rotação: ${logoRotation}°`);
+    
+    console.log(`  🖼️ Logo carregada sem filtros`);
   } else if ($logoImg) {
     $logoImg.style.display = "none";
   }
   
   // TEXTO: mostrar o texto
-if ($textoDiv && state.textoVal) {
-  $textoDiv.textContent = state.textoVal || "";
-  $textoDiv.style.fontFamily = state.fonte || "Arial";
-  
-  const $boxTexto = document.querySelector("#box-texto");
-  if ($boxTexto) {
-    const boxWidth = $boxTexto.offsetWidth;
+  if ($textoDiv && state.textoVal) {
+    $textoDiv.textContent = state.textoVal || "";
+    $textoDiv.style.fontFamily = state.fonte || "Arial";
     
-    // ✅ Calcular fontSize para caber em UMA linha
-    // Usar um multiplicador menor para garantir que cabe
-    const fontSize = Math.max(8, Math.min(48, Math.round(boxWidth * 0.20))); // 20% ao invés de 25%
-    
-    $textoDiv.style.fontSize = `${fontSize}px`;
-    $textoDiv.style.lineHeight = "1.2";
-    
-    // ✅ CRÍTICO: Verificar se tem quebra de linha manual (\n)
-    const hasManualBreak = state.textoVal.includes('\n');
-    
-    if (hasManualBreak) {
-      // Se usuário deu ENTER, respeitar quebras
-      $textoDiv.style.whiteSpace = "pre-wrap";
-    } else {
-      // Se NÃO deu ENTER, NUNCA quebrar linha
-      $textoDiv.style.whiteSpace = "nowrap";
+    const $boxTexto = document.querySelector("#box-texto");
+    if ($boxTexto) {
+      const boxWidth = $boxTexto.offsetWidth;
+      
+      // ✅ Calcular fontSize para caber em UMA linha
+      const fontSize = Math.max(8, Math.min(48, Math.round(boxWidth * 0.20)));
+      
+      $textoDiv.style.fontSize = `${fontSize}px`;
+      $textoDiv.style.lineHeight = "1.2";
+      
+      // ✅ CRÍTICO: Verificar se tem quebra de linha manual (\n)
+      const hasManualBreak = state.textoVal.includes('\n');
+      
+      if (hasManualBreak) {
+        // Se usuário deu ENTER, respeitar quebras
+        $textoDiv.style.whiteSpace = "pre-wrap";
+      } else {
+        // Se NÃO deu ENTER, NUNCA quebrar linha
+        $textoDiv.style.whiteSpace = "nowrap";
+      }
+      
+      $textoDiv.style.overflow = "hidden";
+      $textoDiv.style.textOverflow = "ellipsis";
+      $textoDiv.style.display = "flex";
+      $textoDiv.style.alignItems = "center";
+      $textoDiv.style.justifyContent = "center";
+      $textoDiv.style.padding = "4px";
+      $textoDiv.style.background = "transparent";
+      $textoDiv.style.backgroundColor = "transparent";
+      
+      // ❌ Sem rotação própria (gira com a caixa)
+      $textoDiv.style.transform = "none";
+      
+      console.log(`  📝 Texto: "${state.textoVal}" - fontSize: ${fontSize}px, whiteSpace: ${hasManualBreak ? 'pre-wrap' : 'nowrap'}`);
     }
-    
-    $textoDiv.style.overflow = "hidden"; // ✅ Esconder se passar
-    $textoDiv.style.textOverflow = "ellipsis"; // ✅ Mostrar ... se não couber
-    $textoDiv.style.display = "flex";
-    $textoDiv.style.alignItems = "center";
-    $textoDiv.style.justifyContent = "center";
-    $textoDiv.style.padding = "4px";
-    $textoDiv.style.background = "transparent";
-    $textoDiv.style.backgroundColor = "transparent";
-    
-    // ❌ Sem rotação própria (gira com a caixa)
-    $textoDiv.style.transform = "none";
-    
-    console.log(`  📝 Texto: "${state.textoVal}" - fontSize: ${fontSize}px, whiteSpace: ${hasManualBreak ? 'pre-wrap' : 'nowrap'}`);
+  } else if ($textoDiv) {
+    $textoDiv.textContent = "";
   }
-} else if ($textoDiv) {
-  $textoDiv.textContent = "";
-}
+} // ✅ FECHA A FUNÇÃO updatePreviews()
 
 function refresh() {
   const url = buildURL(state);
