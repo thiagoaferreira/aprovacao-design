@@ -297,9 +297,7 @@ function refresh() {
 
 /* ========= Defaults do SKU ========= */
 async function fetchSkuConfig(sku) {
-  const qs = `/rest/v1/configuracoes_produtos?sku=eq.${encodeURIComponent(sku)}&select=` +
-             `x_logo_media,y_logo_media,tamanho_logo_media,` +
-             `x_texto_media,y_texto_media,tamanho_texto_media`;
+  const qs = `/rest/v1/configuracoes_produtos?sku=eq.${encodeURIComponent(sku)}&select=*`;
   const rows = await supaGET(qs);
   return rows?.[0] || null;
 }
@@ -307,21 +305,51 @@ async function fetchSkuConfig(sku) {
 function applyConfigDefaults(cfg) {
   if (!cfg) return false;
   
-  state.logo = {
-    x: +cfg.x_logo_media || 0,
-    y: +cfg.y_logo_media || 400,
-    w: +cfg.tamanho_logo_media || 100
-  };
-  state.text = {
-    x: +cfg.x_texto_media || 0,
-    y: +cfg.y_texto_media || 520,
-    w: +cfg.tamanho_texto_media || 60
-  };
+  // ✅ Detectar cenário baseado no que o usuário vai usar
+  const temLogo = state.logoId !== "";
+  const temTexto = state.textoVal.trim() !== "";
   
-  console.log("✅ Configs do BD aplicadas:", {
-    logo: state.logo,
-    text: state.text
-  });
+  let cenario = 'nenhum';
+  if (temLogo && temTexto) cenario = 'combo';
+  else if (temLogo) cenario = 'so_logo';
+  else if (temTexto) cenario = 'so_texto';
+  
+  console.log(`📊 Aplicando config para cenário: ${cenario}`);
+  
+  // ✅ Aplicar coordenadas baseadas no cenário
+  if (cenario === 'so_logo') {
+    state.logo = {
+      x: +cfg.x_logo_solo || 0,
+      y: +cfg.y_logo_solo || 400,
+      w: +cfg.tamanho_logo_solo || 100
+    };
+    state.logoRot = +cfg.angulo_logo_solo || 0;
+    
+  } else if (cenario === 'so_texto') {
+    state.text = {
+      x: +cfg.x_texto_solo || 0,
+      y: +cfg.y_texto_solo || 500,
+      w: +cfg.tamanho_texto_solo || 50
+    };
+    state.textRot = +cfg.angulo_texto_solo || 0;
+    
+  } else if (cenario === 'combo') {
+    state.logo = {
+      x: +cfg.x_logo_combo || 0,
+      y: +cfg.y_logo_combo || 300,
+      w: +cfg.tamanho_logo_combo || 80
+    };
+    state.logoRot = +cfg.angulo_logo_combo || 0;
+    
+    state.text = {
+      x: +cfg.x_texto_combo || 0,
+      y: +cfg.y_texto_combo || 550,
+      w: +cfg.tamanho_texto_combo || 40
+    };
+    state.textRot = +cfg.angulo_texto_combo || 0;
+  }
+  
+  console.log("✅ Configs aplicadas:", { logo: state.logo, text: state.text });
   
   centeredOnce = true;
   return true;
