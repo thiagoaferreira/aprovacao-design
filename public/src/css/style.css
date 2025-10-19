@@ -113,16 +113,13 @@ body, html {
 /* ========== CAIXAS DE SELEÇÃO ========== */
 .layer-box {
   position: absolute;
-  border: 3px solid #f68729;
-  background: rgba(246, 135, 41, 0.15);
+  border: 3px solid transparent; /* ✅ Borda transparente por padrão */
+  background: transparent; /* ✅ Fundo transparente por padrão */
   border-radius: 8px;
-  cursor: move;
+  cursor: default; /* ✅ Cursor padrão quando não selecionado */
   pointer-events: auto;
   z-index: 10;
-  /* ✅ ADICIONAR estas linhas: */
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.2s, visibility 0.2s;
+  /* ✅ REMOVER opacity e visibility - sempre visível */
 }
 
 .layer-box.text {
@@ -131,13 +128,20 @@ body, html {
 }
 
 .layer-box.active {
-  /* ✅ ADICIONAR estas linhas: */
-  opacity: 1;
-  visibility: visible;
+  /* ✅ Mostrar bordas quando ativo */
+  border-color: #f68729;
+  background: rgba(246, 135, 41, 0.15);
+  cursor: move;
   outline: 3px solid #22c55e;
   outline-offset: 2px;
   box-shadow: 0 0 0 1px #22c55e;
   z-index: 20;
+}
+
+/* ✅ Cor da borda quando texto está ativo */
+.layer-box.text.active {
+  border-color: #38bdf8;
+  background: rgba(56, 189, 248, 0.15);
 }
 
 /* ========== ELEMENTOS DE PREVIEW ========== */
