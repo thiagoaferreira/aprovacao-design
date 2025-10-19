@@ -612,5 +612,24 @@ if (canvasWrap) {
   }, { passive: true });
 }
 
+/* ========= Clicar fora remove seleções ========= */
+document.addEventListener('click', (e) => {
+  // Se clicou na área do canvas mas NÃO em uma caixa
+  const canvasWrap = document.querySelector('.canvas-wrap');
+  const clickedBox = e.target.closest('.layer-box');
+  const clickedCanvas = e.target.closest('.canvas-wrap');
+  
+  if (clickedCanvas && !clickedBox) {
+    // Clicou no canvas mas fora das caixas - remover todas as seleções
+    const $logo = document.querySelector("#box-logo");
+    const $text = document.querySelector("#box-texto");
+    
+    if ($logo) $logo.classList.remove("active");
+    if ($text) $text.classList.remove("active");
+    
+    console.log("🚫 Seleções removidas - preview limpo");
+  }
+});
+
 /* ========= Boot ========= */
 document.addEventListener("DOMContentLoaded", ()=>{ loadShortLink(); });
