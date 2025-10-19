@@ -778,6 +778,13 @@ async function aprovarProduto() {
         state.logo = defaults.logo;
         state.text = defaults.text;
       }
+
+      // ✅ Adicionar tratamento de erro para imagem
+      img.onerror = () => {
+        console.error("❌ Erro ao carregar mockup:", state.baseId);
+        alert(`Erro: Mockup não encontrado para ${nextProd.sku} - ${pickCor(nextProd)}.\n\nVerifique se o arquivo existe no Cloudinary:\nMockup/${state.baseId}`);
+        busy(false);
+      };
       
       refresh();
       
