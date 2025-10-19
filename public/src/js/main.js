@@ -336,8 +336,34 @@ async function loadShortLink() {
   linkData = rows?.[0];
   if (!linkData) throw new Error("Link não encontrado");
 
-  produtos = Array.isArray(linkData.produtos) ? linkData.produtos : [];
+  // ✅ INÍCIO DA SUBSTITUIÇÃO
+  const aprovados = await supaGET(`/rest/v1/aprovacoes_historico?link_id=eq.${encodeURIComponent(p)}&select=sku,cor`);
+  
+  console.log("📋 Produtos já aprovados:", aprovados);
+  
+  const todosProdutos = Array.isArray(linkData.produtos) ? linkData.produtos : [];
+  produtos = todosProdutos.filter(prod => {
+    const corProd = pickCor(prod).toLowerCase();
+    const jaAprovado = aprovados.some(a => 
+      a.sku === prod.sku && a.cor.toLowerCase() === corProd
+    );
+    return !jaAprovado;
+  });
+  
+  console.log(`✅ ${produtos.length} produtos pendentes de ${todosProdutos.length} totais`);
+  
+  if (produtos.length === 0) {
+    console.log("🎉 Todos os produtos já foram aprovados!");
+    const $panel = document.querySelector(".panel");
+    const $done = document.querySelector("#done");
+    if ($panel) $panel.style.display = "none";
+    if ($done) $done.style.display = "block";
+    return;
+  }
+
   idx = 0;
+  // ✅ FIM DA SUBSTITUIÇÃO
+  
   writeHeader();
 
   const prod = produtos[idx] || {};
@@ -629,6 +655,127 @@ document.addEventListener('click', (e) => {
     
     console.log("🚫 Seleções removidas - preview limpo");
   }
+});
+
+/* ========= Função de Aprovação ========= */
+async function aprovarProduto() {
+  try {
+    busy(true, "Aprovando produto...");
+    
+    const prod = produtos[idx] || {};
+    
+    // ✅ Gerar URL final COM logo e texto aplicados
+    const finalUrl = buildFinalURL(state);
+    
+    console.log("✅ Aprovando produto:", {
+      produto: prod.nome,
+      sku: prod.sku,
+      finalUrl: finalUrl
+    });
+    
+    // ✅ Preparar dados para enviar ao webhook
+    const payload = {
+      link_id: getP(),
+      order_id: linkData?.order_id || "",
+      order_number: linkData?.order_number || "",
+      sku: prod.sku || "",
+      cor: pickCor(prod) || "",
+      mockup_url: finalUrl,
+      logo_public_id: state.logoId || "",
+      texto: state.textoVal || "",
+      fonte: state.fonte || "Arial",
+      x_logo: state.logo.x,
+      y_logo: state.logo.y,
+      tamanho_logo: state.logo.w,
+      angulo_logo: state.logoRot || 0,
+      x_texto: state.text.x,
+      y_texto: state.text.y,
+      tamanho_texto: state.text.w,
+      angulo_texto: state.textRot || 0
+    };
+    
+    console.log("📦 Payload de aprovação:", payload);
+    
+    // ✅ Enviar para webhook de aprovação
+    const response = await fetch(CFG.WEBHOOK_APROVACAO, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Erro ao aprovar: ${response.status}`);
+    }
+    
+    const result = await response.json().catch(() => ({}));
+    console.log("✅ Resposta do webhook:", result);
+    
+    // ✅ Avançar para próximo produto OU mostrar conclusão
+    idx++;
+    
+    if (idx < produtos.length) {
+      // Tem mais produtos - carregar o próximo
+      console.log(`➡️ Avançando para produto ${idx + 1}/${produtos.length}`);
+      
+      const nextProd = produtos[idx];
+      state.baseId = `Mockup/${lower(nextProd.sku)}_${pickCor(nextProd).toLowerCase()}`;
+      state.logoId = ""; 
+      state.textoVal = "";
+      state.hasText = false;
+      
+      // Resetar inputs
+      const $logo = $("#logo");
+      const $texto = $("#texto");
+      if ($logo) $logo.value = "";
+      if ($texto) $texto.value = "";
+      
+      // Resetar rotações
+      state.logoRot = 0;
+      state.textRot = 0;
+      
+      // Esconder caixas
+      const $boxLogo = $("#box-logo");
+      const $boxTexto = $("#box-texto");
+      if ($boxLogo) $boxLogo.style.display = "none";
+      if ($boxTexto) $boxTexto.style.display = "none";
+      
+      writeHeader();
+      
+      // Buscar configs do próximo produto
+      const cfg = await fetchSkuConfig(nextProd.sku);
+      if (cfg && applyConfigDefaults(cfg)) {
+        console.log("✅ Configs do BD aplicadas para próximo produto");
+      } else {
+        const defaults = centerDefaults(null, state.natural);
+        state.logo = defaults.logo;
+        state.text = defaults.text;
+      }
+      
+      refresh();
+      
+    } else {
+      // Acabaram os produtos - mostrar tela de conclusão
+      console.log("🎉 Todos os produtos aprovados!");
+      
+      const $panel = document.querySelector(".panel");
+      const $done = document.querySelector("#done");
+      
+      if ($panel) $panel.style.display = "none";
+      if ($done) $done.style.display = "block";
+    }
+    
+  } catch (error) {
+    console.error("❌ Erro ao aprovar produto:", error);
+    alert("Erro ao aprovar produto. Tente novamente.");
+  } finally {
+    busy(false);
+  }
+}
+
+/* ========= Botão Aprovar ========= */
+$("#aprovar")?.addEventListener("click", (e) => {
+  e.preventDefault();
+  aprovarProduto();
 });
 
 /* ========= Boot ========= */
