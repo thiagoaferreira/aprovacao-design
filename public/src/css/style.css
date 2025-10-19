@@ -119,6 +119,10 @@ body, html {
   cursor: move;
   pointer-events: auto;
   z-index: 10;
+  /* ✅ ADICIONAR estas linhas: */
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s, visibility 0.2s;
 }
 
 .layer-box.text {
@@ -127,6 +131,9 @@ body, html {
 }
 
 .layer-box.active {
+  /* ✅ ADICIONAR estas linhas: */
+  opacity: 1;
+  visibility: visible;
   outline: 3px solid #22c55e;
   outline-offset: 2px;
   box-shadow: 0 0 0 1px #22c55e;
@@ -168,7 +175,7 @@ body, html {
   background: transparent;
 }
 
-/* ========== BADGE ========== */
+/* ========== BADGE (ETIQUETA) ========== */
 .badge {
   position: absolute;
   top: -32px;
@@ -181,8 +188,9 @@ body, html {
   font-size: 11px;
   font-weight: 600;
   white-space: nowrap;
-  pointer-events: none;
+  pointer-events: auto; /* ✅ Capturar cliques */
   z-index: 3;
+  cursor: move; /* ✅ Cursor de arrastar */
 }
 
 .layer-box.active .badge {
