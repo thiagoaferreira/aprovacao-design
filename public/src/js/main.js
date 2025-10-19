@@ -40,6 +40,11 @@ let state = {
   textRot: 0,
 };
 
+// === Compartilhados por link (reaproveitados em todos os itens) ===
+let sharedLogoId  = null;  // logo já processada na Cloudinary
+let sharedTexto   = null;  // texto digitado no 1º item
+let sharedFonte   = null;  // fonte escolhida no 1º item
+
 let active = "logo";        // "logo" | "text"
 let centeredOnce = false;
 let logoCtl, textCtl;
@@ -443,30 +448,60 @@ async function loadShortLink() {
 function buildFormData() {
   const fd = new FormData();
   const prod = produtos[idx] || {};
+
+  // Logo: usa a logo já processada quando existir; senão usa o arquivo do input
   const file = $("#logo")?.files?.[0] || null;
-  if (file) fd.append("logo", file);
+  if (sharedLogoId) {
+    fd.append("logo_public_id", sharedLogoId);
+  } else if (file) {
+    fd.append("logo", file);
+  }
+
   fd.append("sku", prod.sku || "");
   fd.append("cor", pickCor(prod) || "");
   fd.append("order_id",     linkData?.order_id     ?? "");
   fd.append("order_number", linkData?.order_number ?? "");
   fd.append("p", getP() || "");
-  fd.append("texto", ($("#texto")?.value || "").trim());
-  fd.append("fonte", $("#fonte")?.value || "Arial");
+
+  // Texto/Fonte: reaproveita do 1º item quando já definidos
+  const textoVal = (sharedTexto ?? ($("#texto")?.value || "")).trim();
+  const fonteVal = (sharedFonte ?? ($("#fonte")?.value || "Arial"));
+  fd.append("texto", textoVal);
+  fd.append("fonte", fonteVal);
+
   return fd;
 }
+
 
 async function gerarPrevia() {
   try {
     busy(true);
     const r = await fetch(CFG.WEBHOOK_PREVIEW, { method:"POST", body: buildFormData() });
-    const data = await r.json().catch(()=> ({}));
+    if (!r.ok) throw new Error(`Preview ${r.status}`);
+    const raw = await r.json().catch(()=> ({}));
+    const data = Array.isArray(raw) ? (raw[0] || {}) : (raw || {}); // 👈 unifica
     
     console.log("📦 Resposta do webhook:", data);
     
-    const previewUrl = (Array.isArray(data) ? data[0]?.preview_url : data?.preview_url) || null;
+    const previewUrl = data.preview_url || null;
     state.baseId = data.mockup_public_id || state.baseId || (previewUrl ? extractBaseId(previewUrl) : state.baseId);
     state.logoId = data.logo_public_id   || state.logoId || (previewUrl ? extractLogoId(previewUrl) : state.logoId);
-    
+
+        // Salvar valores compartilhados na 1ª vez
+    if (!sharedLogoId && (data.logo_public_id || state.logoId)) {
+      sharedLogoId = data.logo_public_id || state.logoId;
+    }
+    if (sharedTexto == null) {
+      sharedTexto = ($("#texto")?.value || "").trim();
+    }
+    if (sharedFonte == null) {
+      sharedFonte = $("#fonte")?.value || "Arial";
+    }
+
+    // Espelha nos inputs (garante consistência visual/edição)
+    const $texto = $("#texto");  if ($texto) $texto.value = sharedTexto ?? "";
+    const $fonte = $("#fonte");  if ($fonte) $fonte.value = sharedFonte ?? "Arial";
+
     console.log("🆔 IDs extraídos:", {
       baseId: state.baseId,
       logoId: state.logoId
@@ -742,52 +777,35 @@ async function aprovarProduto() {
     idx++;
     
     if (idx < produtos.length) {
-      // Tem mais produtos - carregar o próximo
       console.log(`➡️ Avançando para produto ${idx + 1}/${produtos.length}`);
-      
       const nextProd = produtos[idx];
-      state.baseId = `Mockup/${lower(nextProd.sku)}_${pickCor(nextProd).toLowerCase()}`;
-      state.logoId = ""; 
-      state.textoVal = "";
-      state.hasText = false;
       
-      // Resetar inputs
-      const $logo = $("#logo");
-      const $texto = $("#texto");
-      if ($logo) $logo.value = "";
-      if ($texto) $texto.value = "";
+      // Reset visual/estado do item anterior
+      state.baseId   = "";
+      state.logoId   = "";
+      state.textoVal = "";
+      state.hasText  = !!(sharedTexto && sharedTexto.trim() !== "");
+      
+      // Resetar inputs (mantendo texto/fonte do 1º item no campo, se quiser)
+      const $logo  = $("#logo");   if ($logo)  $logo.value  = "";
+      const $texto = $("#texto");  if ($texto) $texto.value = sharedTexto ?? "";
+      const $fonte = $("#fonte");  if ($fonte) $fonte.value = sharedFonte ?? "Arial";
       
       // Resetar rotações
       state.logoRot = 0;
       state.textRot = 0;
+      centeredOnce = false;
       
-      // Esconder caixas
-      const $boxLogo = $("#box-logo");
-      const $boxTexto = $("#box-texto");
-      if ($boxLogo) $boxLogo.style.display = "none";
-      if ($boxTexto) $boxTexto.style.display = "none";
+      // Esconder caixas até nova prévia chegar
+      const $boxLogo  = $("#box-logo");  if ($boxLogo)  $boxLogo.style.display  = "none";
+      const $boxTexto = $("#box-texto"); if ($boxTexto) $boxTexto.style.display = "none";
       
       writeHeader();
       
-      // Buscar configs do próximo produto
-      const cfg = await fetchSkuConfig(nextProd.sku);
-      if (cfg && applyConfigDefaults(cfg)) {
-        console.log("✅ Configs do BD aplicadas para próximo produto");
-      } else {
-        const defaults = centerDefaults(null, state.natural);
-        state.logo = defaults.logo;
-        state.text = defaults.text;
-      }
-
-      // ✅ Adicionar tratamento de erro para imagem
-      img.onerror = () => {
-        console.error("❌ Erro ao carregar mockup:", state.baseId);
-        alert(`Erro: Mockup não encontrado para ${nextProd.sku} - ${pickCor(nextProd)}.\n\nVerifique se o arquivo existe no Cloudinary:\nMockup/${state.baseId}`);
-        busy(false);
-      };
-      
-      refresh();
-      
+      // 🔑 Agora geramos a PRÉVIA do novo item (stateless por item)
+      await gerarPrevia();
+      return; // sai daqui – a tela de conclusão fica no else original
+     
     } else {
       // Acabaram os produtos - mostrar tela de conclusão
       console.log("🎉 Todos os produtos aprovados!");
