@@ -15,22 +15,35 @@ export function createTextControl({ img, box, state, onChange, onSelect }) {
   let dragging = false, resizing = false, start = {};
   
   function down(e) {
-    console.log("🖱️ TEXT: down event", {
-      target: e.target,
-      resizing: e.target.classList?.contains("handle")
-    });
-    select();
-    dragging  = true;
-    
-    // ✅ CORRIGIDO: usar `el` em vez de `box`
-    el.classList.add("dragging");
-    
-    resizing  = e.target.classList?.contains("handle");
-    start = { x: e.clientX, y: e.clientY, X: state.text.x, Y: state.text.y, W: state.text.w };
-    el.setPointerCapture?.(e.pointerId);
-    document.addEventListener("pointermove", move);
-    document.addEventListener("pointerup",   up);
-  }
+  // ✅ Verificar se clicou na badge OU no corpo da caixa (mas não nas alças)
+  const isHandle = e.target.classList?.contains("handle");
+  const isBadge = e.target.classList?.contains("badge") || e.target.closest(".badge");
+  const isBox = e.target === el || e.target.closest(".layer-box") === el;
+  
+  // ✅ Permitir arrastar se: clicou na badge OU (clicou na caixa E não é alça)
+  const canDrag = isBadge || (isBox && !isHandle);
+  
+  if (!canDrag && !isHandle) return; // Ignorar cliques fora
+  
+  console.log("🖱️ TEXT: down event", {
+    target: e.target,
+    isBadge: isBadge,
+    isHandle: isHandle,
+    canDrag: canDrag
+  });
+  
+  select();
+  dragging = true;
+  
+  el.classList.add("dragging");
+  
+  resizing = isHandle;
+  start = { x: e.clientX, y: e.clientY, X: state.text.x, Y: state.text.y, W: state.text.w };
+  el.setPointerCapture?.(e.pointerId);
+  
+  document.addEventListener("pointermove", move);
+  document.addEventListener("pointerup", up);
+}
   
   function move(e) {
     if (!dragging) return;
