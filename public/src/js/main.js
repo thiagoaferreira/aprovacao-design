@@ -474,7 +474,7 @@ async function gerarPrevia() {
     console.log("📦 Resposta do webhook:", data);
     
     const previewUrl = data.preview_url || null;
-    state.baseId = data.mockup_public_id || state.baseId || (previewUrl ? extractBaseId(previewUrl) : state.baseId);
+    state.baseId = data.mockup_public_id || (previewUrl ? extractBaseId(previewUrl) : state.baseId);
     state.logoId = data.logo_public_id   || state.logoId || (previewUrl ? extractLogoId(previewUrl) : state.logoId);
 
         // Salvar valores compartilhados na 1ª vez
