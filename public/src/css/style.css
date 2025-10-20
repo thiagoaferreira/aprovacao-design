@@ -359,3 +359,37 @@ body, html {
 .modal.show {
   display: flex !important; /* Mostrar quando tiver classe .show */
 }
+
+/* === Fix contraste na tela de conclusão === */
+.done,
+#done {                    /* cobre caso exista id="done" também */
+  opacity: 1 !important;
+  color: #fff !important;
+}
+
+.done h1,
+.done h2,
+.done h3,
+.done p,
+.done .subtitle,
+.done .muted,
+#done h1,
+#done h2,
+#done h3,
+#done p,
+#done .subtitle,
+#done .muted {
+  color: #fff !important;
+}
+
+.done p,
+#done p {
+  color: rgba(255,255,255,0.92) !important; /* leve contraste */
+}
+
+/* (opcional) melhora legibilidade em fundo escuro */
+.done h1, .done h2, .done p,
+#done h1, #done h2, #done p {
+  text-shadow: 0 1px 2px rgba(0,0,0,0.35);
+}
+
