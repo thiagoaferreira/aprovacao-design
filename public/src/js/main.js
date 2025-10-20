@@ -402,24 +402,14 @@ async function loadShortLink() {
   const prod = produtos[idx] || {};
   state.baseId = `Mockup/${lower(prod.sku)}_${pickCor(prod).toLowerCase()}`;
 
-  try {
-    const cfg = await fetchSkuConfig(prod.sku);
-    if (cfg && applyConfigDefaults(cfg)) {
-      console.log("✅ Usando coordenadas do BD");
-    } else {
-      const defaults = centerDefaults(null, state.natural);
-      state.logo = defaults.logo;
-      state.text = defaults.text;
-      centeredOnce = true;
-      console.log("✅ Usando coordenadas padrão centralizadas");
-    }
-  } catch (e) {
-    console.warn("⚠️ Não foi possível ler configuracoes_produtos:", e);
-    const defaults = centerDefaults(null, state.natural);
-    state.logo = defaults.logo;
-    state.text = defaults.text;
-    centeredOnce = true;
-  }
+   // 👇 NÃO aplicamos média aqui (ainda não sabemos se é só logo / só texto / combo).
+  // Apenas inicializamos com defaults básicos e deixamos o gerarPrevia() aplicar a média depois.
+  const defaults = centerDefaults(null, state.natural);
+  state.logo = defaults.logo;
+  state.text = defaults.text;
+
+  // MUITO IMPORTANTE: manter false para permitir que gerarPrevia() puxe a média do BD
+  centeredOnce = false;
 
   img.onload = () => {
     state.natural = { w: img.naturalWidth, h: img.naturalHeight };
