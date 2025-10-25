@@ -54,22 +54,25 @@ export function buildFinalURL(state) {
 
     const logoTransforms = [
       `l_${logoLayerId}`,
-      "e_bgremoval",           // Remove fundo
-      "e_grayscale",           // ✅ Converte para escala de cinza
-      "e_contrast:100",        // ✅ Aumenta contraste
+      "e_bgremoval",              // Remove fundo
+      "e_grayscale",              // Converte para escala de cinza
+      "e_threshold:50",           // ✅ Binariza (preto ou transparente)
     ];
 
-    // ✅ Aplicar inversão se necessário
+    // ✅ Aplicar cor final
     if (logoInverted) {
-      logoTransforms.push("e_negate"); // Inverte (preto → branco)
+      // Logo BRANCA
+      logoTransforms.push("co_rgb:ffffff");
+      logoTransforms.push("e_colorize:100");
     } else {
-      logoTransforms.push("co_rgb:000000"); // Força preto
-      logoTransforms.push("e_colorize:100"); // Aplica colorização
+      // Logo PRETA
+      logoTransforms.push("co_rgb:000000");
+      logoTransforms.push("e_colorize:100");
     }
 
     logoTransforms.push(
       `w_${logoW}`,
-      `a_${logoA}`,           // Ângulo de rotação
+      `a_${logoA}`,
       "g_north_west",
       `x_${logoX}`,
       `y_${logoY}`,
