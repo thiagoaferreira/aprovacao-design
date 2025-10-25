@@ -217,12 +217,13 @@ function updatePreviews() {
   
 // LOGO: mostrar a logo processada
 if (state.logoId && $logoImg) {
-  // ✅ Filtros MÍNIMOS (Gemini já fez o trabalho)
+  // ✅ Filtros MÍNIMOS
   const filtros = ['e_bgremoval'];
   
-  // ✅ Se invertido, adicionar negação
+  // ✅ Colorização baseada no estado
   if (state.logoInverted) {
-    filtros.push('e_negate'); // Inverte (preto → branco)
+    filtros.push('co_rgb:ffffff');   // ✅ Cor branca
+    filtros.push('e_colorize:100');  // ✅ Aplica colorização
   }
   
   // ✅ Adicionar tamanho
