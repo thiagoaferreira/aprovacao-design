@@ -30,6 +30,7 @@ let state = {
   cloud: CFG.CLOUDINARY_CLOUD || "dslzqtajk",
   baseId: "",
   logoId: "",
+  logoInverted: false, // ✅ ADICIONAR
   natural: { w: 1000, h: 1000 },
   logo: { x: 0, y: 400, w: 100 },
   text: { x: 0, y: 520, w: 60 },
@@ -452,6 +453,7 @@ function buildFormData() {
   fd.append("order_id",     linkData?.order_id     ?? "");
   fd.append("order_number", linkData?.order_number ?? "");
   fd.append("p", getP() || "");
+  fd.append("logo_inverted", state.logoInverted ? "true" : "false");
 
   // Texto/Fonte: reaproveita do 1º item quando já definidos
   const textoVal = (sharedTexto ?? ($("#texto")?.value || "")).trim();
@@ -773,6 +775,7 @@ async function aprovarProduto() {
       // Reset visual/estado do item anterior
       state.baseId   = "";
       state.logoId   = "";
+      state.logoInverted = false; // ✅ ADICIONAR
       state.textoVal = "";
       state.hasText  = !!(sharedTexto && sharedTexto.trim() !== "");
       
@@ -813,27 +816,6 @@ async function aprovarProduto() {
   } finally {
     busy(false);
   }
-  
-  /* ========= Botão Inverter Cor ========= */
-  const btnInvert = $("#btn-invert-color");
-  if (btnInvert) {
-    btnInvert.addEventListener("click", () => {
-      const logoPreview = $("#logo-preview");
-      if (!logoPreview) return;
-  
-      // Toggle classe de inversão
-      logoPreview.classList.toggle("logo-inverted");
-      btnInvert.classList.toggle("inverted");
-  
-      // Atualizar state
-      state.logoInverted = logoPreview.classList.contains("logo-inverted");
-  
-      console.log(`🎨 Logo ${state.logoInverted ? 'BRANCA' : 'PRETA'}`);
-      
-      // Atualizar preview
-      updatePreviews();
-    });
-  }
 }
 
 /* ========= Botão Aprovar ========= */
@@ -841,6 +823,30 @@ $("#aprovar")?.addEventListener("click", (e) => {
   e.preventDefault();
   aprovarProduto();
 });
+
+/* ========= Botão Inverter Cor ========= */ // ✅ ADICIONAR AQUI
+const btnInvert = $("#btn-invert-color");
+if (btnInvert) {
+  btnInvert.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const logoPreview = $("#logo-preview");
+    if (!logoPreview) return;
+
+    // Toggle classe de inversão
+    logoPreview.classList.toggle("logo-inverted");
+    btnInvert.classList.toggle("inverted");
+
+    // Atualizar state
+    state.logoInverted = logoPreview.classList.contains("logo-inverted");
+
+    console.log(`🎨 Logo ${state.logoInverted ? 'BRANCA' : 'PRETA'}`);
+    
+    // Atualizar preview
+    updatePreviews();
+  });
+}
 
 /* ========= Boot ========= */
 document.addEventListener("DOMContentLoaded", ()=>{ loadShortLink(); });
