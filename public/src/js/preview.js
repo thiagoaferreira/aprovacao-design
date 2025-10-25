@@ -44,7 +44,7 @@ export function buildFinalURL(state) {
   const baseW = Math.max(100, Math.round(natural.w || 1000));
   const chunks = [`w_${baseW}`];
 
-  // LOGO com rotação (Gemini já converteu para preto)
+// LOGO com rotação
 if (logoId) {
   const logoLayerId = String(logoId).replace(/\//g, ":");
   const logoW = Math.max(10, Math.round(logo.w));
@@ -57,9 +57,10 @@ if (logoId) {
     "e_bgremoval",      // Garantir fundo transparente
   ];
 
-  // ✅ Aplicar inversão se necessário
+  // ✅ Colorização ao invés de negação
   if (logoInverted) {
-    logoTransforms.push("e_negate"); // Inverte (preto → branco)
+    logoTransforms.push("co_rgb:ffffff");   // Cor branca
+    logoTransforms.push("e_colorize:100");  // Aplica colorização
   }
 
   logoTransforms.push(
