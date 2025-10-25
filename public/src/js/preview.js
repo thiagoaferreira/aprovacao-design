@@ -53,30 +53,26 @@ export function buildFinalURL(state) {
     const logoA = Math.round(logoRot) || 0;
 
     const logoTransforms = [
-      `l_${logoLayerId}`,
-      "e_bgremoval",              // Remove fundo
-      "e_grayscale",              // Converte para escala de cinza
-      "e_auto_brightness",        // ✅ Auto ajuste de brilho
-      "e_auto_contrast",          // ✅ Auto ajuste de contraste
-      "e_improve",                // ✅ Melhora qualidade geral
-    ];
-    
-    if (logoInverted) {
-      logoTransforms.push("co_rgb:ffffff");
-      logoTransforms.push("e_colorize:100");
-    } else {
-      logoTransforms.push("co_rgb:000000");
-      logoTransforms.push("e_colorize:100");
-    }
-
-    logoTransforms.push(
-      `w_${logoW}`,
-      `a_${logoA}`,
-      "g_north_west",
-      `x_${logoX}`,
-      `y_${logoY}`,
-      "fl_layer_apply"
-    );
+        `l_${logoLayerId}`,
+        "e_bgremoval",              // Remove fundo
+      ];
+      
+      if (logoInverted) {
+        // Logo BRANCA
+        logoTransforms.push("e_tint:100:ffffff"); // ✅ Força 100% branco
+      } else {
+        // Logo PRETA
+        logoTransforms.push("e_tint:100:000000"); // ✅ Força 100% preto
+      }
+      
+      logoTransforms.push(
+        `w_${logoW}`,
+        `a_${logoA}`,
+        "g_north_west",
+        `x_${logoX}`,
+        `y_${logoY}`,
+        "fl_layer_apply"
+      );
 
     chunks.push(logoTransforms.join(","));
   }
