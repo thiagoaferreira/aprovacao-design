@@ -215,21 +215,21 @@ function updatePreviews() {
   
   console.log("🔄 updatePreviews() chamado");
   
-  // LOGO: mostrar a logo processada SEM fundo E COM FILTROS DE COR
+// LOGO: mostrar a logo processada SEM fundo E COM FILTROS DE COR
 if (state.logoId && $logoImg) {
-  // ✅ Montar filtros de cor
+  // ✅ Montar filtros de cor (MAIS SUAVES)
   const filtros = [
     'e_bgremoval',
-    'e_saturation:-100',    // Remove TODA saturação
-    'e_contrast:100',       // Contraste máximo
-    'e_brightness:-30',     // Escurece
-    'co_rgb:000000',        // Cor preta
-    'e_colorize:100',       // Colorização 100%
+    'e_grayscale',         // ✅ Converte para escala de cinza
+    'e_contrast:80',       // ✅ Contraste moderado (era 100)
   ];
   
   // ✅ Se invertido, adicionar negação
   if (state.logoInverted) {
     filtros.push('e_negate'); // Inverte (preto → branco)
+  } else {
+    filtros.push('co_rgb:000000');  // Cor preta
+    filtros.push('e_colorize:80');  // ✅ Colorização moderada (era 100)
   }
   
   // ✅ Adicionar tamanho
