@@ -813,6 +813,27 @@ async function aprovarProduto() {
   } finally {
     busy(false);
   }
+  
+  /* ========= Botão Inverter Cor ========= */
+  const btnInvert = $("#btn-invert-color");
+  if (btnInvert) {
+    btnInvert.addEventListener("click", () => {
+      const logoPreview = $("#logo-preview");
+      if (!logoPreview) return;
+  
+      // Toggle classe de inversão
+      logoPreview.classList.toggle("logo-inverted");
+      btnInvert.classList.toggle("inverted");
+  
+      // Atualizar state
+      state.logoInverted = logoPreview.classList.contains("logo-inverted");
+  
+      console.log(`🎨 Logo ${state.logoInverted ? 'BRANCA' : 'PRETA'}`);
+      
+      // Atualizar preview
+      updatePreviews();
+    });
+  }
 }
 
 /* ========= Botão Aprovar ========= */
