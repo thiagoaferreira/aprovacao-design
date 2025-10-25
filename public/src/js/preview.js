@@ -54,7 +54,12 @@ export function buildFinalURL(state) {
 
     const logoTransforms = [
       `l_${logoLayerId}`,
-      "e_bgremoval",              // Garantir fundo transparente
+      "e_bgremoval",              // Remove qualquer fundo
+      "e_saturation:-100",        // ✅ Remove TODA saturação (força cinza)
+      "e_contrast:100",           // ✅ Aumenta contraste ao máximo
+      "e_brightness:-30",         // ✅ Escurece
+      "co_rgb:000000",            // ✅ Define cor preta
+      "e_colorize:100",           // ✅ Aplica colorização 100%
     ];
     
     if (logoInverted) {
