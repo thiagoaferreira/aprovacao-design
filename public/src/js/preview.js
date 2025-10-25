@@ -56,16 +56,15 @@ export function buildFinalURL(state) {
       `l_${logoLayerId}`,
       "e_bgremoval",              // Remove fundo
       "e_grayscale",              // Converte para escala de cinza
-      "e_threshold:50",           // ✅ Binariza (preto ou transparente)
+      "e_auto_brightness",        // ✅ Auto ajuste de brilho
+      "e_auto_contrast",          // ✅ Auto ajuste de contraste
+      "e_improve",                // ✅ Melhora qualidade geral
     ];
-
-    // ✅ Aplicar cor final
+    
     if (logoInverted) {
-      // Logo BRANCA
       logoTransforms.push("co_rgb:ffffff");
       logoTransforms.push("e_colorize:100");
     } else {
-      // Logo PRETA
       logoTransforms.push("co_rgb:000000");
       logoTransforms.push("e_colorize:100");
     }
