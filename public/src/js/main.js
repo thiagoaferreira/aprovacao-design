@@ -215,28 +215,46 @@ function updatePreviews() {
   
   console.log("🔄 updatePreviews() chamado");
   
-  // LOGO: mostrar a logo processada SEM fundo
-  if (state.logoId && $logoImg) {
-    const logoUrl = `https://res.cloudinary.com/${state.cloud}/image/upload/e_bgremoval,w_300,h_300,c_fit/${state.logoId}`;
-    
-    console.log("  🖼️ Atualizando logo:", logoUrl);
-    
-    $logoImg.src = logoUrl;
-    $logoImg.style.display = "block";
-    $logoImg.style.background = "transparent";
-    $logoImg.style.backgroundColor = "transparent";
-    
-    // ✅ GARANTIR cores originais
-    $logoImg.style.opacity = "1";
-    $logoImg.style.filter = "none";
-    
-    // ❌ Sem rotação própria (gira com a caixa)
-    $logoImg.style.transform = "none";
-    
-    console.log(`  🖼️ Logo carregada sem filtros`);
-  } else if ($logoImg) {
-    $logoImg.style.display = "none";
+  // LOGO: mostrar a logo processada SEM fundo E COM FILTROS DE COR
+if (state.logoId && $logoImg) {
+  // ✅ Montar filtros de cor
+  const filtros = [
+    'e_bgremoval',
+    'e_saturation:-100',    // Remove TODA saturação
+    'e_contrast:100',       // Contraste máximo
+    'e_brightness:-30',     // Escurece
+    'co_rgb:000000',        // Cor preta
+    'e_colorize:100',       // Colorização 100%
+  ];
+  
+  // ✅ Se invertido, adicionar negação
+  if (state.logoInverted) {
+    filtros.push('e_negate'); // Inverte (preto → branco)
   }
+  
+  // ✅ Adicionar tamanho
+  filtros.push('w_300', 'h_300', 'c_fit');
+  
+  const logoUrl = `https://res.cloudinary.com/${state.cloud}/image/upload/${filtros.join(',')}/${state.logoId}`;
+  
+  console.log("  🖼️ Atualizando logo:", logoUrl);
+  
+  $logoImg.src = logoUrl;
+  $logoImg.style.display = "block";
+  $logoImg.style.background = "transparent";
+  $logoImg.style.backgroundColor = "transparent";
+  
+  // ✅ GARANTIR cores originais
+  $logoImg.style.opacity = "1";
+  $logoImg.style.filter = "none";
+  
+  // ❌ Sem rotação própria (gira com a caixa)
+  $logoImg.style.transform = "none";
+  
+  console.log(`  🖼️ Logo carregada ${state.logoInverted ? 'BRANCA' : 'PRETA'}`);
+} else if ($logoImg) {
+  $logoImg.style.display = "none";
+}
   
   // TEXTO: mostrar o texto
   if ($textoDiv && state.textoVal) {
