@@ -44,39 +44,35 @@ export function buildFinalURL(state) {
   const baseW = Math.max(100, Math.round(natural.w || 1000));
   const chunks = [`w_${baseW}`];
 
-  // LOGO com rotação E filtros de cor
-  if (logoId) {
-    const logoLayerId = String(logoId).replace(/\//g, ":");
-    const logoW = Math.max(10, Math.round(logo.w));
-    const logoX = Math.round(logo.x);
-    const logoY = Math.round(logo.y);
-    const logoA = Math.round(logoRot) || 0;
+  // LOGO com rotação (Gemini já converteu para preto)
+if (logoId) {
+  const logoLayerId = String(logoId).replace(/\//g, ":");
+  const logoW = Math.max(10, Math.round(logo.w));
+  const logoX = Math.round(logo.x);
+  const logoY = Math.round(logo.y);
+  const logoA = Math.round(logoRot) || 0;
 
-    const logoTransforms = [
-      `l_${logoLayerId}`,
-      "e_bgremoval",              // Remove qualquer fundo
-      "e_saturation:-100",        // ✅ Remove TODA saturação (força cinza)
-      "e_contrast:100",           // ✅ Aumenta contraste ao máximo
-      "e_brightness:-30",         // ✅ Escurece
-      "co_rgb:000000",            // ✅ Define cor preta
-      "e_colorize:100",           // ✅ Aplica colorização 100%
-    ];
-    
-    if (logoInverted) {
-      logoTransforms.push("e_negate"); // Inverte (preto → branco)
-    }
-    
-    logoTransforms.push(
-      `w_${logoW}`,
-      `a_${logoA}`,
-      "g_north_west",
-      `x_${logoX}`,
-      `y_${logoY}`,
-      "fl_layer_apply"
-    );
+  const logoTransforms = [
+    `l_${logoLayerId}`,
+    "e_bgremoval",      // Garantir fundo transparente
+  ];
 
-    chunks.push(logoTransforms.join(","));
+  // ✅ Aplicar inversão se necessário
+  if (logoInverted) {
+    logoTransforms.push("e_negate"); // Inverte (preto → branco)
   }
+
+  logoTransforms.push(
+    `w_${logoW}`,
+    `a_${logoA}`,
+    "g_north_west",
+    `x_${logoX}`,
+    `y_${logoY}`,
+    "fl_layer_apply"
+  );
+
+  chunks.push(logoTransforms.join(","));
+}
 
   // TEXTO com rotação
   if (hasText && String(textoVal).trim() !== "") {
