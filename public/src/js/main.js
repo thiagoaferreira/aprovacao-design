@@ -215,21 +215,14 @@ function updatePreviews() {
   
   console.log("🔄 updatePreviews() chamado");
   
-// LOGO: mostrar a logo processada SEM fundo E COM FILTROS DE COR
+// LOGO: mostrar a logo processada
 if (state.logoId && $logoImg) {
-  // ✅ Montar filtros de cor (MAIS SUAVES)
-  const filtros = [
-    'e_bgremoval',
-    'e_grayscale',         // ✅ Converte para escala de cinza
-    'e_contrast:80',       // ✅ Contraste moderado (era 100)
-  ];
+  // ✅ Filtros MÍNIMOS (Gemini já fez o trabalho)
+  const filtros = ['e_bgremoval'];
   
   // ✅ Se invertido, adicionar negação
   if (state.logoInverted) {
     filtros.push('e_negate'); // Inverte (preto → branco)
-  } else {
-    filtros.push('co_rgb:000000');  // Cor preta
-    filtros.push('e_colorize:80');  // ✅ Colorização moderada (era 100)
   }
   
   // ✅ Adicionar tamanho
@@ -243,12 +236,8 @@ if (state.logoId && $logoImg) {
   $logoImg.style.display = "block";
   $logoImg.style.background = "transparent";
   $logoImg.style.backgroundColor = "transparent";
-  
-  // ✅ GARANTIR cores originais
   $logoImg.style.opacity = "1";
   $logoImg.style.filter = "none";
-  
-  // ❌ Sem rotação própria (gira com a caixa)
   $logoImg.style.transform = "none";
   
   console.log(`  🖼️ Logo carregada ${state.logoInverted ? 'BRANCA' : 'PRETA'}`);
