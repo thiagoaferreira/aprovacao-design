@@ -217,17 +217,8 @@ function updatePreviews() {
   
 // LOGO: mostrar a logo processada
 if (state.logoId && $logoImg) {
-  // ✅ Filtros
-  const filtros = ['e_bgremoval'];
-  
-  // ✅ Substituir preto por branco quando invertido
-  if (state.logoInverted) {
-    // Substitui preto (#000000) por branco (#ffffff) com tolerância de 10%
-    filtros.push('e_replace_color:000000:10:ffffff');
-  }
-  
-  // ✅ Adicionar tamanho
-  filtros.push('w_300', 'h_300', 'c_fit');
+  // ✅ URL sem filtros de cor (apenas remove fundo)
+  const filtros = ['e_bgremoval', 'w_300', 'h_300', 'c_fit'];
   
   const logoUrl = `https://res.cloudinary.com/${state.cloud}/image/upload/${filtros.join(',')}/${state.logoId}`;
   
@@ -239,8 +230,14 @@ if (state.logoId && $logoImg) {
   $logoImg.style.background = "transparent";
   $logoImg.style.backgroundColor = "transparent";
   $logoImg.style.opacity = "1";
-  $logoImg.style.filter = "none";
   $logoImg.style.transform = "none";
+  
+  // ✅ APLICAR INVERSÃO VIA CSS (muito mais confiável!)
+  if (state.logoInverted) {
+    $logoImg.style.filter = "invert(1) brightness(2)";
+  } else {
+    $logoImg.style.filter = "none";
+  }
   
   console.log(`  🖼️ Logo carregada ${state.logoInverted ? 'BRANCA' : 'PRETA'}`);
 } else if ($logoImg) {
