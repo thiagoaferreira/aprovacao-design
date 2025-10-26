@@ -54,12 +54,13 @@ if (logoId) {
 
   const logoTransforms = [
     `l_${logoLayerId}`,
-    "e_bgremoval",      // Garantir fundo transparente
+    "e_bgremoval",
   ];
 
-  // ✅ Substituir preto por branco quando invertido
+  // ✅ Para URL final (aprovação), usar e_replace_color
+  // Se corromper, o Gemini já vai gerar em branco
   if (logoInverted) {
-    logoTransforms.push("e_replace_color:000000:10:ffffff");
+    logoTransforms.push("e_replace_color:000000:20:ffffff");
   }
 
   logoTransforms.push(
