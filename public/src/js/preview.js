@@ -57,10 +57,9 @@ if (logoId) {
     "e_bgremoval",      // Garantir fundo transparente
   ];
 
-  // ✅ Colorização ao invés de negação
+  // ✅ Substituir preto por branco quando invertido
   if (logoInverted) {
-    logoTransforms.push("co_rgb:ffffff");   // Cor branca
-    logoTransforms.push("e_colorize:100");  // Aplica colorização
+    logoTransforms.push("e_replace_color:000000:10:ffffff");
   }
 
   logoTransforms.push(
